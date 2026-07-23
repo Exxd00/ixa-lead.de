@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Very light near-white background */
+    --background: 214 44% 98%;
+    --foreground: 216 45% 16%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 216 45% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 216 45% 16%;
+
+    /* Clear blue CTA */
+    --primary: 221 83% 53%;
+    --primary-foreground: 210 40% 98%;
+
+    --secondary: 214 40% 96%;
+    --secondary-foreground: 216 45% 16%;
+
+    --muted: 214 40% 96%;
+    --muted-foreground: 215 20% 45%;
+
+    --accent: 214 45% 95%;
+    --accent-foreground: 216 45% 16%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 214 32% 91%;
+    --input: 214 32% 89%;
+    --ring: 221 83% 53%;
+    --radius: 0.85rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* offset for the sticky navbar when jumping to sections */
+    scroll-padding-top: 96px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* prevent any horizontal scroll on mobile */
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Headings use the geometric display font in deep navy */
+  h1, h2, h3, h4 {
+    @apply text-navy;
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: hsl(221 83% 53% / 0.18);
+    color: hsl(216 55% 14%);
+  }
+}
+
+@layer components {
+  /* Section container with the requested max width */
+  .container-lp {
+    @apply mx-auto w-full max-w-[1220px] px-5 sm:px-6 lg:px-8;
+  }
+
+  /* Soft white card */
+  .card-soft {
+    @apply rounded-2xl border border-slate-200/80 bg-white shadow-soft;
+  }
+
+  /* Small textual tool/badge chip */
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm;
+  }
+
+  /* Focus ring helper used across interactive elements */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  /* Subtle hero background wash */
+  .hero-wash {
+    background:
+      radial-gradient(120% 90% at 90% -10%, hsl(221 83% 53% / 0.10), transparent 55%),
+      radial-gradient(90% 80% at 10% 0%, hsl(160 84% 39% / 0.06), transparent 45%),
+      linear-gradient(180deg, hsl(214 60% 99%), hsl(214 44% 98%));
+  }
+
+  .section-alt {
+    @apply bg-slate-50/70;
+  }
+}
+
+@layer utilities {
+  /* Scroll reveal animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
