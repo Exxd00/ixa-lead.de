@@ -24,6 +24,16 @@ export const siteConfig = {
     location: "Nürnberg & Franken",
   },
 
+  /* Link-Hub-Seite (/link): Marken-Buttons & Profile.
+     Leer lassen = Button erscheint als "bald verfügbar". Echten Link eintragen,
+     um den Button sofort zu aktivieren. */
+  linkHub: {
+    smmUrl: "", // IXA-SMM – Link eintragen, sobald die Seite/das Profil steht
+    instagram: "https://www.instagram.com/ixa_agency/",
+    linkedin: "", // LinkedIn-Profil-Link hier eintragen
+    googleMaps: "", // Link zum Google-Business-Profil
+  },
+
   /* Tracking-IDs — echte Werte eintragen, dann enabled = true */
   tracking: {
     enabled: false,

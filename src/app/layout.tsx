@@ -93,15 +93,6 @@ export default function RootLayout({
   return (
     <html lang="de" dir="ltr" className={`${jakarta.variable} ${sora.variable}`}>
       <head>
-        <Script
-          crossOrigin="anonymous"
-          src="//unpkg.com/react-grab/dist/index.global.js"
-        />
-        <Script
-          crossOrigin="anonymous"
-          src="//unpkg.com/same-runtime/dist/index.global.js"
-        />
-
         {/* بيانات Schema المنظمة */}
         <script
           type="application/ld+json"

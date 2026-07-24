@@ -16,7 +16,8 @@ export type TrackingEvent =
   | "email_click"
   | "form_start"
   | "form_submit_success"
-  | "form_submit_error";
+  | "form_submit_error"
+  | "link_hub_click";
 
 type DataLayerObject = Record<string, unknown>;
 
