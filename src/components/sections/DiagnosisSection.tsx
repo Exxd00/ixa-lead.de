@@ -6,7 +6,7 @@ import { diagnosisItems } from "@/data/site";
 
 export function DiagnosisSection() {
   return (
-    <section className="section-alt border-y border-slate-200/70 py-16 sm:py-20 lg:py-24">
+    <section className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
         <SectionHeading
           eyebrow="Schnelle Selbstprüfung"
@@ -17,11 +17,11 @@ export function DiagnosisSection() {
           <ul className="grid gap-3 sm:grid-cols-2">
             {diagnosisItems.map((item, i) => (
               <Reveal key={item} delay={i * 40}>
-                <li className="flex items-start gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+                <li className="flex items-start gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm">
                   <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-md bg-success-100 text-success-700">
                     <Check className="size-4" strokeWidth={3} />
                   </span>
-                  <span className="text-[15px] leading-relaxed text-slate-700">
+                  <span className="text-[15px] leading-relaxed text-stone-700">
                     {item}
                   </span>
                 </li>

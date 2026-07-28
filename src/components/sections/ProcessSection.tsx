@@ -12,7 +12,7 @@ export function ProcessSection() {
         {/* الخط الزمني الأفقي — الكمبيوتر */}
         <div className="relative mt-14 hidden lg:block">
           <div
-            className="absolute right-0 left-0 top-6 h-0.5 bg-gradient-to-l from-slate-200 via-slate-200 to-slate-200"
+            className="absolute right-0 left-0 top-6 h-0.5 bg-gradient-to-l from-stone-200 via-stone-200 to-stone-200"
             aria-hidden="true"
           />
           <ol className="grid grid-cols-6 gap-4">
@@ -24,13 +24,13 @@ export function ProcessSection() {
                     {i + 1}
                   </span>
                   <div className="mt-4 flex flex-col items-center">
-                    <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-primary">
+                    <span className="grid size-10 place-items-center rounded-xl bg-primary/10 text-stamp">
                       <Icon className="size-5" />
                     </span>
                     <h3 className="mt-3 text-[15px] font-bold text-navy">
                       {step.title}
                     </h3>
-                    <p className="mt-2 text-[13px] leading-relaxed text-slate-500">
+                    <p className="mt-2 text-[13px] leading-relaxed text-stone-500">
                       {step.text}
                     </p>
                   </div>
@@ -51,16 +51,16 @@ export function ProcessSection() {
                   <span className="grid size-11 shrink-0 place-items-center rounded-full bg-navy text-sm font-bold text-white shadow-soft">
                     {i + 1}
                   </span>
-                  {!isLast && <span className="mt-1 w-0.5 flex-1 bg-slate-200" />}
+                  {!isLast && <span className="mt-1 w-0.5 flex-1 bg-stone-200" />}
                 </div>
                 <div className="card-soft mb-1 flex-1 p-5">
                   <div className="flex items-center gap-3">
-                    <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-primary">
+                    <span className="grid size-9 place-items-center rounded-lg bg-primary/10 text-stamp">
                       <Icon className="size-5" />
                     </span>
                     <h3 className="text-base font-bold text-navy">{step.title}</h3>
                   </div>
-                  <p className="mt-3 text-sm leading-relaxed text-slate-600">
+                  <p className="mt-3 text-sm leading-relaxed text-stone-600">
                     {step.text}
                   </p>
                 </div>

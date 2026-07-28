@@ -7,7 +7,7 @@ export function ServiceFitSection() {
   return (
     <section
       id="fit"
-      className="section-alt border-y border-slate-200/70 py-16 sm:py-20 lg:py-24"
+      className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24"
     >
       <div className="container-lp">
         <SectionHeading
@@ -28,7 +28,7 @@ export function ServiceFitSection() {
                   Passt gut
                 </h3>
               </div>
-              <p className="mt-5 text-[15px] leading-relaxed text-slate-700">
+              <p className="mt-5 text-[15px] leading-relaxed text-stone-700">
                 {serviceFit.goodIntro}
               </p>
               <ul className="mt-5 space-y-3">
@@ -37,7 +37,7 @@ export function ServiceFitSection() {
                     <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-success-100 text-success-700">
                       <Check className="size-3.5" strokeWidth={3} />
                     </span>
-                    <span className="text-[15px] leading-relaxed text-slate-700">
+                    <span className="text-[15px] leading-relaxed text-stone-700">
                       {item}
                     </span>
                   </li>
@@ -48,25 +48,25 @@ export function ServiceFitSection() {
 
           {/* Keine Passung */}
           <Reveal delay={100}>
-            <article className="flex h-full flex-col rounded-3xl border border-slate-200 bg-white p-7 shadow-soft sm:p-8">
+            <article className="flex h-full flex-col rounded-3xl border border-stone-200 bg-white p-7 shadow-soft sm:p-8">
               <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-xl bg-slate-100 text-slate-500">
+                <span className="grid size-11 place-items-center rounded-xl bg-stone-100 text-stone-500">
                   <Minus className="size-6" strokeWidth={3} />
                 </span>
                 <h3 className="text-xl font-bold text-navy sm:text-2xl">
                   Eher nicht
                 </h3>
               </div>
-              <p className="mt-5 text-[15px] leading-relaxed text-slate-600">
+              <p className="mt-5 text-[15px] leading-relaxed text-stone-600">
                 {serviceFit.badIntro}
               </p>
               <ul className="mt-5 space-y-3">
                 {serviceFit.bad.map((item) => (
                   <li key={item} className="flex items-start gap-3">
-                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-slate-100 text-slate-400">
+                    <span className="mt-0.5 grid size-5 shrink-0 place-items-center rounded-full bg-stone-100 text-stone-400">
                       <Minus className="size-3.5" strokeWidth={3} />
                     </span>
-                    <span className="text-[15px] leading-relaxed text-slate-600">
+                    <span className="text-[15px] leading-relaxed text-stone-600">
                       {item}
                     </span>
                   </li>

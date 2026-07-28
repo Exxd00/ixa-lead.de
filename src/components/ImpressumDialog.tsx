@@ -31,7 +31,7 @@ export function ImpressumDialog({
         <button
           type="button"
           className={cn(
-            "focus-ring rounded-md text-slate-500 transition-colors hover:text-primary",
+            "focus-ring rounded-md text-stone-500 transition-colors hover:text-stamp",
             className,
           )}
         >
@@ -46,7 +46,7 @@ export function ImpressumDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 text-sm leading-relaxed text-slate-600">
+        <div className="space-y-4 text-sm leading-relaxed text-stone-600">
           <div>
             <h3 className="mb-1 font-bold text-navy">Anbieter</h3>
             <p>
@@ -58,7 +58,7 @@ export function ImpressumDialog({
 
           <div>
             <h3 className="mb-1 font-bold text-navy">Anschrift</h3>
-            <p className="italic text-slate-500">
+            <p className="italic text-stone-500">
               Ladungsfähige Anschrift wird nachgereicht.
             </p>
           </div>
@@ -74,7 +74,7 @@ export function ImpressumDialog({
 
           <div>
             <h3 className="mb-1 font-bold text-navy">Umsatzsteuer-ID</h3>
-            <p className="italic text-slate-500">
+            <p className="italic text-stone-500">
               Umsatzsteuer-Identifikationsnummer gemäß § 27 a UStG: wird
               nachgereicht.
             </p>

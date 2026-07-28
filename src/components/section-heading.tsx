@@ -26,8 +26,8 @@ export function SectionHeading({
       )}
     >
       {eyebrow && (
-        <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm font-semibold text-primary">
-          <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
+        <span className="live-badge">
+          <span className="live-dot" aria-hidden="true" />
           {eyebrow}
         </span>
       )}
@@ -42,7 +42,7 @@ export function SectionHeading({
       {description && (
         <p
           className={cn(
-            "text-base leading-relaxed text-slate-600 sm:text-lg",
+            "text-base leading-relaxed text-stone-600 sm:text-lg",
             align === "center" && "max-w-2xl",
           )}
         >

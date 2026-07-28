@@ -4,19 +4,19 @@ import { budgetChecklist, budgetCompare } from "@/data/site";
 
 export function BeforeBudgetSection() {
   return (
-    <section className="section-alt border-y border-slate-200/70 py-16 sm:py-20 lg:py-24">
+    <section className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
         <div className="grid items-start gap-10 lg:grid-cols-2 lg:gap-14">
           {/* العمود النصي + قائمة التحقق */}
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm font-semibold text-primary">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm font-semibold text-stamp">
               <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
               Vor mehr Budget
             </span>
             <h2 className="mt-4 text-2xl font-bold leading-tight text-navy sm:text-3xl">
               Bevor Sie Ihr Anzeigenbudget erhöhen
             </h2>
-            <p className="mt-5 text-base leading-relaxed text-slate-600 sm:text-lg">
+            <p className="mt-5 text-base leading-relaxed text-stone-600 sm:text-lg">
               Mehr Budget löst das Problem nicht immer. Ist die Seite unklar,
               langsam oder wenig vertrauenswürdig, bedeutet mehr Budget oft nur mehr
               Klicks – nicht mehr Kunden.
@@ -28,7 +28,7 @@ export function BeforeBudgetSection() {
                   <span className="grid size-6 shrink-0 place-items-center rounded-md bg-success-100 text-success-700">
                     <Check className="size-4" strokeWidth={3} />
                   </span>
-                  <span className="text-[15px] text-slate-700">{item}</span>
+                  <span className="text-[15px] text-stone-700">{item}</span>
                 </li>
               ))}
             </ul>
@@ -49,7 +49,7 @@ export function BeforeBudgetSection() {
               <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:items-center">
                 {budgetCompare.before.steps.map((step, i) => (
                   <div key={step} className="flex items-center gap-2">
-                    <span className="rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-slate-600">
+                    <span className="rounded-lg border border-amber-200 bg-white px-3 py-2 text-sm font-medium text-stone-600">
                       {step}
                     </span>
                     {i < budgetCompare.before.steps.length - 1 && (

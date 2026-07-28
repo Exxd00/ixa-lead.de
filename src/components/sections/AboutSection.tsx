@@ -38,23 +38,23 @@ export function AboutSection() {
                 <p className="mt-5 text-lg font-bold text-navy">
                   {siteConfig.owner}
                 </p>
-                <p className="mt-1 text-sm font-medium text-slate-500">
+                <p className="mt-1 text-sm font-medium text-stone-500">
                   {siteConfig.name} · {siteConfig.role}
                 </p>
-                <p className="mt-2 flex items-center gap-1.5 text-sm text-slate-500">
-                  <MapPin className="size-4 text-primary" />
+                <p className="mt-2 flex items-center gap-1.5 text-sm text-stone-500">
+                  <MapPin className="size-4 text-stamp" />
                   {siteConfig.contact.location}
                 </p>
 
-                <div className="mt-6 w-full space-y-2.5 border-t border-slate-100 pt-6">
+                <div className="mt-6 w-full space-y-2.5 border-t border-stone-100 pt-6">
                   {systems.map((system) => {
                     const Icon = system.icon;
                     return (
                       <div
                         key={system.label}
-                        className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-4 py-2.5 text-left"
+                        className="flex items-center gap-3 rounded-xl border border-stone-100 bg-stone-50/70 px-4 py-2.5 text-left"
                       >
-                        <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-primary">
+                        <span className="grid size-8 place-items-center rounded-lg bg-primary/10 text-stamp">
                           <Icon className="size-4" />
                         </span>
                         <span className="text-sm font-semibold text-navy">
@@ -70,7 +70,7 @@ export function AboutSection() {
 
           {/* Textspalte */}
           <Reveal delay={100} className="order-2">
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm font-semibold text-primary">
+            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-sm font-semibold text-stamp">
               <span className="size-1.5 rounded-full bg-primary" aria-hidden="true" />
               Über mich
             </span>
@@ -78,7 +78,7 @@ export function AboutSection() {
               Über mich
             </h2>
 
-            <div className="mt-5 space-y-4 text-base leading-relaxed text-slate-600">
+            <div className="mt-5 space-y-4 text-base leading-relaxed text-stone-600">
               <p>
                 Hinter {siteConfig.name} steht {siteConfig.owner}, mit Fokus auf
                 digitale Kundengewinnung für lokale Unternehmen in Nürnberg und

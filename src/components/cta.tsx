@@ -109,12 +109,12 @@ export function WhatsappTextLink({
       target="_blank"
       rel="noopener noreferrer"
       className={cn(
-        "inline-flex items-center gap-2 font-medium text-navy transition-colors hover:text-primary focus-ring rounded-md",
+        "inline-flex items-center gap-2 font-medium text-navy transition-colors hover:text-stamp focus-ring rounded-md",
         className,
       )}
       onClick={() => track("whatsapp_click", { location })}
     >
-      <MessageCircle className="size-4 text-primary" aria-hidden="true" />
+      <MessageCircle className="size-4 text-stamp" aria-hidden="true" />
       <span>{label}</span>
     </a>
   );
@@ -135,12 +135,12 @@ export function PhoneLink({
       href={siteConfig.contact.phoneHref}
       dir="ltr"
       className={cn(
-        "inline-flex items-center gap-2 font-medium text-navy transition-colors hover:text-primary focus-ring rounded-md",
+        "inline-flex items-center gap-2 font-medium text-navy transition-colors hover:text-stamp focus-ring rounded-md",
         className,
       )}
       onClick={() => track("phone_click", { location })}
     >
-      {withIcon && <Phone className="size-4 text-primary" aria-hidden="true" />}
+      {withIcon && <Phone className="size-4 text-stamp" aria-hidden="true" />}
       <span>{siteConfig.contact.phoneDisplay}</span>
     </a>
   );
@@ -161,12 +161,12 @@ export function EmailLink({
       href={siteConfig.contact.emailHref}
       dir="ltr"
       className={cn(
-        "inline-flex items-center gap-2 font-medium text-navy transition-colors hover:text-primary focus-ring rounded-md",
+        "inline-flex items-center gap-2 font-medium text-navy transition-colors hover:text-stamp focus-ring rounded-md",
         className,
       )}
       onClick={() => track("email_click", { location })}
     >
-      {withIcon && <Mail className="size-4 text-primary" aria-hidden="true" />}
+      {withIcon && <Mail className="size-4 text-stamp" aria-hidden="true" />}
       <span>{siteConfig.contact.emailDisplay}</span>
     </a>
   );

@@ -14,18 +14,18 @@ export function ProblemSection() {
 
         <Reveal
           delay={80}
-          className="mx-auto mt-6 max-w-3xl space-y-4 text-center text-base leading-relaxed text-slate-600 sm:text-lg"
+          className="mx-auto mt-6 max-w-3xl space-y-4 text-center text-base leading-relaxed text-stone-600 sm:text-lg"
         >
           <p>
             Meist liegt es nicht an einer einzelnen Stellschraube, sondern an
             Lücken im Zusammenspiel: Sichtbarkeit, Website, Tracking und
             Nachverfolgung greifen nicht ineinander.
           </p>
-          <p className="rounded-2xl border border-slate-200 bg-white/70 px-5 py-4 text-navy">
+          <p className="rounded-2xl border border-stone-200 bg-white/70 px-5 py-4 text-navy">
             Deshalb beginne ich nicht mit der Frage »Wie wird die Seite schöner?«,
             <br className="hidden sm:block" />
             sondern mit der wichtigeren:{" "}
-            <span className="font-bold text-primary">
+            <span className="font-bold text-stamp">
               Wo geht auf dem Weg zur Anfrage der Kontakt verloren?
             </span>
           </p>
@@ -38,12 +38,12 @@ export function ProblemSection() {
               <Reveal key={problem.title} delay={i * 60}>
                 <article className="group card-soft h-full p-6 transition-all duration-300 hover:-translate-y-1 hover:shadow-card">
                   <div className="flex items-start gap-4">
-                    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
+                    <span className="grid size-12 shrink-0 place-items-center rounded-xl bg-primary/10 text-stamp transition-colors group-hover:bg-primary group-hover:text-white">
                       <Icon className="size-6" />
                     </span>
                     <div>
                       <h3 className="text-lg font-bold text-navy">{problem.title}</h3>
-                      <p className="mt-2 text-[15px] leading-relaxed text-slate-600">
+                      <p className="mt-2 text-[15px] leading-relaxed text-stone-600">
                         {problem.text}
                       </p>
                     </div>

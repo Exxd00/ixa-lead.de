@@ -4,35 +4,35 @@
 
 @layer base {
   :root {
-    /* Very light near-white background */
-    --background: 214 44% 98%;
-    --foreground: 216 45% 16%;
+    /* Klares, kühles Neutral-Weiß statt warmem Leinen oder Werkstatt-Papier */
+    --background: 220 14% 97%;
+    --foreground: 220 20% 14%;
 
     --card: 0 0% 100%;
-    --card-foreground: 216 45% 16%;
+    --card-foreground: 220 20% 14%;
     --popover: 0 0% 100%;
-    --popover-foreground: 216 45% 16%;
+    --popover-foreground: 220 20% 14%;
 
-    /* Clear blue CTA */
-    --primary: 221 83% 53%;
-    --primary-foreground: 210 40% 98%;
+    /* Signal-Blau — die eine Akzentfarbe, an Tracking/Live-Daten geknüpft */
+    --primary: 224 90% 58%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 214 40% 96%;
-    --secondary-foreground: 216 45% 16%;
+    --secondary: 220 14% 93%;
+    --secondary-foreground: 220 20% 14%;
 
-    --muted: 214 40% 96%;
-    --muted-foreground: 215 20% 45%;
+    --muted: 220 14% 93%;
+    --muted-foreground: 220 10% 45%;
 
-    --accent: 214 45% 95%;
-    --accent-foreground: 216 45% 16%;
+    --accent: 220 16% 91%;
+    --accent-foreground: 220 20% 14%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214 32% 91%;
-    --input: 214 32% 89%;
-    --ring: 221 83% 53%;
-    --radius: 0.85rem;
+    --border: 220 13% 88%;
+    --input: 220 13% 86%;
+    --ring: 224 90% 58%;
+    --radius: 0.75rem;
   }
 }
 
@@ -57,7 +57,7 @@
     -webkit-font-smoothing: antialiased;
   }
 
-  /* Headings use the geometric display font in deep navy */
+  /* Headings use the bold grotesque display font in ink */
   h1, h2, h3, h4 {
     @apply text-navy;
     font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
@@ -66,8 +66,8 @@
   }
 
   ::selection {
-    background: hsl(221 83% 53% / 0.18);
-    color: hsl(216 55% 14%);
+    background: hsl(224 90% 58% / 0.22);
+    color: hsl(220 20% 12%);
   }
 }
 
@@ -77,14 +77,33 @@
     @apply mx-auto w-full max-w-[1220px] px-5 sm:px-6 lg:px-8;
   }
 
-  /* Soft white card */
+  /* Klare, moderne Karte: feine Kontur + weicher Elevations-Schatten statt
+     Schmuck-Metaphern — der Auftritt kommt aus Bewegung/Signalfarbe, nicht
+     aus der Kartenform. */
   .card-soft {
-    @apply rounded-2xl border border-slate-200/80 bg-white shadow-soft;
+    @apply relative rounded-2xl border border-navy/10 bg-card shadow-soft transition-shadow duration-300;
+  }
+
+  /* Live-Badge — kleiner pulsierender Signalpunkt statt Schmuck-Pille;
+     verweist direkt auf "live gemessen/getrackt". */
+  .live-badge {
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-navy;
+  }
+  .live-dot {
+    @apply relative inline-flex size-2 rounded-full bg-primary;
+  }
+  .live-dot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: hsl(var(--primary));
+    animation: signal-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
   }
 
   /* Small textual tool/badge chip */
   .chip {
-    @apply inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm;
+    @apply inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm;
   }
 
   /* Focus ring helper used across interactive elements */
@@ -92,16 +111,24 @@
     @apply outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
-  /* Subtle hero background wash */
+  /* Dunkler Hero-Hintergrund: tiefes Graphit statt "near-black + ein Akzent" —
+     zwei driftende Glow-Flächen (Blau + Koralle) statt eines flachen Verlaufs. */
   .hero-wash {
     background:
-      radial-gradient(120% 90% at 90% -10%, hsl(221 83% 53% / 0.10), transparent 55%),
-      radial-gradient(90% 80% at 10% 0%, hsl(160 84% 39% / 0.06), transparent 45%),
-      linear-gradient(180deg, hsl(214 60% 99%), hsl(214 44% 98%));
+      radial-gradient(60% 50% at 15% 10%, hsl(224 90% 58% / 0.28), transparent 65%),
+      radial-gradient(50% 45% at 88% 82%, hsl(14 90% 58% / 0.16), transparent 60%),
+      linear-gradient(180deg, hsl(220 24% 9%), hsl(220 26% 6%));
   }
 
   .section-alt {
-    @apply bg-slate-50/70;
+    @apply bg-stone-50/70;
+  }
+
+  /* Feines Korn — nimmt dem dunklen Hero die Flachheit, ohne aufdringlich zu sein */
+  .grain-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    mix-blend-mode: multiply;
   }
 }
 
@@ -121,6 +148,15 @@
 
   .text-balance {
     text-wrap: balance;
+  }
+
+  /* Hides the scrollbar on horizontal snap carousels while keeping them scrollable */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
   }
 }
 

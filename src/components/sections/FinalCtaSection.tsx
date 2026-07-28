@@ -4,13 +4,13 @@ import { CtaButton } from "@/components/cta";
 
 export function FinalCtaSection() {
   return (
-    <section className="section-alt border-t border-slate-200/70 py-16 sm:py-20 lg:py-24">
+    <section className="section-alt border-t border-stone-200/70 py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
         <Reveal className="mx-auto flex max-w-3xl flex-col items-center text-center">
           <h2 className="text-2xl font-bold leading-snug text-navy sm:text-3xl md:text-[2.1rem]">
             Bauen Sie ein System, das aus Interesse messbare Anfragen macht
           </h2>
-          <p className="mt-5 max-w-2xl text-base leading-relaxed text-slate-600 sm:text-lg">
+          <p className="mt-5 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
             Fordern Sie Ihre kostenlose Erstanalyse an – ich zeige Ihnen die
             wichtigsten Hebel für mehr Sichtbarkeit und mehr Kontakt.
           </p>

@@ -24,7 +24,7 @@ export function PrivacyDialog({
         <button
           type="button"
           className={cn(
-            "focus-ring rounded-md text-slate-500 transition-colors hover:text-primary",
+            "focus-ring rounded-md text-stone-500 transition-colors hover:text-stamp",
             className,
           )}
         >
@@ -39,7 +39,7 @@ export function PrivacyDialog({
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-4 text-sm leading-relaxed text-slate-600">
+        <div className="space-y-4 text-sm leading-relaxed text-stone-600">
           <div>
             <h3 className="mb-1 font-bold text-navy">Welche Daten wir erheben</h3>
             <p>
@@ -75,7 +75,7 @@ export function PrivacyDialog({
             <p>{siteConfig.contact.emailDisplay}</p>
           </div>
 
-          <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 p-3 text-xs text-slate-500">
+          <p className="rounded-lg border border-dashed border-stone-300 bg-stone-50 p-3 text-xs text-stone-500">
             Dies ist eine kurze, anpassbare Übersicht – ersetzen Sie sie durch Ihre
             vollständige, rechtsgültige Datenschutzerklärung.
           </p>

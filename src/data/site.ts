@@ -406,55 +406,125 @@ export const deliverables = [
 ];
 
 /* =====================================================================
-   Beispiele — echte Projekte, ehrliche Formulierung.
-   Ergebnisse basieren auf frühen/aufbauenden Daten und werden bewusst nicht
-   überhöht. Exakte Zahlen werden später manuell ergänzt.
+   Erfolgsgeschichten / Case Studies — echte Projekte, ehrliche Formulierung.
+   Alle Zahlen stammen aus Lead-Dokumentation und GA4 und werden bewusst
+   nicht überhöht (Anfragen ≠ abgeschlossene Aufträge/Käufe).
    ===================================================================== */
 export const caseStudies = [
   {
-    business: "Franken Autoankauf",
-    category: "Fahrzeugankauf",
-    problem:
-      "Anfragen kamen unregelmäßig, und es war nicht nachvollziehbar, welcher Kanal sie ausgelöst hat.",
-    actions: [
-      "Conversion-orientierte Website aufgebaut",
-      "Anruf- und WhatsApp-Buttons klar platziert",
-      "GA4 und Conversion-Tracking eingerichtet",
-      "Herkunft der Anfragen messbar gemacht",
-    ],
-    result:
-      "Erste messbare Anfragen über einen klaren, nachvollziehbaren Kanal. Noch in der Aufbauphase – die Zahlen werden laufend dokumentiert.",
-  },
-  {
+    id: "rohrreinigung-kraft",
     business: "Rohrreinigung Kraft",
-    category: "Handwerk / Notdienst",
-    problem:
+    category: "Handwerk · Notdienst",
+    badge: "Stärkstes Ergebnis",
+    headline: "53 dokumentierte Anfragen in 28 Tagen",
+    stats: ["219 aktive Nutzer", "5,0★ bei 129 Google-Bewertungen"],
+    ausgangslage:
       "Die alte Seite war auf dem Handy langsam und der Weg zum Anruf war unklar – gerade im Notdienst entscheidend.",
-    actions: [
+    umsetzung: [
       "Schnelle, mobil-optimierte Landingpage",
       "Notdienst-Angebot in den Vordergrund gestellt",
       "Ein-Klick-Anruf prominent eingebaut",
       "Local SEO für die Region strukturiert",
       "Anruf-Tracking eingerichtet",
     ],
-    result:
-      "Deutlich klarerer Weg zum Anruf auf dem Handy. Frühe Ergebnisse sind vielversprechend und werden ehrlich weiter beobachtet.",
+    ergebnis:
+      "Klarer Anruf-Weg und Notdienst-Fokus zahlen sich aus: 53 dokumentierte Anfragen bei 219 aktiven Nutzern und einer Bewertung von 5,0★.",
+    zeitraum: "28 Tage",
+    quelle: "Lead-Dokumentation und GA4",
+    // Echtes Foto ablegen unter public/images/case-studies/rohrreinigung-kraft.jpg
+    // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
+    image: undefined as string | undefined,
+    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
+    websiteUrl: undefined as string | undefined,
+    igCaption:
+      "Neue Website, klarer Notdienst-Fokus: 53 dokumentierte Anfragen in 28 Tagen bei 219 aktiven Nutzern. Zahlen aus Lead-Dokumentation & GA4 – ohne Beschönigung. #IXALeads #Kundengewinnung #Handwerk",
   },
   {
+    id: "franken-autoankauf-24",
+    business: "Franken Autoankauf 24",
+    category: "Fahrzeugankauf",
+    headline: "211 dokumentierte Fahrzeuganfragen im ausgewerteten Zeitraum",
+    ausgangslage:
+      "Anfragen kamen unregelmäßig, und es war nicht nachvollziehbar, welcher Kanal sie ausgelöst hat.",
+    umsetzung: [
+      "Conversion-orientierte Website aufgebaut",
+      "Anruf- und WhatsApp-Buttons klar platziert",
+      "GA4 und Conversion-Tracking eingerichtet",
+      "Herkunft der Anfragen messbar gemacht",
+    ],
+    ergebnis:
+      "211 dokumentierte Fahrzeuganfragen über einen klaren, nachvollziehbaren Kanal – Anfragen, keine abgeschlossenen Ankäufe.",
+    // TODO: Zeitraum bestätigen (GA4 vs. Lead-Sheet), dann headline auf
+    // "211 dokumentierte Fahrzeuganfragen in X Tagen" ändern und zeitraum setzen.
+    zeitraum: null,
+    quelle: "Lead-Dokumentation und GA4",
+    // Echtes Foto ablegen unter public/images/case-studies/franken-autoankauf-24.jpg
+    // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
+    image: undefined as string | undefined,
+    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
+    websiteUrl: undefined as string | undefined,
+    igCaption:
+      "211 dokumentierte Fahrzeuganfragen im ausgewerteten Zeitraum – über einen klaren, nachvollziehbaren Kanal (Anfragen, keine abgeschlossenen Ankäufe). Transparent aus Lead-Dokumentation & GA4. #IXALeads #Fahrzeugankauf",
+  },
+  {
+    id: "moebelmontage-nuernberg",
+    business: "Möbelmontage Nürnberg",
+    category: "Montage · Nürnberg",
+    headline: "Google-Ads-Anfragen bis zur Quelle nachvollziehbar (~14 Anfragen in 7 Tagen)",
+    ausgangslage:
+      "Google-Ads-Kampagnen liefen, aber es war unklar, wie viele echte Anfragen daraus entstanden und über welchen Kanal sie eingingen.",
+    umsetzung: [
+      "Google Ads mit klarer Zielseite verknüpft",
+      "Conversion-Tracking für Anrufe, WhatsApp und Formular eingerichtet",
+      "GA4 mit Quellenzuordnung aufgesetzt",
+      "Anfragen einheitlich dokumentiert",
+    ],
+    ergebnis:
+      "Rund 14 dokumentierte Anfragen ließen sich im Beobachtungszeitraum eindeutig auf Google Ads zurückführen – erstmals nachvollziehbar von der Anzeige bis zur Anfrage.",
+    // TODO vor Veröffentlichung: Zeitraumdeckung GA4 vs. Lead-Sheet prüfen
+    // (siehe auch Keller Montage) – Besucherzahl bewusst nicht auf der Karte
+    // gezeigt, da Zeitfenster von Besuch (8) und Anfragen (14) abweichen.
+    zeitraum: "7 Tage",
+    quelle: "Lead-Dokumentation und GA4",
+    // Echtes Foto ablegen unter public/images/case-studies/moebelmontage-nuernberg.jpg
+    // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
+    image: undefined as string | undefined,
+    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
+    websiteUrl: undefined as string | undefined,
+    igCaption:
+      "Google-Ads-Anfragen erstmals bis zur Quelle nachvollziehbar: rund 14 dokumentierte Anfragen in 7 Tagen. Klein angefangen, sauber gemessen. #IXALeads #GoogleAds #Möbelmontage",
+  },
+  {
+    id: "keller-montage",
     business: "Keller Montage",
-    category: "Montage & Renovierung",
-    problem:
+    category: "Küchenmontage · Nürnberg & Franken",
+    headline: "Rund 10 dokumentierte Anfragen innerhalb von 7 Tagen",
+    stats: ["5,0 ★ Google-Bewertung · Echte Projektbilder"],
+    ausgangslage:
       "Viele Klicks, aber kaum verwertbare Anfragen – und keine Verbindung zwischen Formular und Nachverfolgung.",
-    actions: [
+    umsetzung: [
       "Angebot und Leistungen klar strukturiert",
       "Formular vereinfacht und mit Google Sheets verbunden",
       "Lead-Automation per Webhook aufgesetzt",
       "GA4 und Conversion-Tracking eingerichtet",
     ],
-    result:
-      "Anfragen landen jetzt automatisch und nachvollziehbar im System – ein früher, aber solider Startpunkt für weiteres Wachstum.",
+    ergebnis:
+      "Ein fokussierter Auftritt mit realen Projektreferenzen, klaren Kontaktwegen und nachvollziehbarer Anfrageerfassung.",
+    // TODO vor Veröffentlichung: Zeitraumdeckung GA4 vs. Lead-Sheet prüfen
+    // (siehe auch Möbelmontage Nürnberg).
+    zeitraum: "7 Tage",
+    quelle: "Lead-Dokumentation und GA4",
+    // Echtes Foto ablegen unter public/images/case-studies/keller-montage.jpg
+    // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
+    image: undefined as string | undefined,
+    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
+    websiteUrl: undefined as string | undefined,
+    igCaption:
+      "Rund 10 dokumentierte Anfragen in 7 Tagen – mit echten Projektbildern, klaren Kontaktwegen und 5,0★ Bewertung. #IXALeads #Küchenmontage #Nürnberg",
   },
 ];
+
+export type CaseStudy = (typeof caseStudies)[number];
 
 /* Abschnitt Transparenz */
 export const transparencyFactors = [

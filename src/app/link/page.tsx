@@ -21,7 +21,7 @@ export default function LinkHubPage() {
         className="pointer-events-none absolute inset-0"
         style={{
           backgroundImage:
-            "radial-gradient(60% 45% at 50% 0%, hsl(221 83% 53% / 0.28), transparent 60%), radial-gradient(50% 40% at 85% 90%, hsl(160 84% 39% / 0.14), transparent 60%), radial-gradient(50% 40% at 10% 85%, hsl(221 83% 53% / 0.10), transparent 60%)",
+            "radial-gradient(60% 45% at 50% 0%, hsl(14 65% 42% / 0.30), transparent 60%), radial-gradient(50% 40% at 85% 90%, hsl(38 55% 55% / 0.16), transparent 60%), radial-gradient(50% 40% at 10% 85%, hsl(14 65% 42% / 0.12), transparent 60%)",
         }}
       />
       <div
@@ -41,7 +41,7 @@ export default function LinkHubPage() {
             aria-hidden="true"
             className="absolute inset-0 -z-10 animate-pulse-soft rounded-full bg-primary/30 blur-2xl"
           />
-          <span className="grid size-24 place-items-center rounded-full border border-primary/40 bg-navy-900 text-2xl font-bold tracking-tight text-white shadow-[0_0_50px_-10px_rgba(37,99,235,0.7)]">
+          <span className="grid size-24 place-items-center rounded-full border border-primary/40 bg-navy-900 text-2xl font-bold tracking-tight text-white shadow-[0_0_50px_-10px_rgba(177,70,38,0.7)]">
             IX
           </span>
         </div>
@@ -55,7 +55,7 @@ export default function LinkHubPage() {
         <p className="mt-1 max-w-[280px] text-center text-sm leading-relaxed text-white/50">
           Social Media, Websites &amp; Ads, die Anfragen liefern.
         </p>
-        <p className="mt-2.5 text-xs font-medium tracking-wide text-primary/80">
+        <p className="mt-2.5 text-xs font-medium tracking-wide text-stamp/80">
           25+ Kunden · 15+ Branchen
         </p>
 

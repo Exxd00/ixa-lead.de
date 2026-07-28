@@ -134,7 +134,7 @@ export function ContactForm() {
   const isDemo = !siteConfig.form.endpoint;
 
   return (
-    <section id="contact" className="section-alt border-y border-slate-200/70 py-16 sm:py-20 lg:py-24">
+    <section id="contact" className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
         <SectionHeading
           eyebrow="Anfrage"
@@ -291,7 +291,7 @@ export function ContactForm() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="focus-ring inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-cta transition-all hover:bg-blue-700 hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0"
+                  className="focus-ring inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-cta transition-all hover:-translate-y-0.5 hover:shadow-glow active:translate-y-0 active:shadow-cta-pressed disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-cta"
                 >
                   {status === "loading" ? (
                     <>
@@ -306,14 +306,14 @@ export function ContactForm() {
                   )}
                 </button>
 
-                <p className="flex items-center justify-center gap-2 text-center text-sm text-slate-500">
+                <p className="flex items-center justify-center gap-2 text-center text-sm text-stone-500">
                   <ShieldCheck className="size-4 text-success-600" />
                   Ihre Daten werden nur zur Kontaktaufnahme bezüglich Ihrer Anfrage
                   verwendet.
                 </p>
 
                 {isDemo && (
-                  <p className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-3 text-center text-xs text-slate-500">
+                  <p className="rounded-xl border border-dashed border-stone-300 bg-stone-50 px-4 py-3 text-center text-xs text-stone-500">
                     Hinweis für Entwickler: Das Formular ist im Demo-Modus. Tragen
                     Sie das Ziel in
                     <span className="mx-1 font-mono">siteConfig.form.endpoint</span>
@@ -349,9 +349,9 @@ function Field({
     <div className="space-y-2">
       <Label htmlFor={id} className="text-sm font-semibold text-navy">
         {label}
-        {required && <span className="ml-1 text-primary">*</span>}
+        {required && <span className="ml-1 text-stamp">*</span>}
         {optional && (
-          <span className="ml-1 text-xs font-normal text-slate-400">(optional)</span>
+          <span className="ml-1 text-xs font-normal text-stone-400">(optional)</span>
         )}
       </Label>
       {children}
@@ -375,7 +375,7 @@ function SuccessState({ isDemo }: { isDemo: boolean }) {
         <CheckCircle2 className="size-9" />
       </span>
       <h3 className="mt-5 text-xl font-bold text-navy">Ihre Anfrage ist eingegangen</h3>
-      <p className="mt-2 max-w-md text-[15px] leading-relaxed text-slate-600">
+      <p className="mt-2 max-w-md text-[15px] leading-relaxed text-stone-600">
         Ich melde mich, sobald ich Ihre Angaben geprüft habe.
       </p>
       {isDemo && (

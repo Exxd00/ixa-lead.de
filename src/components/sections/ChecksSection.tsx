@@ -2,6 +2,7 @@ import { ArrowRight } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaButton } from "@/components/cta";
+import GlareHover from "@/components/GlareHover";
 import { getIcon } from "@/lib/icons";
 import { checks } from "@/data/site";
 
@@ -21,13 +22,24 @@ export function ChecksSection() {
             return (
               <Reveal key={check.id} delay={i * 90} className="flex">
                 <article className="card-soft group flex w-full flex-col p-6 sm:p-7">
-                  <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-primary transition-colors group-hover:bg-primary group-hover:text-white">
-                    <Icon className="size-6" />
-                  </span>
+                  <GlareHover
+                    width="48px"
+                    height="48px"
+                    background="transparent"
+                    borderColor="transparent"
+                    borderRadius="16px"
+                    glareColor="#5B8CFF"
+                    glareOpacity={0.35}
+                    className="!inline-flex"
+                  >
+                    <span className="grid size-12 place-items-center rounded-2xl bg-primary/10 text-stamp transition-colors group-hover:bg-primary group-hover:text-white">
+                      <Icon className="size-6" />
+                    </span>
+                  </GlareHover>
                   <h3 className="mt-5 text-lg font-bold text-navy">
                     {check.title}
                   </h3>
-                  <p className="mt-2 flex-1 text-[15px] leading-relaxed text-slate-600">
+                  <p className="mt-2 flex-1 text-[15px] leading-relaxed text-stone-600">
                     {check.text}
                   </p>
                   <div className="mt-6">

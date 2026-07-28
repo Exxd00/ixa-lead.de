@@ -1,92 +1,122 @@
-import {
-  ArrowRight,
-  Check,
-  Search,
-  LayoutTemplate,
-  MessageSquare,
-  UserCheck,
-  ShieldCheck,
-} from "lucide-react";
+"use client";
+
+import { useEffect, useRef, useState } from "react";
+import { ArrowRight, Check } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton } from "@/components/cta";
-import { Button } from "@/components/ui/button";
+import ShinyText from "@/components/ShinyText";
+import SplitText from "@/components/SplitText";
+import Aurora from "@/components/Aurora";
+import TargetCursor from "@/components/TargetCursor";
 import { heroTrustPoints, heroChips } from "@/data/site";
 
-const funnel = [
-  {
-    icon: Search,
-    label: "Suche & Anzeige",
-    note: "Lokale Sichtbarkeit",
-    status: "Sichtbar",
-    tone: "blue",
-  },
-  {
-    icon: LayoutTemplate,
-    label: "Website",
-    note: "Klarheit & Vertrauen",
-    status: "Optimiert",
-    tone: "navy",
-  },
-  {
-    icon: MessageSquare,
-    label: "Anruf, WhatsApp, Formular",
-    note: "Kontaktschritt",
-    status: "Getracktes Event",
-    tone: "blue",
-  },
-  {
-    icon: UserCheck,
-    label: "Messbare Anfrage",
-    note: "Automatisch erfasst",
-    status: "Messbar",
-    tone: "green",
-  },
-] as const;
-
-const toneStyles: Record<string, { chip: string; icon: string }> = {
-  blue: { chip: "bg-primary/10 text-primary", icon: "bg-primary/10 text-primary" },
-  navy: { chip: "bg-navy/10 text-navy", icon: "bg-navy/10 text-navy" },
-  green: {
-    chip: "bg-success-50 text-success-700",
-    icon: "bg-success-50 text-success-600",
-  },
-};
+/* Positionen der 4 Signalpunkte entlang des Trace-Pfads (in % relativ zum
+   220x220-Zeichenbereich) und kurze Labels, damit nichts über den Kartenrand
+   hinausläuft — heroJourney.label bleibt der ausführliche Text an anderer Stelle. */
+const points = [
+  { x: 8, y: 78, label: "Suche", align: "left" as const },
+  { x: 36, y: 56, label: "Website", align: "center" as const },
+  { x: 64, y: 38, label: "Kontakt", align: "center" as const },
+  { x: 92, y: 14, label: "Anfrage", align: "right" as const },
+];
 
 export function Hero() {
+  const sectionRef = useRef<HTMLElement | null>(null);
+  const [cursorActive, setCursorActive] = useState(false);
+  const [isDesktopViewport, setIsDesktopViewport] = useState(false);
+
+  // TargetCursor ist ein globaler Cursor-Ersatz — wird nur montiert, solange
+  // der Hero im Viewport ist, damit der Rest der Seite (Formular, Fließtext)
+  // den normalen Mauszeiger behält. TargetCursor schaltet sich auf Touch-
+  // Geräten selbst ab, aber diese Prüfung verlässt sich auf Touch-/UA-
+  // Erkennung — als zusätzliche Absicherung wird hier zusätzlich explizit
+  // die Breakpoint-Breite (wie überall sonst auf der Seite: ab lg) geprüft.
+  useEffect(() => {
+    const mql = window.matchMedia("(min-width: 1024px)");
+    const update = () => setIsDesktopViewport(mql.matches);
+    update();
+    mql.addEventListener("change", update);
+    return () => mql.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    const node = sectionRef.current;
+    if (!node) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => setCursorActive(entry.isIntersecting),
+      { threshold: 0.15 },
+    );
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <section id="home" className="hero-wash relative overflow-hidden">
+    <section
+      id="home"
+      ref={sectionRef}
+      className="hero-wash relative overflow-hidden"
+    >
+      {cursorActive && isDesktopViewport && (
+        <TargetCursor
+          targetSelector=".cursor-target"
+          cursorColor="#5B8CFF"
+          spinDuration={3}
+        />
+      )}
+
+      {/* Aurora-Hintergrund — nur Desktop, WebGL kostet auf Mobil Akku/Leistung */}
+      <div aria-hidden="true" className="absolute inset-0 hidden lg:block">
+        <Aurora colorStops={["#1D2430", "#5B8CFF", "#FF7043"]} amplitude={0.8} blend={0.55} speed={0.6} />
+      </div>
+
       {/* dezentes Raster */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-[0.4] [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)]"
+        className="pointer-events-none absolute inset-0 opacity-[0.5] [mask-image:radial-gradient(70%_60%_at_50%_0%,black,transparent)]"
         style={{
           backgroundImage:
-            "linear-gradient(to right, rgba(15,46,86,0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(15,46,86,0.05) 1px, transparent 1px)",
+            "linear-gradient(to right, rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.06) 1px, transparent 1px)",
           backgroundSize: "44px 44px",
         }}
       />
 
-      <div className="container-lp relative grid items-center gap-8 pb-14 pt-24 sm:gap-12 sm:pb-20 sm:pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pb-28 lg:pt-36">
+      <div className="container-lp relative grid items-center gap-10 pb-16 pt-24 sm:gap-14 sm:pb-24 sm:pt-28 lg:grid-cols-[1.05fr_0.95fr] lg:gap-10 lg:pb-32 lg:pt-36">
         {/* Textspalte */}
         <div className="flex flex-col items-start">
           <Reveal>
-            <span className="inline-flex items-center gap-2 rounded-full border border-primary/20 bg-white/70 px-4 py-1.5 text-sm font-semibold text-primary shadow-sm backdrop-blur">
-              <span className="size-2 rounded-full bg-primary" aria-hidden="true" />
+            <span className="inline-flex items-center gap-2.5 rounded-full border border-white/15 bg-white/5 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-white/80 backdrop-blur">
+              <span className="relative inline-flex size-2 rounded-full bg-primary">
+                <span className="absolute inset-0 animate-signal-ping rounded-full bg-primary" />
+              </span>
               Digitale Kundengewinnung · Nürnberg & Franken
             </span>
           </Reveal>
 
           <Reveal delay={80}>
-            <h1 className="mt-5 text-[1.9rem] font-bold leading-[1.14] text-navy sm:mt-6 sm:text-[2.6rem] lg:text-[3.1rem] lg:leading-[1.08]">
-              <span className="block text-navy">
-                Website. Werbung. Tracking.
-              </span>
-              <span className="relative mt-2 block whitespace-nowrap text-primary">
-                Mehr messbare Anfragen.
+            <h1 className="mt-5 text-[1.9rem] font-bold leading-[1.12] text-white sm:mt-6 sm:text-[2.7rem] lg:text-[3.25rem] lg:leading-[1.06]">
+              <SplitText
+                text="Website. Werbung. Tracking."
+                tag="span"
+                className="block"
+                textAlign="left"
+                splitType="words"
+                delay={60}
+                duration={0.7}
+                from={{ opacity: 0, y: 24 }}
+                to={{ opacity: 1, y: 0 }}
+              />
+              <span className="relative mt-2 block whitespace-nowrap">
+                <ShinyText
+                  text="Live gemessen."
+                  color="#5B8CFF"
+                  shineColor="#ffffff"
+                  speed={2.4}
+                  className="text-[1.9rem] font-bold sm:text-[2.7rem] lg:text-[3.25rem]"
+                />
                 <svg
                   aria-hidden="true"
                   viewBox="0 0 200 12"
-                  className="absolute -bottom-1.5 left-0 h-2.5 w-full text-primary/30"
+                  className="absolute -bottom-1.5 left-0 h-2.5 w-full text-primary/40"
                   preserveAspectRatio="none"
                 >
                   <path
@@ -102,12 +132,10 @@ export function Hero() {
           </Reveal>
 
           <Reveal delay={160}>
-            <div className="mt-6 space-y-4 text-base leading-relaxed text-slate-600 sm:text-lg">
-              <p>
-                Ich baue digitale Kundengewinnungs-Systeme für lokale Unternehmen
-                in Nürnberg und Franken – von der Suche bis zur messbaren Anfrage.
-              </p>
-            </div>
+            <p className="mt-6 max-w-lg text-base leading-relaxed text-white/60 sm:text-lg">
+              Ich baue digitale Kundengewinnungs-Systeme für lokale Unternehmen
+              in Nürnberg und Franken – von der Suche bis zur messbaren Anfrage.
+            </p>
           </Reveal>
 
           <Reveal delay={220}>
@@ -117,28 +145,24 @@ export function Hero() {
                 location="hero_primary"
                 size="xl"
                 icon={<ArrowRight className="order-last" />}
-                className="w-full sm:w-auto"
+                className="cursor-target w-full sm:w-auto"
               >
                 Kostenlose Erstanalyse anfordern
               </CtaButton>
-              <Button asChild variant="outline" size="xl" className="w-full sm:w-auto">
-                <a href="#packages">Pakete ansehen</a>
-              </Button>
+              <a
+                href="#packages"
+                className="cursor-target focus-ring inline-flex h-14 w-full items-center justify-center rounded-xl border border-white/20 px-8 text-base font-semibold text-white transition-colors hover:bg-white/10 sm:w-auto"
+              >
+                Pakete ansehen
+              </a>
             </div>
           </Reveal>
 
-          <Reveal delay={260}>
-            <p className="mt-3 flex items-center gap-2 text-sm font-medium text-navy">
-              <ShieldCheck className="size-4 text-primary" />
-              Ihr Partner in Nürnberg und Franken für digitale Kundengewinnung.
-            </p>
-          </Reveal>
-
           <Reveal delay={300}>
-            <ul className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
+            <ul className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-2">
               {heroTrustPoints.map((point) => (
-                <li key={point} className="flex items-center gap-2 text-sm text-slate-600">
-                  <span className="grid size-5 shrink-0 place-items-center rounded-full bg-success-100 text-success-700">
+                <li key={point} className="flex items-center gap-2 text-sm text-white/60">
+                  <span className="grid size-5 shrink-0 place-items-center rounded-full bg-white/10 text-success-400">
                     <Check className="size-3.5" strokeWidth={3} />
                   </span>
                   {point}
@@ -148,95 +172,95 @@ export function Hero() {
           </Reveal>
         </div>
 
-        {/* Visualisierung: Reise vom Klick zur Anfrage */}
+        {/* Signatur-Visualisierung: eine live gezeichnete Tracking-Linie statt
+            einer statischen Karte — zeigt den Kern des Angebots (messbare
+            Anfragen) direkt als Bewegung, nicht als Text in einer Box. */}
         <Reveal delay={200} className="relative">
-          <div
-            aria-hidden="true"
-            className="absolute -inset-6 -z-10 rounded-[2rem] bg-gradient-to-tr from-primary/10 via-transparent to-success-200/20 blur-2xl"
-          />
+          <div className="relative aspect-[5/4] w-full max-w-md rounded-3xl border border-white/10 bg-white/[0.03] p-6 backdrop-blur sm:p-8">
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/40">
+              Ihr System · live
+            </p>
 
-          <div className="card-soft relative rounded-[1.75rem] p-5 sm:p-6">
-            {/* Kopf */}
-            <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-              <div className="flex items-center gap-2.5">
-                <span className="grid size-9 place-items-center rounded-xl bg-navy text-white">
-                  <ShieldCheck className="size-5" />
-                </span>
-                <div className="leading-tight">
-                  <p className="text-sm font-bold text-navy">Ihr System</p>
-                  <p className="text-xs text-slate-500">
-                    Von der Suche zur messbaren Anfrage
-                  </p>
-                </div>
-              </div>
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-success-50 px-3 py-1 text-xs font-semibold text-success-700">
-                <span className="size-1.5 animate-pulse-soft rounded-full bg-success-500" />
-                Bereit
-              </span>
-            </div>
+            <div className="relative mt-4 h-[calc(100%-2.5rem)] w-full">
+              <svg
+                aria-hidden="true"
+                viewBox="0 0 220 220"
+                preserveAspectRatio="none"
+                className="absolute inset-0 size-full overflow-visible text-primary"
+              >
+                <path
+                  d={`M ${points.map((p) => `${p.x * 2.2},${p.y * 2.2}`).join(" L ")}`}
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeDasharray={700}
+                  className="animate-draw-line"
+                  style={{ ["--line-length" as string]: 700 }}
+                />
+              </svg>
 
-            {/* Schritte */}
-            <ol className="mt-5">
-              {funnel.map((step, i) => {
-                const Icon = step.icon;
-                const tone = toneStyles[step.tone];
-                const isLast = i === funnel.length - 1;
+              {points.map((p, i) => {
+                const isLast = i === points.length - 1;
+                const labelAlign =
+                  p.align === "left"
+                    ? "left-0"
+                    : p.align === "right"
+                      ? "right-0"
+                      : "left-1/2 -translate-x-1/2";
                 return (
-                  <li key={step.label}>
-                    <div className="flex items-center gap-3 rounded-2xl border border-slate-100 bg-white/80 p-3 shadow-sm">
+                  <div
+                    key={p.label}
+                    className="absolute -translate-x-1/2 -translate-y-1/2 opacity-0 animate-fade-up"
+                    style={{
+                      left: `${p.x}%`,
+                      top: `${p.y}%`,
+                      animationDelay: `${0.35 + i * 0.4}s`,
+                    }}
+                  >
+                    <span
+                      className={`relative grid size-3 place-items-center rounded-full ${isLast ? "bg-success-400" : "bg-primary"}`}
+                    >
                       <span
-                        className={`grid size-11 shrink-0 place-items-center rounded-xl ${tone.icon}`}
-                      >
-                        <Icon className="size-5" />
-                      </span>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-semibold text-navy">
-                          {step.label}
-                        </p>
-                        <p className="truncate text-xs text-slate-500">{step.note}</p>
-                      </div>
-                      <span
-                        className={`hidden shrink-0 rounded-full px-2.5 py-1 text-[11px] font-semibold sm:inline-block ${tone.chip}`}
-                      >
-                        {step.status}
-                      </span>
-                    </div>
-
-                    {!isLast && (
-                      <div className="relative ml-[34px] h-6 w-0.5 overflow-hidden bg-slate-200">
-                        <span className="absolute inset-x-0 top-0 h-2 animate-flow-down bg-primary/70" />
-                      </div>
-                    )}
-                  </li>
+                        className={`absolute inset-0 rounded-full ${isLast ? "bg-success-400" : "bg-primary"} animate-signal-ping`}
+                      />
+                    </span>
+                    <span
+                      className={`absolute top-full mt-1.5 whitespace-nowrap rounded-md bg-navy-950/80 px-2 py-1 text-[10px] font-semibold text-white/80 backdrop-blur ${labelAlign}`}
+                    >
+                      {p.label}
+                    </span>
+                  </div>
                 );
               })}
-            </ol>
+            </div>
 
-            {/* Tool-Chips */}
-            <div className="mt-5 flex flex-wrap gap-2 border-t border-slate-100 pt-4">
-              {heroChips.map((chip) => (
-                <span
-                  key={chip}
-                  className="inline-flex items-center gap-1.5 rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-600"
-                >
-                  <span className="size-1.5 rounded-full bg-primary/60" />
-                  {chip}
-                </span>
-              ))}
+            <div
+              className="mt-5 flex items-center gap-2 rounded-xl border border-success-400/30 bg-success-400/10 px-3.5 py-2.5 opacity-0 animate-fade-up"
+              style={{ animationDelay: "1.9s" }}
+            >
+              <Check className="size-4 shrink-0 text-success-400" strokeWidth={3} />
+              <p className="text-xs font-semibold text-success-300">
+                Anfrage automatisch erfasst und getrackt
+              </p>
             </div>
           </div>
 
-          {/* schwebende Karte für Tiefe */}
-          <div className="absolute -bottom-5 -right-3 hidden items-center gap-2.5 rounded-2xl border border-slate-100 bg-white/95 p-3 shadow-card backdrop-blur sm:flex">
-            <span className="grid size-9 place-items-center rounded-xl bg-success-50 text-success-600">
-              <Check className="size-5" strokeWidth={3} />
-            </span>
-            <div className="leading-tight">
-              <p className="text-xs font-bold text-navy">Lead-Automation</p>
-              <p className="text-[11px] text-slate-500">
-                Anfragen automatisch erfasst
-              </p>
-            </div>
+          {/* Tool-Chips */}
+          <div
+            className="mt-4 flex flex-wrap gap-2 opacity-0 animate-fade-up"
+            style={{ animationDelay: "2.1s" }}
+          >
+            {heroChips.map((chip) => (
+              <span
+                key={chip}
+                className="inline-flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/60"
+              >
+                <span className="size-1.5 rounded-full bg-primary/70" />
+                {chip}
+              </span>
+            ))}
           </div>
         </Reveal>
       </div>

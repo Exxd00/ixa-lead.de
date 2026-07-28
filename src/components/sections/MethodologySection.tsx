@@ -14,7 +14,7 @@ export function MethodologySection() {
 
         <div className="mx-auto mt-10 max-w-3xl">
           <Reveal>
-            <p className="text-center text-base leading-relaxed text-slate-600 sm:text-lg">
+            <p className="text-center text-base leading-relaxed text-stone-600 sm:text-lg">
               Weil Besucher nicht aus dem Nichts kommen. Sie sehen eine Anzeige,
               bilden eine Erwartung und entscheiden dann in kurzer Zeit:
             </p>
@@ -25,9 +25,9 @@ export function MethodologySection() {
               {methodologyQuestions.map((q) => (
                 <li
                   key={q}
-                  className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
+                  className="flex items-center gap-3 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm"
                 >
-                  <HelpCircle className="size-5 shrink-0 text-primary" />
+                  <HelpCircle className="size-5 shrink-0 text-stamp" />
                   <span className="text-[15px] text-navy">{q}</span>
                 </li>
               ))}
@@ -41,16 +41,16 @@ export function MethodologySection() {
             <div className="flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">
               {methodologyEquation.map((el, i) => (
                 <div key={el} className="flex items-center gap-2.5 sm:gap-3">
-                  <span className="rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-navy shadow-sm sm:text-base">
+                  <span className="rounded-xl border border-stone-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-navy shadow-sm sm:text-base">
                     {el}
                   </span>
                   {i < methodologyEquation.length - 1 && (
-                    <Plus className="size-4 shrink-0 text-primary" strokeWidth={2.5} />
+                    <Plus className="size-4 shrink-0 text-stamp" strokeWidth={2.5} />
                   )}
                 </div>
               ))}
             </div>
-            <p className="mt-7 text-center text-base leading-relaxed text-slate-700 sm:text-lg">
+            <p className="mt-7 text-center text-base leading-relaxed text-stone-700 sm:text-lg">
               Wenn diese Elemente zusammenspielen, werden die Daten klarer – und
               Optimierung wird möglich.
             </p>

@@ -9,7 +9,7 @@ import { track, buildWhatsappUrl } from "@/lib/tracking";
  */
 export function MobileCtaBar() {
   return (
-    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)] lg:hidden">
+    <div className="fixed inset-x-0 bottom-0 z-40 border-t border-stone-200 bg-white/95 backdrop-blur-md pb-[env(safe-area-inset-bottom)] lg:hidden">
       <div className="flex items-center gap-2.5 px-4 py-3">
         <CtaButton
           event="hero_cta_click"

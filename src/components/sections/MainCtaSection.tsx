@@ -34,7 +34,7 @@ export function MainCtaSection() {
                 <h2 className="text-2xl font-bold leading-snug text-white sm:text-3xl">
                   Bevor Sie das Budget erhöhen: Ist Ihr System bereit dafür?
                 </h2>
-                <p className="mt-5 text-base leading-relaxed text-slate-300 sm:text-lg">
+                <p className="mt-5 text-base leading-relaxed text-stone-300 sm:text-lg">
                   Erzählen Sie mir kurz von Ihrem Unternehmen und Ihrem Ziel – mit
                   oder ohne bestehende Website. Ich verschaffe mir einen Überblick
                   und helfe einzuordnen, wo der größte Hebel liegt:
@@ -56,7 +56,7 @@ export function MainCtaSection() {
                 {reviewPoints.map((point) => (
                   <li
                     key={point}
-                    className="flex items-center gap-2.5 text-[15px] text-slate-200"
+                    className="flex items-center gap-2.5 text-[15px] text-stone-200"
                   >
                     <span className="size-1.5 shrink-0 rounded-full bg-primary" />
                     {point}

@@ -21,10 +21,10 @@ export function FaqSection() {
                 <AccordionItem
                   key={faq.q}
                   value={`faq-${i}`}
-                  className="border-slate-100 last:border-0"
+                  className="border-stone-100 last:border-0"
                 >
                   <AccordionTrigger>{faq.q}</AccordionTrigger>
-                  <AccordionContent className="text-[15px] leading-relaxed text-slate-600">
+                  <AccordionContent className="text-[15px] leading-relaxed text-stone-600">
                     {faq.a}
                   </AccordionContent>
                 </AccordionItem>

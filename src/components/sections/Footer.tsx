@@ -8,7 +8,7 @@ export function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer className="border-t border-slate-200 bg-white">
+    <footer className="border-t border-stone-200 bg-white">
       <div className="container-lp py-14">
         <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1.4fr]">
           {/* العلامة */}
@@ -19,7 +19,7 @@ export function Footer() {
               </span>
               <span className="text-lg font-bold text-navy">{siteConfig.name}</span>
             </div>
-            <p className="mt-4 max-w-xs text-sm leading-relaxed text-slate-500">
+            <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-500">
               Digitale Kundengewinnungs-Systeme für lokale Unternehmen in Nürnberg
               und Franken – Website, Werbung, Tracking und Automation aus einer
               Hand.
@@ -34,7 +34,7 @@ export function Footer() {
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    className="focus-ring rounded-md text-slate-500 transition-colors hover:text-primary"
+                    className="focus-ring rounded-md text-stone-500 transition-colors hover:text-stamp"
                   >
                     {link.label}
                   </a>
@@ -62,15 +62,15 @@ export function Footer() {
               <li>
                 <EmailLink location="footer" />
               </li>
-              <li className="flex items-center gap-2 text-slate-500">
-                <MapPin className="size-4 text-primary" />
+              <li className="flex items-center gap-2 text-stone-500">
+                <MapPin className="size-4 text-stamp" />
                 {siteConfig.contact.location}
               </li>
             </ul>
           </div>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-slate-200 pt-6 text-sm text-slate-500 sm:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between gap-4 border-t border-stone-200 pt-6 text-sm text-stone-500 sm:flex-row">
           <p>
             © {year} {siteConfig.name}. Alle Rechte vorbehalten.
           </p>
