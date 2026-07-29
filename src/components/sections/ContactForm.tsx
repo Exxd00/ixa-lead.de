@@ -67,9 +67,9 @@ function payloadFor(state: FormState): FormState {
 export function ContactForm() {
   const [state, setState] = useState<FormState>(initialState);
   const [errors, setErrors] = useState<Errors>({});
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
-    "idle",
-  );
+  const [status, setStatus] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
   const startedRef = useRef(false);
 
   // تحديد الخدمة تلقائيًا عند الضغط على زر خدمة معيّنة
@@ -116,7 +116,10 @@ export function ContactForm() {
       if (endpoint) {
         const res = await fetch(endpoint, {
           method: "POST",
-          headers: { Accept: "application/json", "Content-Type": "application/json" },
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
           body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("request_failed");
@@ -141,7 +144,10 @@ export function ContactForm() {
   const isDemo = !siteConfig.form.endpoint;
 
   return (
-    <section id="contact" className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24">
+    <section
+      id="contact"
+      className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24"
+    >
       <div className="container-lp">
         <SectionHeading
           eyebrow="Anfrage"
@@ -151,10 +157,12 @@ export function ContactForm() {
 
         <Reveal delay={80} className="mx-auto mt-10 max-w-2xl">
           <div className="card-soft p-6 sm:p-8">
-            <div className="mb-6 grid grid-cols-2 gap-3">
+            <div className="mb-6 grid gap-3 min-[360px]:grid-cols-2">
               <a
                 href={siteConfig.contact.phoneHref}
-                onClick={() => track("phone_click", { location: "contact_form" })}
+                onClick={() =>
+                  track("phone_click", { location: "contact_form" })
+                }
                 className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm transition-colors hover:border-stamp/40 hover:text-stamp"
               >
                 <Phone className="size-4" aria-hidden="true" />
@@ -215,7 +223,9 @@ export function ContactForm() {
                       onChange={(e) => update("name", e.target.value)}
                       placeholder="Ihr Name"
                       aria-invalid={!!errors.name}
-                      aria-describedby={errors.name ? "field-name-error" : undefined}
+                      aria-describedby={
+                        errors.name ? "field-name-error" : undefined
+                      }
                       autoComplete="name"
                     />
                   </Field>
@@ -284,7 +294,7 @@ export function ContactForm() {
                 <button
                   type="submit"
                   disabled={status === "loading"}
-                  className="focus-ring inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-semibold text-primary-foreground shadow-cta transition-all hover:-translate-y-0.5 hover:shadow-glow active:translate-y-0 active:shadow-cta-pressed disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-cta"
+                  className="focus-ring inline-flex min-h-14 w-full items-center justify-center gap-2 whitespace-normal rounded-xl bg-primary px-3 py-3 text-center text-sm font-semibold leading-tight text-primary-foreground shadow-cta transition-all hover:-translate-y-0.5 hover:shadow-glow active:translate-y-0 active:shadow-cta-pressed disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:translate-y-0 disabled:hover:shadow-cta sm:h-14 sm:px-6 sm:py-0 sm:text-base"
                 >
                   {status === "loading" ? (
                     <>
@@ -294,7 +304,7 @@ export function ContactForm() {
                   ) : (
                     <>
                       <Send className="size-5" />
-                      Anfrage senden
+                      <span>Kostenlose Erstanalyse anfordern</span>
                     </>
                   )}
                 </button>
@@ -307,9 +317,11 @@ export function ContactForm() {
 
                 {isDemo && (
                   <p className="rounded-xl border border-dashed border-stone-300 bg-stone-50 px-4 py-3 text-center text-xs text-stone-500">
-                    Hinweis für Entwickler: Das Formular ist im Demo-Modus. Tragen
-                    Sie das Ziel in
-                    <span className="mx-1 font-mono">siteConfig.form.endpoint</span>
+                    Hinweis für Entwickler: Das Formular ist im Demo-Modus.
+                    Tragen Sie das Ziel in
+                    <span className="mx-1 font-mono">
+                      siteConfig.form.endpoint
+                    </span>
                     (Formspree / API / Supabase) ein, um den echten Versand zu
                     aktivieren.
                   </p>
@@ -344,7 +356,9 @@ function Field({
         {label}
         {required && <span className="ml-1 text-stamp">*</span>}
         {optional && (
-          <span className="ml-1 text-xs font-normal text-stone-400">(optional)</span>
+          <span className="ml-1 text-xs font-normal text-stone-400">
+            (optional)
+          </span>
         )}
       </Label>
       {children}
@@ -371,14 +385,16 @@ function SuccessState({ isDemo }: { isDemo: boolean }) {
       <span className="grid size-16 place-items-center rounded-full bg-success-100 text-success-600">
         <CheckCircle2 className="size-9" />
       </span>
-      <h3 className="mt-5 text-xl font-bold text-navy">Ihre Anfrage ist eingegangen</h3>
+      <h3 className="mt-5 text-xl font-bold text-navy">
+        Ihre Anfrage ist eingegangen
+      </h3>
       <p className="mt-2 max-w-md text-[15px] leading-relaxed text-stone-600">
         Ich melde mich, sobald ich Ihre Angaben geprüft habe.
       </p>
       {isDemo && (
         <p className="mt-5 rounded-xl border border-dashed border-amber-300 bg-amber-50 px-4 py-3 text-xs text-amber-800">
-          Demo-Modus: Es ist noch kein Versandziel eingerichtet, daher wurden keine
-          Daten tatsächlich gesendet. Verbinden Sie das Formular mit einem
+          Demo-Modus: Es ist noch kein Versandziel eingerichtet, daher wurden
+          keine Daten tatsächlich gesendet. Verbinden Sie das Formular mit einem
           E-Mail-Dienst oder einer API, um Anfragen zu empfangen.
         </p>
       )}

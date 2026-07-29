@@ -17,10 +17,10 @@ export function PackagesSection() {
 
         <div className="mt-12 grid gap-5 lg:grid-cols-3">
           {packages.map((pkg, index) => (
-            <Reveal key={pkg.id} delay={index * 80}>
+            <Reveal key={pkg.id} delay={index * 80} className="min-w-0">
               <article
                 className={cn(
-                  "relative flex h-full flex-col rounded-[1.5rem] border p-6 sm:p-7",
+                  "relative flex h-full min-w-0 flex-col rounded-[1.5rem] border p-6 sm:p-7",
                   pkg.highlighted
                     ? "border-primary/35 bg-navy text-white shadow-card"
                     : "border-navy/10 bg-[#fbfaf7]",
@@ -33,7 +33,9 @@ export function PackagesSection() {
                       pkg.highlighted ? "text-success-300" : "text-primary",
                     )}
                   >
-                    {pkg.highlighted ? "Für die meisten Betriebe" : `Paket 0${index + 1}`}
+                    {pkg.highlighted
+                      ? "Für die meisten Betriebe"
+                      : `Paket 0${index + 1}`}
                   </p>
                   {pkg.badge && (
                     <span className="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-white">
@@ -112,7 +114,7 @@ export function PackagesSection() {
                   size="lg"
                   icon={<ArrowRight className="order-last size-4" />}
                   className={cn(
-                    "mt-8 w-full",
+                    "mt-8 w-full px-3 text-sm sm:px-5 sm:text-base",
                     pkg.highlighted &&
                       "bg-white text-navy shadow-none hover:bg-white/90",
                   )}

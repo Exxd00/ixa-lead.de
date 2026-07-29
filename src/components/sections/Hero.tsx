@@ -84,7 +84,7 @@ export function Hero() {
                 icon={<ArrowRight className="order-last" />}
                 className="w-full sm:w-auto"
               >
-                Kostenlose Potenzialanalyse
+                Kostenlose Erstanalyse
               </CtaButton>
               <WhatsappLink
                 location="hero_secondary"
@@ -95,10 +95,15 @@ export function Hero() {
                 Direkt per WhatsApp
               </WhatsappLink>
             </div>
+            <p className="mt-3 max-w-xl text-xs leading-relaxed text-white/55 sm:text-sm">
+              Ich prüfe Website, lokale Sichtbarkeit und Messbarkeit und gebe
+              Ihnen eine klare Empfehlung für den sinnvollsten nächsten Schritt
+              – unverbindlich.
+            </p>
           </Reveal>
 
           <Reveal immediate>
-            <ul className="mt-7 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/65">
+            <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/65">
               {[
                 "Direkter Ansprechpartner",
                 "Mobile zuerst",
@@ -117,9 +122,32 @@ export function Hero() {
               ))}
             </ul>
           </Reveal>
+
+          <Reveal immediate className="mt-6 lg:hidden">
+            <a
+              href="#ergebnis-frankenautoankauf24"
+              className="focus-ring flex flex-col items-start gap-3 rounded-2xl border border-white/12 bg-white/[0.07] p-4 backdrop-blur min-[360px]:flex-row min-[360px]:items-center min-[360px]:justify-between min-[360px]:gap-4"
+            >
+              <span>
+                <span className="block text-xs font-bold uppercase tracking-[0.12em] text-success-300">
+                  Franken Autoankauf 24
+                </span>
+                <span className="mt-1 block text-sm font-semibold text-white/75">
+                  <strong className="mr-1.5 font-mono text-xl text-white">
+                    {featuredCase.documentedActions}
+                  </strong>
+                  dokumentierte Kontakte
+                </span>
+              </span>
+              <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-success-300">
+                3 echte Nachweise
+                <ArrowRight className="size-3.5" aria-hidden="true" />
+              </span>
+            </a>
+          </Reveal>
         </div>
 
-        <Reveal immediate>
+        <Reveal immediate className="hidden lg:block">
           <div className="relative">
             <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-primary/20 blur-3xl" />
             <div className="overflow-hidden rounded-[1.75rem] border border-white/12 bg-white/[0.07] p-5 shadow-2xl backdrop-blur-xl sm:p-7">
@@ -180,8 +208,8 @@ export function Hero() {
                 })}
               </div>
 
-              <div className="mt-7 rounded-2xl border border-white/10 bg-navy-950/35 p-4">
-                <p className="text-xs leading-relaxed text-white/48">
+              <div className="mt-7 rounded-2xl border border-white/10 bg-black/20 p-4">
+                <p className="text-xs leading-relaxed text-white/60">
                   Quelle: projektbezogenes Lead-Sheet, 16. Apr.–8. Juni 2026.
                   Kontaktaktionen sind keine abgeschlossenen Fahrzeugankäufe
                   oder Umsatzzahl.
@@ -190,7 +218,7 @@ export function Hero() {
                   href="#ergebnis-frankenautoankauf24"
                   className="focus-ring mt-3 inline-flex items-center gap-2 rounded-lg text-xs font-bold text-success-300 hover:text-success-200"
                 >
-                  Nachweise ansehen
+                  3 echte Nachweise ansehen
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </a>
               </div>

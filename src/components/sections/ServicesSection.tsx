@@ -1,9 +1,4 @@
-import {
-  ArrowRight,
-  BarChart3,
-  MousePointerClick,
-  Search,
-} from "lucide-react";
+import { ArrowRight, BarChart3, MousePointerClick, Search } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaButton } from "@/components/cta";
@@ -23,7 +18,11 @@ const stages = [
     icon: MousePointerClick,
     title: "Vertrauen & Kontakt",
     text: "Eine schnelle mobile Website beantwortet die wichtigsten Fragen und bietet den passenden Kontaktweg ohne Umwege.",
-    points: ["Mobile Conversion", "Echte Beweise", "Anruf, WhatsApp & Formular"],
+    points: [
+      "Mobile Conversion",
+      "Echte Beweise",
+      "Anruf, WhatsApp & Formular",
+    ],
     note: "49 % der dokumentierten Kontakte kamen per Telefon oder WhatsApp – nicht über ein Formular.",
     service: "Website / Landingpage",
   },
@@ -63,7 +62,9 @@ export function ServicesSection() {
                     </span>
                   </div>
 
-                  <h3 className="mt-6 text-xl font-bold text-navy">{stage.title}</h3>
+                  <h3 className="mt-6 text-xl font-bold text-navy">
+                    {stage.title}
+                  </h3>
                   <p className="mt-3 text-[15px] leading-relaxed text-stone-600">
                     {stage.text}
                   </p>
@@ -93,7 +94,7 @@ export function ServicesSection() {
                     icon={<ArrowRight className="order-last size-4" />}
                     className="mt-4 w-full justify-between px-1 hover:bg-transparent hover:text-primary"
                   >
-                    Dazu beraten lassen
+                    Kostenlose Erstanalyse
                   </CtaButton>
                 </article>
               </Reveal>
