@@ -1,22 +1,16 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3,
   CalendarDays,
-  CheckCircle2,
   ChevronDown,
   ExternalLink,
   FileSpreadsheet,
   FileText,
-  Globe2,
-  Info,
   MessageCircle,
   Phone,
-  Smartphone,
 } from "lucide-react";
 import { FrankenEvidencePost } from "@/components/case-studies/FrankenEvidencePost";
 import {
   documentedCases,
-  felicityGa4Note,
   portfolioEvidence,
   projectLinks,
   type ContactMethodKey,
@@ -36,7 +30,7 @@ const methodVisuals = {
   },
   whatsapp: {
     Icon: MessageCircle,
-    iconClass: "bg-stamp-50 text-stamp",
+    iconClass: "bg-success-100 text-success-700",
   },
 } satisfies Record<
   ContactMethodKey,
@@ -54,7 +48,7 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
             {study.category}
           </p>
           <h4 className="mt-1.5 text-lg font-bold leading-snug text-navy">
@@ -82,7 +76,10 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
           </p>
         </div>
         <p className="flex items-center gap-1.5 text-[11px] text-stone-500">
-          <CalendarDays className="size-3.5 text-stamp" aria-hidden="true" />
+          <CalendarDays
+            className="size-3.5 text-stone-400"
+            aria-hidden="true"
+          />
           {study.period}
         </p>
       </div>
@@ -145,99 +142,16 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
   );
 }
 
-function FelicityGa4OnlyCard() {
-  return (
-    <aside className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.035] p-4 sm:p-5">
-      <div
-        className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-primary/10 blur-3xl"
-        aria-hidden="true"
-      />
-      <div className="relative flex items-start justify-between gap-4">
-        <div>
-          <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
-            <Globe2 className="size-3.5" aria-hidden="true" />
-            GA4-only · International
-          </p>
-          <h4 className="mt-1.5 text-lg font-bold leading-snug text-navy">
-            {felicityGa4Note.business}
-          </h4>
-        </div>
-        <a
-          href={felicityGa4Note.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          aria-label={`${felicityGa4Note.business} in einem neuen Tab öffnen`}
-          className="focus-ring grid size-10 shrink-0 place-items-center rounded-xl border border-primary/15 bg-white text-primary transition-colors hover:border-primary/35"
-        >
-          <ExternalLink className="size-4" aria-hidden="true" />
-        </a>
-      </div>
-
-      <div className="relative mt-4 flex flex-wrap items-end justify-between gap-3">
-        <div>
-          <p className="font-mono text-4xl font-bold tracking-[-0.06em] text-navy">
-            {numberFormatter.format(felicityGa4Note.sessions)}
-          </p>
-          <p className="text-xs font-semibold text-primary">GA4-Sitzungen</p>
-        </div>
-        <p className="flex items-center gap-1.5 text-[11px] text-stone-500">
-          <CalendarDays className="size-3.5 text-stamp" aria-hidden="true" />
-          {felicityGa4Note.period}
-        </p>
-      </div>
-
-      <dl className="relative mt-4 grid grid-cols-3 gap-2">
-        <div className="rounded-xl border border-stone-200 bg-white p-2.5">
-          <dt className="text-[10px] leading-snug text-stone-500">
-            GA4 „Neue Leads“
-          </dt>
-          <dd className="mt-1 font-mono text-lg font-bold text-navy">
-            {numberFormatter.format(felicityGa4Note.newLeadMetric)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-2.5">
-          <dt className="text-[10px] leading-snug text-stone-500">
-            Key Events
-          </dt>
-          <dd className="mt-1 font-mono text-lg font-bold text-navy">
-            {numberFormatter.format(felicityGa4Note.keyEvents)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-2.5">
-          <dt className="flex items-center gap-1 text-[10px] leading-snug text-stone-500">
-            <Smartphone className="size-3" aria-hidden="true" />
-            Mobil
-          </dt>
-          <dd className="mt-1 font-mono text-lg font-bold text-navy">
-            {felicityGa4Note.mobileShare} %
-          </dd>
-        </div>
-      </dl>
-
-      <div className="relative mt-4 flex gap-2 border-t border-amber-200/70 pt-4">
-        <Info
-          className="mt-0.5 size-4 shrink-0 text-amber-700"
-          aria-hidden="true"
-        />
-        <p className="text-[11px] leading-relaxed text-amber-900">
-          Nicht Teil der 308 dokumentierten Kontakte. Die GA4-Kennzahl ist nicht
-          durch ein Lead-Sheet verifiziert.
-        </p>
-      </div>
-    </aside>
-  );
-}
-
 function PortfolioSummary() {
   return (
-    <details className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
-      <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
+    <section className="overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
+      <div className="flex items-center gap-4 p-4 sm:p-5">
         <div className="flex min-w-0 items-center gap-4">
-          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-stone-50 text-stamp">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-primary/10 text-primary">
             <FileSpreadsheet className="size-5" aria-hidden="true" />
           </span>
           <span className="min-w-0">
-            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
+            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
               Portfolio-Summe · sekundärer Nachweis
             </span>
             <span className="mt-1 flex flex-wrap items-baseline gap-x-2">
@@ -250,14 +164,7 @@ function PortfolioSummary() {
             </span>
           </span>
         </div>
-        <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">
-          <span className="hidden sm:inline">Aufteilung ansehen</span>
-          <ChevronDown
-            className="size-5 transition-transform group-open:rotate-180"
-            aria-hidden="true"
-          />
-        </span>
-      </summary>
+      </div>
 
       <div className="border-t border-stone-200 bg-stone-50 p-4 sm:p-5">
         <dl className="grid grid-cols-3 gap-2">
@@ -292,12 +199,11 @@ function PortfolioSummary() {
           })}
         </dl>
         <p className="mt-3 text-[11px] leading-relaxed text-stone-500">
-          {portfolioEvidence.caseCount} getrennte Lead-Sheets. Darin enthalten:
-          11 Kontaktaktionen aus Keller Montage; das Projekt steht unter
-          „Weitere Live-Websites“.
+          Vier Projekte zusammen; Franken Autoankauf 24 ist bereits enthalten.
+          Grundlage sind {portfolioEvidence.caseCount} getrennte Lead-Sheets.
         </p>
       </div>
-    </details>
+    </section>
   );
 }
 
@@ -311,7 +217,6 @@ export function CaseStudiesSection() {
     "frankenautoankauf24.de",
     "rohrreinigung-kraft.de",
     "mobelmontage-nurnberg.de",
-    "felicity-solar-syria.com",
   ]);
   const additionalProjects = projectLinks.filter(
     (project) => !highlightedDomains.has(project.domain),
@@ -321,53 +226,35 @@ export function CaseStudiesSection() {
     <section id="results" className="py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
         <div className="max-w-3xl">
-          <span className="inline-flex items-center gap-2 rounded-full border border-success-200 bg-success-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide text-success-800">
-            <CheckCircle2 className="size-4" aria-hidden="true" />
-            Dokumentierte Fallstudie
-          </span>
-          <h2 className="mt-5 text-3xl font-bold leading-tight text-navy sm:text-4xl">
-            Vom Kontaktweg zum sichtbaren Nachweis
+          <p className="text-sm font-semibold text-primary">
+            Ergebnis aus einem echten Projekt
+          </p>
+          <h2 className="mt-3 text-3xl font-bold leading-tight text-navy sm:text-4xl">
+            Nachvollziehbar statt nur versprochen
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
-            Franken Autoankauf 24 zeigt den Ablauf zuerst: Ausgangslage,
-            IXA-Umsetzung und dokumentiertes Ergebnis. Der anonymisierte
-            Lead-Sheet-Auszug ist direkt sichtbar und lässt sich vergrößern.
+            Bei Franken Autoankauf 24 wurden Formular, Telefon und WhatsApp
+            zusammengeführt und getrennt dokumentiert. Das wichtigste Ergebnis
+            und der anonymisierte Originalauszug stehen direkt hier.
           </p>
-          <ol className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-navy">
-            {["Ausgangslage", "IXA-Umsetzung", "Ergebnis & Quelle"].map(
-              (step, index) => (
-                <li
-                  key={step}
-                  className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2"
-                >
-                  <span className="font-mono text-stamp">{index + 1}</span>
-                  {step}
-                </li>
-              ),
-            )}
-          </ol>
         </div>
 
         <div className="mt-8 sm:mt-10">
           <FrankenEvidencePost study={featuredCase} />
         </div>
 
-        <div className="mt-5">
-          <PortfolioSummary />
-        </div>
-
         <details className="group mt-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
           <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
-                Weitere Nachweise
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
+                Optional vertiefen
               </p>
               <h3 className="mt-1 text-lg font-bold text-navy sm:text-xl">
-                Zwei Lead-Sheet-Fälle + ein GA4-Snapshot
+                Weitere Nachweise &amp; Projekte
               </h3>
             </div>
             <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">
-              <span className="hidden sm:inline">Ergebnisse öffnen</span>
+              <span className="hidden sm:inline">Details öffnen</span>
               <ChevronDown
                 className="size-5 transition-transform group-open:rotate-180"
                 aria-hidden="true"
@@ -375,63 +262,49 @@ export function CaseStudiesSection() {
             </span>
           </summary>
 
-          <div className="grid gap-4 border-t border-stone-200 bg-stone-50 p-4 md:grid-cols-2 xl:grid-cols-3 sm:p-5">
-            {supportingCases.map((study) => (
-              <SupportingCase key={study.id} study={study} />
-            ))}
-            <FelicityGa4OnlyCard />
-          </div>
-        </details>
-
-        <details className="group mt-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
-          <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
-            <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
-                Weitere Projekte
-              </p>
-              <h3 className="mt-1 text-lg font-bold text-navy sm:text-xl">
-                Fünf zusätzliche Live-Websites
-              </h3>
+          <div className="border-t border-stone-200 bg-stone-50 p-4 sm:p-5">
+            <PortfolioSummary />
+            <div className="mt-4 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+              {supportingCases.map((study) => (
+                <SupportingCase key={study.id} study={study} />
+              ))}
             </div>
-            <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">
-              <span className="hidden sm:inline">Websites öffnen</span>
-              <ChevronDown
-                className="size-5 transition-transform group-open:rotate-180"
-                aria-hidden="true"
-              />
-            </span>
-          </summary>
-
-          <ul className="grid gap-3 border-t border-stone-200 bg-stone-50 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
-            {additionalProjects.map((project) => (
-              <li key={project.url}>
-                <a
-                  href={project.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="focus-ring group/link flex h-full items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft"
-                >
-                  <span className="min-w-0">
-                    <span className="block text-sm font-bold text-navy">
-                      {project.label}
-                    </span>
-                    <span className="mt-1 block truncate font-mono text-xs text-stone-400">
-                      {project.domain}
-                    </span>
-                    {"note" in project && project.note && (
-                      <span className="mt-1.5 block text-[11px] leading-snug text-stone-400">
-                        {project.note}
+            <div className="mt-5 border-t border-stone-200 pt-5">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
+                Weitere Live-Websites
+              </p>
+              <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                {additionalProjects.map((project) => (
+                  <li key={project.url}>
+                    <a
+                      href={project.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="focus-ring group/link flex h-full items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft"
+                    >
+                      <span className="min-w-0">
+                        <span className="block text-sm font-bold text-navy">
+                          {project.label}
+                        </span>
+                        <span className="mt-1 block truncate font-mono text-xs text-stone-400">
+                          {project.domain}
+                        </span>
+                        {"note" in project && project.note && (
+                          <span className="mt-1.5 block text-[11px] leading-snug text-stone-400">
+                            {project.note}
+                          </span>
+                        )}
                       </span>
-                    )}
-                  </span>
-                  <ExternalLink
-                    className="size-4 shrink-0 text-stone-300 transition-colors group-hover/link:text-primary"
-                    aria-hidden="true"
-                  />
-                </a>
-              </li>
-            ))}
-          </ul>
+                      <ExternalLink
+                        className="size-4 shrink-0 text-stone-300 transition-colors group-hover/link:text-primary"
+                        aria-hidden="true"
+                      />
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </details>
       </div>
     </section>

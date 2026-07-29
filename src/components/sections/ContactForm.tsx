@@ -163,7 +163,7 @@ export function ContactForm() {
                 onClick={() =>
                   track("phone_click", { location: "contact_form" })
                 }
-                className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm transition-colors hover:border-stamp/40 hover:text-stamp"
+                className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
               >
                 <Phone className="size-4" aria-hidden="true" />
                 Direkt anrufen
@@ -187,7 +187,7 @@ export function ContactForm() {
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
                 {state.neededService && (
-                  <div className="flex items-center justify-between gap-3 rounded-xl border border-stamp/20 bg-stamp/5 px-4 py-3 text-sm text-navy">
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-primary/20 bg-primary/5 px-4 py-3 text-sm text-navy">
                     <span>
                       Interesse:{" "}
                       <strong className="font-semibold">

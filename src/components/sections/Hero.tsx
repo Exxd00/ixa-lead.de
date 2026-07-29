@@ -1,32 +1,10 @@
-import {
-  ArrowRight,
-  Check,
-  FileText,
-  MapPin,
-  MessageCircle,
-  Phone,
-} from "lucide-react";
+import { ArrowRight, Check, MapPin } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton, WhatsappLink } from "@/components/cta";
 import { documentedCases } from "@/data/evidence";
 
 const featuredCase =
   documentedCases.find((study) => study.featured) ?? documentedCases[0];
-
-const contactVisuals = {
-  form: {
-    icon: FileText,
-    color: "bg-primary",
-  },
-  phone: {
-    icon: Phone,
-    color: "bg-success-500",
-  },
-  whatsapp: {
-    icon: MessageCircle,
-    color: "bg-stamp-400",
-  },
-} as const;
 
 export function Hero() {
   return (
@@ -44,7 +22,7 @@ export function Hero() {
       />
       <div
         aria-hidden="true"
-        className="absolute -right-20 bottom-0 -z-10 size-80 rounded-full bg-stamp-400/15 blur-[120px]"
+        className="absolute -right-20 bottom-0 -z-10 size-80 rounded-full bg-primary/10 blur-[120px]"
       />
 
       <div className="container-lp grid items-center gap-12 lg:grid-cols-[1.08fr_.92fr] lg:gap-16">
@@ -70,9 +48,8 @@ export function Hero() {
 
           <Reveal immediate>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
-              Ich verbinde Website, lokale Sichtbarkeit, Werbung und Tracking zu
-              einem System, das Anrufe, WhatsApp und Formulare wirklich
-              nachvollziehbar macht.
+              Ich verbinde Ihre Website, Google und klare Kontaktwege zu einem
+              System, das Anrufe, WhatsApp und Formulare sichtbar macht.
             </p>
           </Reveal>
 
@@ -140,7 +117,7 @@ export function Hero() {
                 </span>
               </span>
               <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-bold text-success-300">
-                3 echte Nachweise
+                Originalauszug ansehen
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </span>
             </a>
@@ -172,41 +149,10 @@ export function Hero() {
               <p className="mt-5 text-base font-bold text-white">
                 Franken Autoankauf 24
               </p>
-
-              <div className="mt-5 space-y-4">
-                {featuredCase.methods.map((item) => {
-                  const visual = contactVisuals[item.key];
-                  const Icon = visual.icon;
-                  const percent = Math.round(
-                    (item.value / featuredCase.documentedActions) * 100,
-                  );
-                  return (
-                    <div key={item.key}>
-                      <div className="flex items-center justify-between gap-4">
-                        <span className="flex items-center gap-2 text-sm font-semibold text-white/80">
-                          <Icon
-                            className="size-4 text-white/45"
-                            aria-hidden="true"
-                          />
-                          {item.label}
-                        </span>
-                        <span className="font-mono text-sm font-bold text-white">
-                          {item.value}
-                          <span className="ml-2 text-xs font-normal text-white/40">
-                            {percent}%
-                          </span>
-                        </span>
-                      </div>
-                      <div className="mt-2 h-2 overflow-hidden rounded-full bg-white/10">
-                        <div
-                          className={`h-full rounded-full ${visual.color}`}
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+              <p className="mt-2 max-w-sm text-sm leading-relaxed text-white/60">
+                Der anonymisierte Originalauszug zeigt Datum, Status und
+                Kontaktart direkt im nächsten Abschnitt.
+              </p>
 
               <div className="mt-7 rounded-2xl border border-white/10 bg-black/20 p-4">
                 <p className="text-xs leading-relaxed text-white/60">
@@ -218,7 +164,7 @@ export function Hero() {
                   href="#ergebnis-frankenautoankauf24"
                   className="focus-ring mt-3 inline-flex items-center gap-2 rounded-lg text-xs font-bold text-success-300 hover:text-success-200"
                 >
-                  3 echte Nachweise ansehen
+                  Originalauszug ansehen
                   <ArrowRight className="size-3.5" aria-hidden="true" />
                 </a>
               </div>

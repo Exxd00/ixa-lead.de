@@ -31,7 +31,7 @@ export function ImpressumDialog({
         <button
           type="button"
           className={cn(
-            "focus-ring rounded-md text-stone-500 transition-colors hover:text-stamp",
+            "focus-ring rounded-md text-stone-500 transition-colors hover:text-primary",
             className,
           )}
         >
@@ -89,8 +89,8 @@ export function ImpressumDialog({
 
           <p className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
             Hinweis: Dieses Impressum ist noch unvollständig (Anschrift und
-            USt-IdNr fehlen). Vor der Live-Schaltung bitte mit Steuerberater bzw.
-            Anwalt vervollständigen.
+            USt-IdNr fehlen). Vor der Live-Schaltung bitte mit Steuerberater
+            bzw. Anwalt vervollständigen.
           </p>
         </div>
       </DialogContent>
