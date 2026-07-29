@@ -1,0 +1,176 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 42 30% 98%;
+    --foreground: 220 20% 14%;
+
+    --card: 42 35% 99%;
+    --card-foreground: 220 20% 14%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 220 20% 14%;
+
+    --primary: 224 84% 56%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 40 18% 93%;
+    --secondary-foreground: 220 20% 14%;
+
+    --muted: 40 18% 93%;
+    --muted-foreground: 220 10% 45%;
+
+    --accent: 40 18% 91%;
+    --accent-foreground: 220 20% 14%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 35 14% 86%;
+    --input: 35 14% 84%;
+    --ring: 224 90% 58%;
+    --radius: 0.75rem;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    /* offset for the sticky navbar when jumping to sections */
+    scroll-padding-top: 96px;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+    font-family: var(--font-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+    /* prevent any horizontal scroll on mobile */
+    overflow-x: hidden;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Headings use the bold grotesque display font in ink */
+  h1, h2, h3, h4 {
+    @apply text-navy;
+    font-family: var(--font-display), var(--font-sans), system-ui, sans-serif;
+    letter-spacing: -0.01em;
+    text-wrap: balance;
+  }
+
+  ::selection {
+    background: hsl(224 90% 58% / 0.22);
+    color: hsl(220 20% 12%);
+  }
+}
+
+@layer components {
+  /* Section container with the requested max width */
+  .container-lp {
+    @apply mx-auto w-full max-w-[1220px] px-5 sm:px-6 lg:px-8;
+  }
+
+  /* Klare, moderne Karte: feine Kontur + weicher Elevations-Schatten statt
+     Schmuck-Metaphern — der Auftritt kommt aus Bewegung/Signalfarbe, nicht
+     aus der Kartenform. */
+  .card-soft {
+    @apply relative rounded-2xl border border-navy/10 bg-card shadow-soft transition-shadow duration-300;
+  }
+
+  /* Live-Badge — kleiner pulsierender Signalpunkt statt Schmuck-Pille;
+     verweist direkt auf "live gemessen/getrackt". */
+  .live-badge {
+    @apply inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary/5 px-3.5 py-1.5 text-xs font-semibold uppercase tracking-wide text-navy;
+  }
+  .live-dot {
+    @apply relative inline-flex size-2 rounded-full bg-primary;
+  }
+  .live-dot::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: 9999px;
+    background: hsl(var(--primary));
+    animation: signal-ping 2.2s cubic-bezier(0, 0, 0.2, 1) infinite;
+  }
+
+  /* Small textual tool/badge chip */
+  .chip {
+    @apply inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm;
+  }
+
+  /* Focus ring helper used across interactive elements */
+  .focus-ring {
+    @apply outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  .hero-wash {
+    background:
+      radial-gradient(65% 55% at 10% 5%, hsl(224 84% 56% / 0.26), transparent 64%),
+      radial-gradient(46% 48% at 94% 92%, hsl(14 90% 58% / 0.14), transparent 68%),
+      linear-gradient(145deg, hsl(220 28% 9%), hsl(218 30% 6%));
+  }
+
+  .section-alt {
+    @apply bg-stone-50/70;
+  }
+
+  /* Feines Korn — nimmt dem dunklen Hero die Flachheit, ohne aufdringlich zu sein */
+  .grain-overlay {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.035;
+    mix-blend-mode: multiply;
+  }
+}
+
+@layer utilities {
+  /* Scroll reveal animation */
+  .reveal {
+    opacity: 0;
+    transform: translateY(18px);
+    transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+      transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: opacity, transform;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  /* Hides the scrollbar on horizontal snap carousels while keeping them scrollable */
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* Respect user motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  .reveal {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

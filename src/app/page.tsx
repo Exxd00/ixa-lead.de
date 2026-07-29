@@ -1,0 +1,35 @@
+import { Navbar } from "@/components/sections/Navbar";
+import { Hero } from "@/components/sections/Hero";
+import { TrustBar } from "@/components/sections/TrustBar";
+import { CaseStudiesSection } from "@/components/sections/CaseStudiesSection";
+import { ServicesSection } from "@/components/sections/ServicesSection";
+import { ProcessSection } from "@/components/sections/ProcessSection";
+import { PackagesSection } from "@/components/sections/PackagesSection";
+import { AboutSection } from "@/components/sections/AboutSection";
+import { FaqSection } from "@/components/sections/FaqSection";
+import { ContactForm } from "@/components/sections/ContactForm";
+import { Footer } from "@/components/sections/Footer";
+import { WhatsappFloat } from "@/components/WhatsappFloat";
+import { MobileCtaBar } from "@/components/MobileCtaBar";
+
+export default function Home() {
+  return (
+    <>
+      <Navbar />
+      <main>
+        <Hero />
+        <TrustBar />
+        <CaseStudiesSection />
+        <ServicesSection />
+        <ProcessSection />
+        <PackagesSection />
+        <AboutSection />
+        <FaqSection />
+        <ContactForm />
+      </main>
+      <Footer />
+      <WhatsappFloat />
+      <MobileCtaBar />
+    </>
+  );
+}
