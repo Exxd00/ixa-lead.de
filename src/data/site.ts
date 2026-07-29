@@ -46,7 +46,7 @@ export const packages = [
       "Klare Kontaktwege: Anruf, WhatsApp, Formular",
       "Optional: digitale Speisekarte für Gastronomie",
     ],
-    cta: "Starter anfragen",
+    cta: "Kostenlose Erstanalyse",
     formValue: "Komplettes System – Starter",
   },
   {
@@ -64,7 +64,7 @@ export const packages = [
       "Vollständiges Conversion-Tracking",
       "Formulare, Anrufe und WhatsApp messbar",
     ],
-    cta: "Performance System anfragen",
+    cta: "Kostenlose Erstanalyse",
     formValue: "Komplettes System – Performance",
   },
   {
@@ -82,7 +82,7 @@ export const packages = [
       "Anbindung an Google Sheets",
       "Laufende Auswertung und Optimierung",
     ],
-    cta: "Growth System anfragen",
+    cta: "Kostenlose Erstanalyse",
     formValue: "Komplettes System – Growth",
   },
 ];

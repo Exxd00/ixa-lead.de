@@ -1,4 +1,10 @@
-import { Check, Languages, MapPin, MessageCircle, UserRound } from "lucide-react";
+import {
+  Check,
+  Languages,
+  MapPin,
+  MessageCircle,
+  UserRound,
+} from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton, WhatsappLink } from "@/components/cta";
 import { siteConfig } from "@/data/site";
@@ -11,7 +17,10 @@ const promises = [
 
 export function AboutSection() {
   return (
-    <section id="about" className="border-y border-navy/10 bg-[#f3f1eb] py-16 sm:py-20 lg:py-24">
+    <section
+      id="about"
+      className="border-y border-navy/10 bg-[#f3f1eb] py-16 sm:py-20 lg:py-24"
+    >
       <div className="container-lp grid items-center gap-10 lg:grid-cols-[.9fr_1.1fr] lg:gap-16">
         <Reveal>
           <div className="relative overflow-hidden rounded-[1.75rem] bg-navy p-7 text-white shadow-card sm:p-9">
@@ -48,7 +57,9 @@ export function AboutSection() {
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                   <Languages className="size-5 text-success-300" />
-                  <p className="mt-3 text-sm font-bold">Zwei Märkte verstanden</p>
+                  <p className="mt-3 text-sm font-bold">
+                    Zwei Märkte verstanden
+                  </p>
                   <p className="mt-1 text-xs leading-relaxed text-white/50">
                     Deutsch & Arabisch
                   </p>
@@ -88,7 +99,7 @@ export function AboutSection() {
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
             <CtaButton location="about" size="lg">
-              Kennenlernen
+              Kostenlose Erstanalyse
             </CtaButton>
             <WhatsappLink
               location="about"

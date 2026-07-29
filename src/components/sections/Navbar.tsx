@@ -10,8 +10,9 @@ import { track } from "@/lib/tracking";
 const links = [
   { label: "Ergebnisse", href: "#results" },
   { label: "System", href: "#services" },
+  { label: "Preise", href: "#packages" },
   { label: "Ablauf", href: "#process" },
-  { label: "Über mich", href: "#about" },
+  { label: "Kontakt", href: "#contact" },
 ];
 
 export function Navbar() {
@@ -83,7 +84,7 @@ export function Navbar() {
             <Phone className="size-4" />
           </a>
           <CtaButton location="navbar" size="default">
-            Potenzial prüfen
+            Kostenlose Erstanalyse
           </CtaButton>
         </div>
 
@@ -105,7 +106,7 @@ export function Navbar() {
         className={cn(
           "overflow-hidden border-t border-navy/10 bg-[#fbfaf7] transition-[max-height,opacity] duration-300 lg:hidden",
           open
-            ? "visible max-h-[420px] opacity-100"
+            ? "visible max-h-[520px] opacity-100"
             : "invisible max-h-0 border-transparent opacity-0",
         )}
       >
@@ -120,7 +121,7 @@ export function Navbar() {
               {link.label}
             </a>
           ))}
-          <div className="grid grid-cols-2 gap-2 pt-3">
+          <div className="grid gap-2 pt-3">
             <a
               href={siteConfig.contact.phoneHref}
               onClick={() => {
@@ -138,7 +139,7 @@ export function Navbar() {
               className="h-12 px-3 text-sm"
               onClick={() => setOpen(false)}
             >
-              Erstanalyse
+              Kostenlose Erstanalyse
             </CtaButton>
           </div>
         </div>

@@ -3,6 +3,7 @@ import {
   BarChart3,
   CalendarDays,
   CheckCircle2,
+  ChevronDown,
   ExternalLink,
   FileSpreadsheet,
   FileText,
@@ -49,44 +50,45 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
   return (
     <article
       id={`ergebnis-${study.id}`}
-      className="card-soft flex h-full scroll-mt-28 flex-col overflow-hidden p-6"
+      className="scroll-mt-28 rounded-2xl border border-stone-200 bg-white p-4 sm:p-5"
     >
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-xs font-bold uppercase tracking-[0.12em] text-stamp">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
             {study.category}
           </p>
-          <h3 className="mt-2 text-xl font-bold leading-snug text-navy">
+          <h4 className="mt-1.5 text-lg font-bold leading-snug text-navy">
             {study.business}
-          </h3>
+          </h4>
         </div>
         <a
           href={study.url}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`${study.business} in einem neuen Tab öffnen`}
-          className="focus-ring grid size-11 shrink-0 place-items-center rounded-xl border border-stone-200 bg-white text-navy transition-colors hover:border-primary/30 hover:text-primary"
+          className="focus-ring grid size-10 shrink-0 place-items-center rounded-xl border border-stone-200 text-navy transition-colors hover:border-primary/30 hover:text-primary"
         >
           <ExternalLink className="size-4" aria-hidden="true" />
         </a>
       </div>
 
-      <div className="mt-6">
-        <p className="font-mono text-5xl font-bold tracking-[-0.06em] text-navy">
-          {numberFormatter.format(study.documentedActions)}
-        </p>
-        <p className="mt-1 text-sm font-semibold text-success-800">
-          dokumentierte Kontaktaktionen
+      <div className="mt-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-4xl font-bold tracking-[-0.06em] text-navy">
+            {numberFormatter.format(study.documentedActions)}
+          </p>
+          <p className="text-xs font-semibold text-success-800">
+            dokumentierte Kontaktaktionen
+          </p>
+        </div>
+        <p className="flex items-center gap-1.5 text-[11px] text-stone-500">
+          <CalendarDays className="size-3.5 text-stamp" aria-hidden="true" />
+          {study.period}
         </p>
       </div>
 
-      <p className="mt-4 flex items-center gap-2 text-xs text-stone-500">
-        <CalendarDays className="size-3.5 text-stamp" aria-hidden="true" />
-        {study.period}
-      </p>
-
       <ul
-        className="mt-5 flex flex-wrap gap-2"
+        className="mt-4 flex flex-wrap gap-2"
         aria-label="Aufteilung nach Kontaktweg"
       >
         {study.methods.map((method) => {
@@ -96,12 +98,12 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
           return (
             <li
               key={method.key}
-              className="inline-flex items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 text-xs font-semibold text-stone-600"
+              className="inline-flex items-center gap-2 rounded-xl bg-stone-50 px-2.5 py-2 text-[11px] font-semibold text-stone-600"
             >
               <span
-                className={`grid size-7 place-items-center rounded-lg ${visual.iconClass}`}
+                className={`grid size-6 place-items-center rounded-lg ${visual.iconClass}`}
               >
-                <Icon className="size-3.5" aria-hidden="true" />
+                <Icon className="size-3" aria-hidden="true" />
               </span>
               <span className="font-mono font-bold text-navy">
                 {numberFormatter.format(method.value)}
@@ -113,7 +115,7 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
       </ul>
 
       {study.acquisitionSources && (
-        <p className="mt-5 border-t border-stone-100 pt-4 text-xs leading-relaxed text-stone-500">
+        <p className="mt-4 text-[11px] leading-relaxed text-stone-500">
           Größte dokumentierte Herkunft:{" "}
           <strong className="font-semibold text-navy">
             {study.acquisitionSources[0].label} ·{" "}
@@ -122,22 +124,22 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
         </p>
       )}
 
-      <dl className="mt-auto grid grid-cols-2 gap-2 pt-5">
-        <div className="rounded-xl border border-primary/10 bg-primary/[0.035] p-3">
-          <dt className="text-[11px] text-stone-500">GA4-Sitzungen</dt>
-          <dd className="mt-1 font-mono text-xl font-bold text-navy">
+      <div className="mt-4 grid grid-cols-2 gap-2 border-t border-stone-100 pt-4">
+        <p className="rounded-xl bg-primary/[0.035] p-3 text-[11px] text-stone-500">
+          GA4-Sitzungen
+          <strong className="mt-1 block font-mono text-xl text-navy">
             {numberFormatter.format(study.ga4.sessions)}
-          </dd>
-        </div>
-        <div className="rounded-xl border border-primary/10 bg-primary/[0.035] p-3">
-          <dt className="text-[11px] text-stone-500">GA4 Key Events</dt>
-          <dd className="mt-1 font-mono text-xl font-bold text-navy">
+          </strong>
+        </p>
+        <p className="rounded-xl bg-primary/[0.035] p-3 text-[11px] text-stone-500">
+          GA4 Key Events
+          <strong className="mt-1 block font-mono text-xl text-navy">
             {numberFormatter.format(study.ga4.keyEvents)}
-          </dd>
-        </div>
-      </dl>
+          </strong>
+        </p>
+      </div>
       <p className="mt-2 text-[10px] leading-relaxed text-stone-400">
-        Separater GA4-Zeitraum; nicht mit dem Lead-Sheet verrechnet.
+        {study.ga4.period}; nicht mit dem Lead-Sheet verrechnet.
       </p>
     </article>
   );
@@ -145,46 +147,47 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
 
 function FelicityGa4OnlyCard() {
   return (
-    <aside className="card-soft relative flex h-full flex-col overflow-hidden border-primary/20 bg-primary/[0.035] p-6">
+    <aside className="relative overflow-hidden rounded-2xl border border-primary/20 bg-primary/[0.035] p-4 sm:p-5">
       <div
         className="pointer-events-none absolute -right-20 -top-20 size-52 rounded-full bg-primary/10 blur-3xl"
         aria-hidden="true"
       />
       <div className="relative flex items-start justify-between gap-4">
         <div>
-          <p className="inline-flex items-center gap-1.5 text-xs font-bold uppercase tracking-[0.12em] text-primary">
+          <p className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
             <Globe2 className="size-3.5" aria-hidden="true" />
             GA4-only · International
           </p>
-          <h3 className="mt-2 text-xl font-bold leading-snug text-navy">
+          <h4 className="mt-1.5 text-lg font-bold leading-snug text-navy">
             {felicityGa4Note.business}
-          </h3>
+          </h4>
         </div>
         <a
           href={felicityGa4Note.url}
           target="_blank"
           rel="noopener noreferrer"
           aria-label={`${felicityGa4Note.business} in einem neuen Tab öffnen`}
-          className="focus-ring grid size-11 shrink-0 place-items-center rounded-xl border border-primary/15 bg-white text-primary transition-colors hover:border-primary/35"
+          className="focus-ring grid size-10 shrink-0 place-items-center rounded-xl border border-primary/15 bg-white text-primary transition-colors hover:border-primary/35"
         >
           <ExternalLink className="size-4" aria-hidden="true" />
         </a>
       </div>
 
-      <div className="relative mt-6">
-        <p className="font-mono text-5xl font-bold tracking-[-0.06em] text-navy">
-          {numberFormatter.format(felicityGa4Note.sessions)}
+      <div className="relative mt-4 flex flex-wrap items-end justify-between gap-3">
+        <div>
+          <p className="font-mono text-4xl font-bold tracking-[-0.06em] text-navy">
+            {numberFormatter.format(felicityGa4Note.sessions)}
+          </p>
+          <p className="text-xs font-semibold text-primary">GA4-Sitzungen</p>
+        </div>
+        <p className="flex items-center gap-1.5 text-[11px] text-stone-500">
+          <CalendarDays className="size-3.5 text-stamp" aria-hidden="true" />
+          {felicityGa4Note.period}
         </p>
-        <p className="mt-1 text-sm font-semibold text-primary">GA4-Sitzungen</p>
       </div>
 
-      <p className="relative mt-4 flex items-center gap-2 text-xs text-stone-500">
-        <CalendarDays className="size-3.5 text-stamp" aria-hidden="true" />
-        {felicityGa4Note.period}
-      </p>
-
-      <dl className="relative mt-5 grid grid-cols-3 gap-2">
-        <div className="rounded-xl border border-stone-200 bg-white p-3">
+      <dl className="relative mt-4 grid grid-cols-3 gap-2">
+        <div className="rounded-xl border border-stone-200 bg-white p-2.5">
           <dt className="text-[10px] leading-snug text-stone-500">
             GA4 „Neue Leads“
           </dt>
@@ -192,13 +195,15 @@ function FelicityGa4OnlyCard() {
             {numberFormatter.format(felicityGa4Note.newLeadMetric)}
           </dd>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-3">
-          <dt className="text-[10px] leading-snug text-stone-500">Key Events</dt>
+        <div className="rounded-xl border border-stone-200 bg-white p-2.5">
+          <dt className="text-[10px] leading-snug text-stone-500">
+            Key Events
+          </dt>
           <dd className="mt-1 font-mono text-lg font-bold text-navy">
             {numberFormatter.format(felicityGa4Note.keyEvents)}
           </dd>
         </div>
-        <div className="rounded-xl border border-stone-200 bg-white p-3">
+        <div className="rounded-xl border border-stone-200 bg-white p-2.5">
           <dt className="flex items-center gap-1 text-[10px] leading-snug text-stone-500">
             <Smartphone className="size-3" aria-hidden="true" />
             Mobil
@@ -209,7 +214,7 @@ function FelicityGa4OnlyCard() {
         </div>
       </dl>
 
-      <div className="relative mt-auto flex gap-2 border-t border-amber-200/70 pt-5">
+      <div className="relative mt-4 flex gap-2 border-t border-amber-200/70 pt-4">
         <Info
           className="mt-0.5 size-4 shrink-0 text-amber-700"
           aria-hidden="true"
@@ -225,26 +230,37 @@ function FelicityGa4OnlyCard() {
 
 function PortfolioSummary() {
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-stone-200 bg-white shadow-soft">
-      <div className="grid lg:grid-cols-[0.75fr_1.25fr]">
-        <div className="flex flex-col justify-center bg-stone-50 p-6 sm:p-8">
-          <p className="text-xs font-bold uppercase tracking-[0.14em] text-stamp">
-            Portfolio-Summe · sekundärer Nachweis
-          </p>
-          <p className="mt-3 font-mono text-5xl font-bold tracking-[-0.06em] text-navy sm:text-6xl">
-            {numberFormatter.format(portfolioEvidence.documentedActions)}
-          </p>
-          <p className="mt-2 text-sm font-semibold text-navy">
-            dokumentierte Kontaktaktionen
-          </p>
-          <p className="mt-3 text-xs leading-relaxed text-stone-500">
-            {portfolioEvidence.caseCount} getrennte Lead-Sheets. Darin enthalten:
-            11 Kontaktaktionen aus Keller Montage; das Projekt steht unten unter
-            „Weitere Projekte“.
-          </p>
+    <details className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
+      <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
+        <div className="flex min-w-0 items-center gap-4">
+          <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-stone-50 text-stamp">
+            <FileSpreadsheet className="size-5" aria-hidden="true" />
+          </span>
+          <span className="min-w-0">
+            <span className="block text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
+              Portfolio-Summe · sekundärer Nachweis
+            </span>
+            <span className="mt-1 flex flex-wrap items-baseline gap-x-2">
+              <strong className="font-mono text-3xl tracking-[-0.05em] text-navy">
+                {numberFormatter.format(portfolioEvidence.documentedActions)}
+              </strong>
+              <span className="text-xs font-semibold text-navy">
+                dokumentierte Kontaktaktionen
+              </span>
+            </span>
+          </span>
         </div>
+        <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">
+          <span className="hidden sm:inline">Aufteilung ansehen</span>
+          <ChevronDown
+            className="size-5 transition-transform group-open:rotate-180"
+            aria-hidden="true"
+          />
+        </span>
+      </summary>
 
-        <dl className="grid grid-cols-3 gap-px bg-stone-200">
+      <div className="border-t border-stone-200 bg-stone-50 p-4 sm:p-5">
+        <dl className="grid grid-cols-3 gap-2">
           {portfolioEvidence.methods.map((method) => {
             const visual = methodVisuals[method.key];
             const Icon = visual.Icon;
@@ -255,28 +271,33 @@ function PortfolioSummary() {
             return (
               <div
                 key={method.key}
-                className="flex min-w-0 flex-col justify-center bg-white p-4 sm:p-6"
+                className="rounded-xl border border-stone-200 bg-white p-3"
               >
                 <span
-                  className={`grid size-9 place-items-center rounded-xl ${visual.iconClass}`}
+                  className={`grid size-7 place-items-center rounded-lg ${visual.iconClass}`}
                 >
-                  <Icon className="size-4" aria-hidden="true" />
+                  <Icon className="size-3.5" aria-hidden="true" />
                 </span>
-                <dt className="mt-3 truncate text-[11px] font-semibold text-stone-500 sm:text-xs">
+                <dt className="mt-2 truncate text-[10px] text-stone-500 sm:text-xs">
                   {method.label}
                 </dt>
-                <dd className="mt-1 font-mono text-2xl font-bold text-navy sm:text-3xl">
+                <dd className="mt-0.5 font-mono text-xl font-bold text-navy sm:text-2xl">
                   {numberFormatter.format(method.value)}
                 </dd>
-                <span className="mt-1 text-[10px] text-stone-400">
+                <span className="text-[10px] text-stone-400">
                   {percentage} %
                 </span>
               </div>
             );
           })}
         </dl>
+        <p className="mt-3 text-[11px] leading-relaxed text-stone-500">
+          {portfolioEvidence.caseCount} getrennte Lead-Sheets. Darin enthalten:
+          11 Kontaktaktionen aus Keller Montage; das Projekt steht unter
+          „Weitere Live-Websites“.
+        </p>
       </div>
-    </div>
+    </details>
   );
 }
 
@@ -284,8 +305,7 @@ export function CaseStudiesSection() {
   const featuredCase =
     documentedCases.find((study) => study.featured) ?? documentedCases[0];
   const supportingCases = documentedCases.filter(
-    (study) =>
-      study.id !== featuredCase.id && study.id !== "keller-montage",
+    (study) => study.id !== featuredCase.id && study.id !== "keller-montage",
   );
   const highlightedDomains = new Set([
     "frankenautoankauf24.de",
@@ -300,88 +320,96 @@ export function CaseStudiesSection() {
   return (
     <section id="results" className="py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
-        <div className="grid items-end gap-8 lg:grid-cols-[1fr_0.72fr] lg:gap-12">
-          <div>
-            <span className="inline-flex items-center gap-2 rounded-full border border-success-200 bg-success-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide text-success-800">
-              <CheckCircle2 className="size-4" aria-hidden="true" />
-              Dokumentierte Fallstudie
-            </span>
-            <h2 className="mt-5 max-w-3xl text-3xl font-bold leading-tight text-navy sm:text-4xl">
-              Der stärkste Datensatz – mit sichtbarer Quelle
-            </h2>
-            <p className="mt-5 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
-              Franken Autoankauf 24 steht bewusst an erster Stelle. Wischen Sie
-              durch Ergebnis, Kontaktwege und anonymisierte Nachweise aus Google
-              Sheets und GA4.
-            </p>
-          </div>
-
-          <div className="rounded-2xl border border-stone-200 bg-white p-5 shadow-soft">
-            <p className="flex items-center gap-2 text-sm font-bold text-navy">
-              <FileSpreadsheet className="size-4 text-stamp" aria-hidden="true" />
-              Transparente Datengrundlage
-            </p>
-            <p className="mt-2 text-sm leading-relaxed text-stone-500">
-              Kontaktaktionen sind dokumentierte Eingänge – keine Behauptung über
-              abgeschlossene Aufträge, Umsatz oder eine garantierte Erfolgsquote.
-            </p>
-          </div>
+        <div className="max-w-3xl">
+          <span className="inline-flex items-center gap-2 rounded-full border border-success-200 bg-success-50 px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide text-success-800">
+            <CheckCircle2 className="size-4" aria-hidden="true" />
+            Dokumentierte Fallstudie
+          </span>
+          <h2 className="mt-5 text-3xl font-bold leading-tight text-navy sm:text-4xl">
+            Vom Kontaktweg zum sichtbaren Nachweis
+          </h2>
+          <p className="mt-4 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
+            Franken Autoankauf 24 zeigt den Ablauf zuerst: Ausgangslage,
+            IXA-Umsetzung und dokumentiertes Ergebnis. Der anonymisierte
+            Lead-Sheet-Auszug ist direkt sichtbar und lässt sich vergrößern.
+          </p>
+          <ol className="mt-5 flex flex-wrap gap-2 text-xs font-semibold text-navy">
+            {["Ausgangslage", "IXA-Umsetzung", "Ergebnis & Quelle"].map(
+              (step, index) => (
+                <li
+                  key={step}
+                  className="inline-flex items-center gap-2 rounded-full border border-stone-200 bg-white px-3 py-2"
+                >
+                  <span className="font-mono text-stamp">{index + 1}</span>
+                  {step}
+                </li>
+              ),
+            )}
+          </ol>
         </div>
 
-        <div className="mt-10">
+        <div className="mt-8 sm:mt-10">
           <FrankenEvidencePost study={featuredCase} />
         </div>
 
-        <div className="mt-8">
+        <div className="mt-5">
           <PortfolioSummary />
         </div>
 
-        <div className="mt-12 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="text-xs font-bold uppercase tracking-[0.14em] text-stamp">
-              Weitere Ergebnisse
-            </p>
-            <h3 className="mt-2 text-2xl font-bold text-navy">
-              Kompakt statt endlos gestapelt
-            </h3>
-          </div>
-          <p className="max-w-md text-sm leading-relaxed text-stone-500">
-            Zwei weitere Lead-Sheet-Datensätze und ein klar gekennzeichneter
-            GA4-only-Snapshot.
-          </p>
-        </div>
-
-        <div className="mt-6 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-          {supportingCases.map((study) => (
-            <SupportingCase key={study.id} study={study} />
-          ))}
-          <FelicityGa4OnlyCard />
-        </div>
-
-        <div className="mt-14 border-t border-stone-200 pt-10">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+        <details className="group mt-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
+          <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
             <div>
-              <p className="text-xs font-bold uppercase tracking-[0.14em] text-stamp">
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
+                Weitere Nachweise
+              </p>
+              <h3 className="mt-1 text-lg font-bold text-navy sm:text-xl">
+                Zwei Lead-Sheet-Fälle + ein GA4-Snapshot
+              </h3>
+            </div>
+            <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">
+              <span className="hidden sm:inline">Ergebnisse öffnen</span>
+              <ChevronDown
+                className="size-5 transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </span>
+          </summary>
+
+          <div className="grid gap-4 border-t border-stone-200 bg-stone-50 p-4 md:grid-cols-2 xl:grid-cols-3 sm:p-5">
+            {supportingCases.map((study) => (
+              <SupportingCase key={study.id} study={study} />
+            ))}
+            <FelicityGa4OnlyCard />
+          </div>
+        </details>
+
+        <details className="group mt-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
+          <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
+            <div>
+              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-stamp">
                 Weitere Projekte
               </p>
-              <h3 className="mt-2 text-2xl font-bold text-navy">
+              <h3 className="mt-1 text-lg font-bold text-navy sm:text-xl">
                 Fünf zusätzliche Live-Websites
               </h3>
             </div>
-            <p className="max-w-md text-sm leading-relaxed text-stone-500">
-              Keller Montage wurde bewusst hierhin verschoben. Alle Projekte
-              lassen sich direkt öffnen und auf dem eigenen Gerät prüfen.
-            </p>
-          </div>
+            <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">
+              <span className="hidden sm:inline">Websites öffnen</span>
+              <ChevronDown
+                className="size-5 transition-transform group-open:rotate-180"
+                aria-hidden="true"
+              />
+            </span>
+          </summary>
 
-          <ul className="mt-7 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid gap-3 border-t border-stone-200 bg-stone-50 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-3">
             {additionalProjects.map((project) => (
               <li key={project.url}>
                 <a
                   href={project.url}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="focus-ring group flex h-full items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft"
+                  className="focus-ring group/link flex h-full items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft"
                 >
                   <span className="min-w-0">
                     <span className="block text-sm font-bold text-navy">
@@ -397,14 +425,14 @@ export function CaseStudiesSection() {
                     )}
                   </span>
                   <ExternalLink
-                    className="size-4 shrink-0 text-stone-300 transition-colors group-hover:text-primary"
+                    className="size-4 shrink-0 text-stone-300 transition-colors group-hover/link:text-primary"
                     aria-hidden="true"
                   />
                 </a>
               </li>
             ))}
           </ul>
-        </div>
+        </details>
       </div>
     </section>
   );
