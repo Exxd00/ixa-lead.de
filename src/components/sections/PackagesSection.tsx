@@ -231,9 +231,11 @@ export function PackagesSection() {
         </div>
 
         <p className="mx-auto mt-7 max-w-3xl text-center text-xs leading-relaxed text-stone-500">
-          Die genannten Festpreise gelten für den beschriebenen Umfang.
-          Zusatzwünsche werden vorab vereinbart. Das Werbebudget ist nicht
-          enthalten und wird direkt an Google bezahlt.
+          Alle Preise sind Endpreise. Aufgrund der Kleinunternehmerregelung
+          gemäß § 19 UStG wird keine Umsatzsteuer berechnet. Die genannten
+          Festpreise gelten für den beschriebenen Umfang; Zusatzwünsche werden
+          vorab vereinbart. Das Werbebudget ist nicht enthalten und wird direkt
+          an Google bezahlt.
         </p>
       </div>
     </section>
