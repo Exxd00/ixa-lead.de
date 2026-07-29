@@ -1,74 +1,148 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { navLinks, siteConfig } from "@/data/site";
-import { CtaButton, PhoneLink } from "@/components/cta";
-import PillNav from "@/components/PillNav";
+import { siteConfig } from "@/data/site";
+import { CtaButton } from "@/components/cta";
+import { track } from "@/lib/tracking";
+
+const links = [
+  { label: "Ergebnisse", href: "#results" },
+  { label: "System", href: "#services" },
+  { label: "Ablauf", href: "#process" },
+  { label: "Über mich", href: "#about" },
+];
 
 export function Navbar() {
+  const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 8);
+    const onScroll = () => setScrolled(window.scrollY > 10);
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  useEffect(() => {
+    const close = () => setOpen(false);
+    window.addEventListener("hashchange", close);
+    return () => window.removeEventListener("hashchange", close);
+  }, []);
+
   return (
     <header
       className={cn(
-        "fixed inset-x-0 top-0 z-50 transition-all duration-300",
+        "fixed inset-x-0 top-0 z-50 border-b transition-all duration-300",
         scrolled
-          ? "border-b border-stone-200/70 bg-white/80 shadow-soft backdrop-blur-md"
-          : "border-b border-transparent bg-white/60 backdrop-blur-sm",
+          ? "border-navy/10 bg-[#fbfaf7]/95 shadow-[0_8px_30px_-22px_rgba(13,17,23,.45)] backdrop-blur-xl"
+          : "border-transparent bg-[#fbfaf7]/80 backdrop-blur-md",
       )}
     >
-      <nav className="container-lp relative flex h-[72px] items-center justify-between gap-4">
-        {/* Marke */}
+      <nav className="container-lp flex h-[72px] items-center justify-between gap-4">
         <a
           href="#home"
-          className="focus-ring group flex shrink-0 items-center gap-3 rounded-lg"
-          aria-label={`${siteConfig.name} — Startseite`}
+          className="focus-ring group inline-flex shrink-0 items-center gap-3 rounded-lg"
+          aria-label={`${siteConfig.name} – Startseite`}
+          onClick={() => setOpen(false)}
         >
-          <span className="grid size-10 place-items-center rounded-xl bg-navy text-sm font-bold tracking-tight text-white shadow-soft">
-            IX
+          <span className="relative grid size-10 place-items-center rounded-xl bg-navy text-[13px] font-extrabold tracking-[-0.08em] text-white shadow-soft">
+            IXA
+            <span className="absolute -right-1 -top-1 size-2.5 rounded-full border-2 border-[#fbfaf7] bg-success-400" />
           </span>
-          <span className="hidden flex-col leading-tight sm:flex">
-            <span className="text-[15px] font-bold text-navy">
-              {siteConfig.name}
+          <span className="leading-none">
+            <span className="block text-[15px] font-extrabold tracking-tight text-navy">
+              IXA Leads
             </span>
-            <span className="text-[11px] font-medium text-stone-500">
-              {siteConfig.role}
+            <span className="mt-1 block text-[10px] font-semibold uppercase tracking-[0.14em] text-stone-500">
+              Nürnberg
             </span>
           </span>
         </a>
 
-        {/* Pill-Navigation (Desktop-Links + eigenes Mobil-Menü) */}
-        <div className="relative flex flex-1 items-center justify-end lg:justify-center">
-          <PillNav
-            items={navLinks}
-            wrapperClassName="relative z-[1000] w-full lg:w-auto"
-            baseColor="hsl(var(--primary))"
-            pillColor="#ffffff"
-            pillTextColor="#1D2430"
-            hoveredPillTextColor="#ffffff"
-            initialLoadAnimation={false}
-          />
+        <div className="hidden items-center gap-1 lg:flex">
+          {links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              className="focus-ring rounded-lg px-3 py-2 text-sm font-semibold text-stone-600 transition-colors hover:bg-white hover:text-navy"
+            >
+              {link.label}
+            </a>
+          ))}
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <PhoneLink location="navbar" className="hidden text-sm xl:inline-flex" />
-          <CtaButton
-            event="hero_cta_click"
-            location="navbar"
-            size="default"
+          <a
+            href={siteConfig.contact.phoneHref}
+            aria-label={`Anrufen: ${siteConfig.contact.phoneDisplay}`}
+            onClick={() => track("phone_click", { location: "navbar" })}
+            className="focus-ring hidden size-11 place-items-center rounded-xl border border-navy/10 bg-white text-navy transition-colors hover:border-primary/30 hover:text-primary xl:grid"
           >
-            Erstanalyse anfordern
+            <Phone className="size-4" />
+          </a>
+          <CtaButton location="navbar" size="default">
+            Potenzial prüfen
           </CtaButton>
         </div>
+
+        <button
+          type="button"
+          onClick={() => setOpen((value) => !value)}
+          className="focus-ring grid size-11 place-items-center rounded-xl border border-navy/10 bg-white text-navy lg:hidden"
+          aria-expanded={open}
+          aria-controls="mobile-navigation"
+          aria-label={open ? "Menü schließen" : "Menü öffnen"}
+        >
+          {open ? <X className="size-5" /> : <Menu className="size-5" />}
+        </button>
       </nav>
+
+      <div
+        id="mobile-navigation"
+        aria-hidden={!open}
+        className={cn(
+          "overflow-hidden border-t border-navy/10 bg-[#fbfaf7] transition-[max-height,opacity] duration-300 lg:hidden",
+          open
+            ? "visible max-h-[420px] opacity-100"
+            : "invisible max-h-0 border-transparent opacity-0",
+        )}
+      >
+        <div className="container-lp space-y-1 py-4">
+          {links.map((link) => (
+            <a
+              key={link.href}
+              href={link.href}
+              onClick={() => setOpen(false)}
+              className="focus-ring flex rounded-xl px-4 py-3 text-base font-semibold text-navy transition-colors hover:bg-white"
+            >
+              {link.label}
+            </a>
+          ))}
+          <div className="grid grid-cols-2 gap-2 pt-3">
+            <a
+              href={siteConfig.contact.phoneHref}
+              onClick={() => {
+                setOpen(false);
+                track("phone_click", { location: "mobile_menu" });
+              }}
+              className="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-navy/15 bg-white text-sm font-bold text-navy"
+            >
+              <Phone className="size-4" />
+              Anrufen
+            </a>
+            <CtaButton
+              location="mobile_menu"
+              size="lg"
+              className="h-12 px-3 text-sm"
+              onClick={() => setOpen(false)}
+            >
+              Erstanalyse
+            </CtaButton>
+          </div>
+        </div>
+      </div>
     </header>
   );
 }

@@ -52,9 +52,9 @@ export const siteConfig = {
   /* SEO */
   seo: {
     title:
-      "IXA-Leads | Digitale Kundengewinnung für lokale Unternehmen in Nürnberg",
+      "IXA Leads | Messbare Anfragen für lokale Unternehmen in Nürnberg",
     description:
-      "IXA-Leads baut komplette Kundengewinnungs-Systeme für lokale Unternehmen in Nürnberg und Franken: Website, Google Ads, Tracking und Automation aus einer Hand.",
+      "Website, Local SEO, Google Ads und Tracking als ein System: IXA Leads macht Formular-, Telefon- und WhatsApp-Kontakte für lokale Dienstleister in Nürnberg und Franken nachvollziehbar.",
     url: "https://ixa-leads.de",
   },
 };
@@ -270,7 +270,7 @@ export const packages = [
     name: "Performance System",
     price: "ab 2.490 €",
     retainer: "",
-    tagline: "Das komplette System vom Klick bis zum Kunden.",
+    tagline: "Das komplette System vom Suchmoment bis zur messbaren Anfrage.",
     highlighted: true,
     badge: "Am beliebtesten",
     features: [
@@ -406,18 +406,17 @@ export const deliverables = [
 ];
 
 /* =====================================================================
-   Erfolgsgeschichten / Case Studies — echte Projekte, ehrliche Formulierung.
-   Alle Zahlen stammen aus Lead-Dokumentation und GA4 und werden bewusst
-   nicht überhöht (Anfragen ≠ abgeschlossene Aufträge/Käufe).
+   Interne, teilbare Case-Study-Karten. Die Kontaktzahlen stammen ausschließlich
+   aus den Lead-Sheets; GA4 wird nicht mit ihnen verrechnet.
    ===================================================================== */
 export const caseStudies = [
   {
     id: "rohrreinigung-kraft",
     business: "Rohrreinigung Kraft",
     category: "Handwerk · Notdienst",
-    badge: "Stärkstes Ergebnis",
-    headline: "53 dokumentierte Anfragen in 28 Tagen",
-    stats: ["219 aktive Nutzer", "5,0★ bei 129 Google-Bewertungen"],
+    badge: "Telefonstarker Datensatz",
+    headline: "55 dokumentierte Kontaktaktionen",
+    stats: ["49 Telefonkontakte", "6 Formularanfragen"],
     ausgangslage:
       "Die alte Seite war auf dem Handy langsam und der Weg zum Anruf war unklar – gerade im Notdienst entscheidend.",
     umsetzung: [
@@ -428,22 +427,22 @@ export const caseStudies = [
       "Anruf-Tracking eingerichtet",
     ],
     ergebnis:
-      "Klarer Anruf-Weg und Notdienst-Fokus zahlen sich aus: 53 dokumentierte Anfragen bei 219 aktiven Nutzern und einer Bewertung von 5,0★.",
-    zeitraum: "28 Tage",
-    quelle: "Lead-Dokumentation und GA4",
+      "Im Lead-Sheet wurden 55 Kontaktaktionen erfasst: 49 per Telefon und 6 über das Formular. Das ist keine Aussage über abgeschlossene Aufträge oder Umsatz.",
+    zeitraum: "27. Apr.–28. Juli 2026",
+    quelle: "Lead-Sheet",
     // Echtes Foto ablegen unter public/images/case-studies/rohrreinigung-kraft.jpg
     // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
     image: undefined as string | undefined,
-    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
-    websiteUrl: undefined as string | undefined,
+    websiteUrl: "https://rohrreinigung-kraft.de/",
     igCaption:
-      "Neue Website, klarer Notdienst-Fokus: 53 dokumentierte Anfragen in 28 Tagen bei 219 aktiven Nutzern. Zahlen aus Lead-Dokumentation & GA4 – ohne Beschönigung. #IXALeads #Kundengewinnung #Handwerk",
+      "55 dokumentierte Kontaktaktionen vom 27. April bis 28. Juli 2026: 49 per Telefon und 6 per Formular. Quelle: Lead-Sheet. Kontaktaktionen sind keine abgeschlossenen Aufträge. #IXALeads #Handwerk",
   },
   {
-    id: "franken-autoankauf-24",
+    id: "frankenautoankauf24",
     business: "Franken Autoankauf 24",
     category: "Fahrzeugankauf",
     headline: "211 dokumentierte Fahrzeuganfragen im ausgewerteten Zeitraum",
+    stats: ["135 Formulare", "40 Telefon · 36 WhatsApp"],
     ausgangslage:
       "Anfragen kamen unregelmäßig, und es war nicht nachvollziehbar, welcher Kanal sie ausgelöst hat.",
     umsetzung: [
@@ -454,23 +453,21 @@ export const caseStudies = [
     ],
     ergebnis:
       "211 dokumentierte Fahrzeuganfragen über einen klaren, nachvollziehbaren Kanal – Anfragen, keine abgeschlossenen Ankäufe.",
-    // TODO: Zeitraum bestätigen (GA4 vs. Lead-Sheet), dann headline auf
-    // "211 dokumentierte Fahrzeuganfragen in X Tagen" ändern und zeitraum setzen.
-    zeitraum: null,
-    quelle: "Lead-Dokumentation und GA4",
+    zeitraum: "16. Apr.–8. Juni 2026",
+    quelle: "Lead-Sheet",
     // Echtes Foto ablegen unter public/images/case-studies/franken-autoankauf-24.jpg
     // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
     image: undefined as string | undefined,
-    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
-    websiteUrl: undefined as string | undefined,
+    websiteUrl: "https://frankenautoankauf24.de/",
     igCaption:
-      "211 dokumentierte Fahrzeuganfragen im ausgewerteten Zeitraum – über einen klaren, nachvollziehbaren Kanal (Anfragen, keine abgeschlossenen Ankäufe). Transparent aus Lead-Dokumentation & GA4. #IXALeads #Fahrzeugankauf",
+      "211 dokumentierte Kontaktaktionen vom 16. April bis 8. Juni 2026: 135 Formulare, 40 Telefonkontakte und 36 WhatsApp-Kontakte. Quelle: Lead-Sheet. Keine Aussage über abgeschlossene Ankäufe oder Umsatz. #IXALeads #Fahrzeugankauf",
   },
   {
     id: "moebelmontage-nuernberg",
     business: "Möbelmontage Nürnberg",
     category: "Montage · Nürnberg",
-    headline: "Google-Ads-Anfragen bis zur Quelle nachvollziehbar (~14 Anfragen in 7 Tagen)",
+    headline: "31 dokumentierte Kontaktaktionen",
+    stats: ["14 Formulare", "9 WhatsApp · 8 Telefon"],
     ausgangslage:
       "Google-Ads-Kampagnen liefen, aber es war unklar, wie viele echte Anfragen daraus entstanden und über welchen Kanal sie eingingen.",
     umsetzung: [
@@ -480,26 +477,22 @@ export const caseStudies = [
       "Anfragen einheitlich dokumentiert",
     ],
     ergebnis:
-      "Rund 14 dokumentierte Anfragen ließen sich im Beobachtungszeitraum eindeutig auf Google Ads zurückführen – erstmals nachvollziehbar von der Anzeige bis zur Anfrage.",
-    // TODO vor Veröffentlichung: Zeitraumdeckung GA4 vs. Lead-Sheet prüfen
-    // (siehe auch Keller Montage) – Besucherzahl bewusst nicht auf der Karte
-    // gezeigt, da Zeitfenster von Besuch (8) und Anfragen (14) abweichen.
-    zeitraum: "7 Tage",
-    quelle: "Lead-Dokumentation und GA4",
+      "31 Kontaktaktionen wurden dokumentiert. Bei der Herkunft waren 13 organisch, 10 Google Ads, 6 direkt, 1 Referral und 1 ChatGPT zugeordnet.",
+    zeitraum: "22. Mai–24. Juli 2026",
+    quelle: "Lead-Sheet",
     // Echtes Foto ablegen unter public/images/case-studies/moebelmontage-nuernberg.jpg
     // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
     image: undefined as string | undefined,
-    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
-    websiteUrl: undefined as string | undefined,
+    websiteUrl: "https://mobelmontage-nurnberg.de/",
     igCaption:
-      "Google-Ads-Anfragen erstmals bis zur Quelle nachvollziehbar: rund 14 dokumentierte Anfragen in 7 Tagen. Klein angefangen, sauber gemessen. #IXALeads #GoogleAds #Möbelmontage",
+      "31 dokumentierte Kontaktaktionen vom 22. Mai bis 24. Juli 2026: 14 Formulare, 9 WhatsApp- und 8 Telefonkontakte. Quelle: Lead-Sheet. Kontaktaktionen sind keine abgeschlossenen Aufträge. #IXALeads #Möbelmontage",
   },
   {
     id: "keller-montage",
     business: "Keller Montage",
     category: "Küchenmontage · Nürnberg & Franken",
-    headline: "Rund 10 dokumentierte Anfragen innerhalb von 7 Tagen",
-    stats: ["5,0 ★ Google-Bewertung · Echte Projektbilder"],
+    headline: "11 dokumentierte Kontaktaktionen",
+    stats: ["5 Telefonkontakte", "3 Formulare · 3 WhatsApp"],
     ausgangslage:
       "Viele Klicks, aber kaum verwertbare Anfragen – und keine Verbindung zwischen Formular und Nachverfolgung.",
     umsetzung: [
@@ -509,18 +502,15 @@ export const caseStudies = [
       "GA4 und Conversion-Tracking eingerichtet",
     ],
     ergebnis:
-      "Ein fokussierter Auftritt mit realen Projektreferenzen, klaren Kontaktwegen und nachvollziehbarer Anfrageerfassung.",
-    // TODO vor Veröffentlichung: Zeitraumdeckung GA4 vs. Lead-Sheet prüfen
-    // (siehe auch Möbelmontage Nürnberg).
-    zeitraum: "7 Tage",
-    quelle: "Lead-Dokumentation und GA4",
+      "11 Kontaktaktionen wurden im Lead-Sheet erfasst. Die dokumentierte Herkunft: 6 organisch, 3 direkt und 2 Google Ads.",
+    zeitraum: "27. Apr.–26. Juli 2026",
+    quelle: "Lead-Sheet",
     // Echtes Foto ablegen unter public/images/case-studies/keller-montage.jpg
     // (1:1, ≥1080×1080px), dann Pfad hier eintragen.
     image: undefined as string | undefined,
-    // TODO: echte Website-URL des Kunden eintragen (für Live-Vorschau/Link).
-    websiteUrl: undefined as string | undefined,
+    websiteUrl: "https://keller-montage.de/",
     igCaption:
-      "Rund 10 dokumentierte Anfragen in 7 Tagen – mit echten Projektbildern, klaren Kontaktwegen und 5,0★ Bewertung. #IXALeads #Küchenmontage #Nürnberg",
+      "11 dokumentierte Kontaktaktionen vom 27. April bis 26. Juli 2026: 5 per Telefon, 3 per Formular und 3 per WhatsApp. Quelle: Lead-Sheet. Kontaktaktionen sind keine abgeschlossenen Aufträge. #IXALeads #Küchenmontage",
   },
 ];
 
@@ -593,7 +583,7 @@ export const faqs = [
     a: "Das hängt von Ihrem Ziel ab. Wer für eine konkrete Leistung wirbt, fährt oft mit einer einzelnen Landingpage besser. Wer mehrere Leistungen oder Orte abdecken will, braucht eine strukturierte Website mit Service- und Städteseiten. Ich empfehle die Lösung nach Bedarf – nicht nach Projektgröße.",
   },
   {
-    q: "Kann mein bestehendes Website verbessert werden, statt neu zu bauen?",
+    q: "Kann meine bestehende Website verbessert werden, statt neu zu bauen?",
     a: "Oft ja. Wenn die vorhandene Struktur und Technik tragfähig sind, verbessere ich gezielt Geschwindigkeit, Struktur, Kontaktwege und Tracking. Ist die Basis zu schwach, ist ein Neuaufbau meist der schnellere und günstigere Weg. Ein kostenloser Check klärt das vorab.",
   },
   {

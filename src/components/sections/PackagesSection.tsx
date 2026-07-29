@@ -1,121 +1,134 @@
-import { Check, Info, Star } from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaButton } from "@/components/cta";
-import SpotlightCard from "@/components/SpotlightCard";
-import BorderGlow from "@/components/BorderGlow";
 import { cn } from "@/lib/utils";
-import { packages, packagesNote } from "@/data/site";
+import { packages } from "@/data/site";
 
 export function PackagesSection() {
   return (
-    <section
-      id="packages"
-      className="section-alt border-y border-stone-200/70 py-16 sm:py-20 lg:py-24"
-    >
+    <section id="packages" className="bg-white py-16 sm:py-20 lg:py-28">
       <div className="container-lp">
         <SectionHeading
-          eyebrow="Pakete"
-          title="Systeme, die zu Ihrem Wachstum passen"
-          description="Drei aufeinander aufbauende Systeme – vom sauberen Auftritt bis zum kontinuierlichen, automatisierten Wachstum."
+          eyebrow="Investition"
+          title="Der sinnvolle Einstieg hängt von Ihrem Engpass ab"
+          description="Die Pakete sind Orientierung. Nach der kostenlosen Analyse erhalten Sie einen klaren Umfang – ohne versteckte Bausteine."
         />
 
-        <div className="mt-12 grid items-stretch gap-6 lg:grid-cols-3">
-          {packages.map((pkg, i) => {
-            const cardBody = (
-              <>
-                {/* Hervorhebungs-Badge */}
-                {pkg.badge && (
-                  <span className="absolute -top-3.5 left-1/2 z-10 inline-flex -translate-x-1/2 items-center gap-1.5 rounded-full bg-primary px-4 py-1.5 text-xs font-bold text-primary-foreground shadow-cta">
-                    <Star className="size-3.5 fill-current" />
-                    {pkg.badge}
-                  </span>
+        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+          {packages.map((pkg, index) => (
+            <Reveal key={pkg.id} delay={index * 80}>
+              <article
+                className={cn(
+                  "relative flex h-full flex-col rounded-[1.5rem] border p-6 sm:p-7",
+                  pkg.highlighted
+                    ? "border-primary/35 bg-navy text-white shadow-card"
+                    : "border-navy/10 bg-[#fbfaf7]",
                 )}
+              >
+                <div className="flex min-h-7 items-center justify-between gap-3">
+                  <p
+                    className={cn(
+                      "text-xs font-bold uppercase tracking-[0.13em]",
+                      pkg.highlighted ? "text-success-300" : "text-primary",
+                    )}
+                  >
+                    {pkg.highlighted ? "Für die meisten Betriebe" : `Paket 0${index + 1}`}
+                  </p>
+                  {pkg.badge && (
+                    <span className="rounded-full bg-primary px-3 py-1 text-[11px] font-bold text-white">
+                      {pkg.badge}
+                    </span>
+                  )}
+                </div>
 
-                <h3 className="text-xl font-bold text-navy">{pkg.name}</h3>
-                <p className="mt-1.5 text-sm leading-relaxed text-stone-500">
+                <h3
+                  className={cn(
+                    "mt-5 text-2xl font-bold",
+                    pkg.highlighted ? "text-white" : "text-navy",
+                  )}
+                >
+                  {pkg.name}
+                </h3>
+                <p
+                  className={cn(
+                    "mt-2 min-h-12 text-sm leading-relaxed",
+                    pkg.highlighted ? "text-white/60" : "text-stone-500",
+                  )}
+                >
                   {pkg.tagline}
                 </p>
 
-                {/* Preis */}
-                <div className="mt-5 border-b border-stone-100 pb-5">
-                  <p className="text-3xl font-bold text-navy">{pkg.price}</p>
+                <div
+                  className={cn(
+                    "mt-6 border-y py-5",
+                    pkg.highlighted ? "border-white/10" : "border-navy/10",
+                  )}
+                >
+                  <p
+                    className={cn(
+                      "font-mono text-3xl font-bold tracking-[-0.04em]",
+                      pkg.highlighted ? "text-white" : "text-navy",
+                    )}
+                  >
+                    {pkg.price}
+                  </p>
                   {pkg.retainer && (
-                    <p className="mt-1 text-sm font-medium text-stamp">
+                    <p className="mt-1 text-xs font-semibold text-success-800">
                       {pkg.retainer}
                     </p>
                   )}
                 </div>
 
-                {/* Leistungen */}
                 <ul className="mt-6 flex-1 space-y-3">
                   {pkg.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3">
+                    <li
+                      key={feature}
+                      className={cn(
+                        "flex items-start gap-3 text-sm leading-relaxed",
+                        pkg.highlighted ? "text-white/75" : "text-stone-700",
+                      )}
+                    >
                       <span
                         className={cn(
                           "mt-0.5 grid size-5 shrink-0 place-items-center rounded-full",
                           pkg.highlighted
-                            ? "bg-primary/10 text-stamp"
+                            ? "bg-success-300/15 text-success-300"
                             : "bg-success-100 text-success-700",
                         )}
                       >
-                        <Check className="size-3.5" strokeWidth={3} />
+                        <Check className="size-3" strokeWidth={3} />
                       </span>
-                      <span className="text-[15px] leading-relaxed text-stone-700">
-                        {feature}
-                      </span>
+                      {feature}
                     </li>
                   ))}
                 </ul>
 
-                <div className="mt-8">
-                  <CtaButton
-                    event="package_cta_click"
-                    location={`package_${pkg.id}`}
-                    service={pkg.formValue}
-                    variant={pkg.highlighted ? "default" : "outline"}
-                    size="lg"
-                    className="w-full"
-                  >
-                    {pkg.cta}
-                  </CtaButton>
-                </div>
-              </>
-            );
-
-            return (
-              <Reveal key={pkg.id} delay={i * 100} className="flex">
-                {pkg.highlighted ? (
-                  <BorderGlow
-                    backgroundColor="#ffffff"
-                    colors={["#5B8CFF", "#FF7043", "#1D2430"]}
-                    glowColor="224 90 58"
-                    borderRadius={24}
-                    animated
-                    className="relative flex w-full flex-col p-7 lg:-my-3 lg:scale-[1.02] sm:p-8"
-                  >
-                    {cardBody}
-                  </BorderGlow>
-                ) : (
-                  <SpotlightCard
-                    spotlightColor="rgba(91, 140, 255, 0.15)"
-                    className="relative flex w-full flex-col rounded-3xl border border-stone-200 bg-white p-7 shadow-soft transition-all hover:-translate-y-1 hover:shadow-card sm:p-8"
-                  >
-                    {cardBody}
-                  </SpotlightCard>
-                )}
-              </Reveal>
-            );
-          })}
+                <CtaButton
+                  event="package_cta_click"
+                  location={`package_${pkg.id}`}
+                  service={pkg.formValue}
+                  variant={pkg.highlighted ? "default" : "outline"}
+                  size="lg"
+                  icon={<ArrowRight className="order-last size-4" />}
+                  className={cn(
+                    "mt-8 w-full",
+                    pkg.highlighted &&
+                      "bg-white text-navy shadow-none hover:bg-white/90",
+                  )}
+                >
+                  {pkg.cta}
+                </CtaButton>
+              </article>
+            </Reveal>
+          ))}
         </div>
 
-        {/* Empfehlung */}
-        <Reveal delay={120}>
-          <p className="mx-auto mt-10 flex max-w-2xl items-center justify-center gap-2.5 rounded-2xl border border-primary/15 bg-primary/[0.04] px-5 py-4 text-center text-[15px] leading-relaxed text-navy">
-            <Info className="size-5 shrink-0 text-stamp" />
-            {packagesNote}
-          </p>
-        </Reveal>
+        <p className="mx-auto mt-7 max-w-2xl text-center text-xs leading-relaxed text-stone-500">
+          Alle Preise verstehen sich als Ausgangspunkt und werden erst nach
+          Prüfung von Umfang, Technik und vorhandenen Inhalten verbindlich.
+          Werbebudget ist nicht enthalten.
+        </p>
       </div>
     </section>
   );

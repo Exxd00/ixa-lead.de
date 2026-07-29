@@ -7,7 +7,11 @@ import { buildWhatsappUrl } from "@/lib/tracking";
 
 export const metadata: Metadata = {
   title: "IXA | Alle Links",
-  description: "Alle Kanäle. Eine Handschrift. Social Media, Websites & Ads, die Anfragen liefern.",
+  description:
+    "Direkter Kontakt zu IXA Leads: Website, WhatsApp, Instagram und weitere Kanäle.",
+  alternates: {
+    canonical: "https://ixa-leads.de/link",
+  },
 };
 
 export default function LinkHubPage() {
@@ -35,14 +39,13 @@ export default function LinkHubPage() {
       />
 
       <div className="relative z-10 flex w-full max-w-sm flex-col items-center">
-        {/* Emblem — Platzhalter, endgültiges Logo folgt separat */}
         <div className="relative">
           <div
             aria-hidden="true"
             className="absolute inset-0 -z-10 animate-pulse-soft rounded-full bg-primary/30 blur-2xl"
           />
-          <span className="grid size-24 place-items-center rounded-full border border-primary/40 bg-navy-900 text-2xl font-bold tracking-tight text-white shadow-[0_0_50px_-10px_rgba(177,70,38,0.7)]">
-            IX
+          <span className="grid size-24 place-items-center rounded-full border border-primary/40 bg-navy-900 text-2xl font-extrabold tracking-[-0.08em] text-white shadow-[0_0_50px_-10px_rgba(91,140,255,0.7)]">
+            IXA
           </span>
         </div>
 
@@ -55,8 +58,8 @@ export default function LinkHubPage() {
         <p className="mt-1 max-w-[280px] text-center text-sm leading-relaxed text-white/50">
           Social Media, Websites &amp; Ads, die Anfragen liefern.
         </p>
-        <p className="mt-2.5 text-xs font-medium tracking-wide text-stamp/80">
-          25+ Kunden · 15+ Branchen
+        <p className="mt-2.5 text-xs font-medium tracking-wide text-primary/80">
+          9 Live-Projekte · Nürnberg &amp; internationale Märkte
         </p>
 
         {/* Marken-Buttons */}

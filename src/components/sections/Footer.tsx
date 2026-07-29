@@ -11,24 +11,21 @@ export function Footer() {
     <footer className="border-t border-stone-200 bg-white">
       <div className="container-lp py-14">
         <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1.4fr]">
-          {/* العلامة */}
           <div>
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-xl bg-navy text-sm font-bold tracking-tight text-white">
-                IX
+              <span className="grid size-10 place-items-center rounded-xl bg-navy text-[13px] font-extrabold tracking-[-0.08em] text-white">
+                IXA
               </span>
               <span className="text-lg font-bold text-navy">{siteConfig.name}</span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-500">
-              Digitale Kundengewinnungs-Systeme für lokale Unternehmen in Nürnberg
-              und Franken – Website, Werbung, Tracking und Automation aus einer
-              Hand.
+              Messbare Kundengewinnungs-Systeme für lokale Dienstleister in
+              Nürnberg und Franken – persönlich geplant, gebaut und ausgewertet.
             </p>
           </div>
 
-          {/* Links */}
           <nav aria-label="Footer-Links">
-            <h4 className="text-sm font-bold text-navy">Links</h4>
+            <h3 className="text-sm font-bold text-navy">Links</h3>
             <ul className="mt-4 space-y-2.5 text-sm">
               {footerLinks.map((link) => (
                 <li key={link.href}>
@@ -49,9 +46,8 @@ export function Footer() {
             </ul>
           </nav>
 
-          {/* Kontakt */}
           <div>
-            <h4 className="text-sm font-bold text-navy">Kontakt</h4>
+            <h3 className="text-sm font-bold text-navy">Kontakt</h3>
             <ul className="mt-4 space-y-3 text-sm">
               <li>
                 <PhoneLink location="footer" />

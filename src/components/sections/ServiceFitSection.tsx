@@ -21,7 +21,7 @@ export function ServiceFitSection() {
           <Reveal>
             <article className="h-full rounded-3xl border border-success-200 bg-success-50/50 p-7 shadow-soft sm:p-8">
               <div className="flex items-center gap-3">
-                <span className="grid size-11 place-items-center rounded-xl bg-success-500 text-white">
+                <span className="grid size-11 place-items-center rounded-xl bg-success-700 text-white">
                   <Check className="size-6" strokeWidth={3} />
                 </span>
                 <h3 className="text-xl font-bold text-navy sm:text-2xl">

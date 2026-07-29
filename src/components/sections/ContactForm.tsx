@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { CheckCircle2, Loader2, Send, ShieldCheck, AlertTriangle } from "lucide-react";
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Loader2,
+  MessageCircle,
+  Phone,
+  Send,
+  ShieldCheck,
+  X,
+} from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { cn } from "@/lib/utils";
-import { track, reportAdsConversion } from "@/lib/tracking";
-import { siteConfig, serviceOptions, budgetOptions } from "@/data/site";
+import { buildWhatsappUrl, reportAdsConversion, track } from "@/lib/tracking";
+import { siteConfig } from "@/data/site";
 
 type FormState = {
   name: string;
@@ -45,17 +46,22 @@ function validate(state: FormState): Errors {
   if (!state.name.trim()) errors.name = "Bitte geben Sie Ihren Namen ein.";
   if (!state.contact.trim())
     errors.contact = "Bitte geben Sie Telefon oder E-Mail an.";
-  // Website ist optional – viele Interessenten haben noch keine Seite.
-  if (state.url.trim() && !/\.[a-z]{2,}/i.test(state.url.trim())) {
-    errors.url = "Bitte geben Sie einen gültigen Link ein.";
-  }
-  if (!state.adService.trim())
-    errors.adService = "Bitte beschreiben Sie kurz Ihre Leistung.";
-  if (!state.neededService.trim())
-    errors.neededService = "Bitte wählen Sie, was Sie brauchen.";
   if (!state.problem.trim())
     errors.problem = "Bitte beschreiben Sie kurz Ihr Problem.";
   return errors;
+}
+
+function payloadFor(state: FormState): FormState {
+  const companyOrWebsite = state.adService.trim();
+  const looksLikeWebsite =
+    /^(?:https?:\/\/|www\.)/i.test(companyOrWebsite) ||
+    /^[^\s]+\.[a-z]{2,}(?:[/?#].*)?$/i.test(companyOrWebsite);
+
+  return {
+    ...state,
+    url: looksLikeWebsite ? companyOrWebsite : "",
+    adService: looksLikeWebsite ? "" : companyOrWebsite,
+  };
 }
 
 export function ContactForm() {
@@ -106,11 +112,12 @@ export function ContactForm() {
     setStatus("loading");
     try {
       const endpoint = siteConfig.form.endpoint;
+      const payload = payloadFor(state);
       if (endpoint) {
         const res = await fetch(endpoint, {
           method: "POST",
           headers: { Accept: "application/json", "Content-Type": "application/json" },
-          body: JSON.stringify(state),
+          body: JSON.stringify(payload),
         });
         if (!res.ok) throw new Error("request_failed");
       } else {
@@ -144,14 +151,61 @@ export function ContactForm() {
 
         <Reveal delay={80} className="mx-auto mt-10 max-w-2xl">
           <div className="card-soft p-6 sm:p-8">
+            <div className="mb-6 grid grid-cols-2 gap-3">
+              <a
+                href={siteConfig.contact.phoneHref}
+                onClick={() => track("phone_click", { location: "contact_form" })}
+                className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm transition-colors hover:border-stamp/40 hover:text-stamp"
+              >
+                <Phone className="size-4" aria-hidden="true" />
+                Direkt anrufen
+              </a>
+              <a
+                href={buildWhatsappUrl()}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  track("whatsapp_click", { location: "contact_form" })
+                }
+                className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-success-700 px-3 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-success-800"
+              >
+                <MessageCircle className="size-4" aria-hidden="true" />
+                WhatsApp
+              </a>
+            </div>
+
             {status === "success" ? (
               <SuccessState isDemo={isDemo} />
             ) : (
               <form onSubmit={handleSubmit} noValidate className="space-y-5">
+                {state.neededService && (
+                  <div className="flex items-center justify-between gap-3 rounded-xl border border-stamp/20 bg-stamp/5 px-4 py-3 text-sm text-navy">
+                    <span>
+                      Interesse:{" "}
+                      <strong className="font-semibold">
+                        {state.neededService}
+                      </strong>
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setState((current) => ({
+                          ...current,
+                          neededService: "",
+                        }))
+                      }
+                      className="focus-ring grid size-7 shrink-0 place-items-center rounded-full text-stone-500 transition-colors hover:bg-white hover:text-navy"
+                      aria-label="Ausgewählte Leistung entfernen"
+                    >
+                      <X className="size-4" aria-hidden="true" />
+                    </button>
+                  </div>
+                )}
+
                 <div className="grid gap-5 sm:grid-cols-2">
                   <Field
                     id="field-name"
-                    label="Vollständiger Name"
+                    label="Ihr Name"
                     error={errors.name}
                     required
                   >
@@ -161,6 +215,7 @@ export function ContactForm() {
                       onChange={(e) => update("name", e.target.value)}
                       placeholder="Ihr Name"
                       aria-invalid={!!errors.name}
+                      aria-describedby={errors.name ? "field-name-error" : undefined}
                       autoComplete="name"
                     />
                   </Field>
@@ -175,75 +230,33 @@ export function ContactForm() {
                       id="field-contact"
                       value={state.contact}
                       onChange={(e) => update("contact", e.target.value)}
-                      placeholder="So erreichen wir Sie"
+                      placeholder="Telefonnummer oder E-Mail"
                       aria-invalid={!!errors.contact}
+                      aria-describedby={
+                        errors.contact ? "field-contact-error" : undefined
+                      }
+                      autoComplete="tel"
                     />
                   </Field>
                 </div>
 
                 <Field
-                  id="field-url"
-                  label="Aktuelle Website (falls vorhanden)"
-                  error={errors.url}
+                  id="field-adService"
+                  label="Unternehmen oder Website"
                   optional
                 >
                   <Input
-                    id="field-url"
-                    type="url"
-                    value={state.url}
-                    onChange={(e) => update("url", e.target.value)}
-                    placeholder="https://ihre-seite.de"
-                    aria-invalid={!!errors.url}
+                    id="field-adService"
+                    value={state.adService}
+                    onChange={(e) => update("adService", e.target.value)}
+                    placeholder="z. B. Muster GmbH oder muster.de"
+                    autoComplete="organization"
                   />
                 </Field>
 
-                <div className="grid gap-5 sm:grid-cols-2">
-                  <Field
-                    id="field-adService"
-                    label="Was bieten Sie an?"
-                    error={errors.adService}
-                    required
-                  >
-                    <Input
-                      id="field-adService"
-                      value={state.adService}
-                      onChange={(e) => update("adService", e.target.value)}
-                      placeholder="z. B. Rohrreinigung in Nürnberg"
-                      aria-invalid={!!errors.adService}
-                    />
-                  </Field>
-
-                  <Field
-                    id="field-neededService"
-                    label="Was brauchen Sie?"
-                    error={errors.neededService}
-                    required
-                  >
-                    <Select
-                      value={state.neededService}
-                      onValueChange={(v) => update("neededService", v)}
-                    >
-                      <SelectTrigger
-                        id="field-neededService"
-                        aria-invalid={!!errors.neededService}
-                        className={cn(errors.neededService && "border-destructive")}
-                      >
-                        <SelectValue placeholder="Bitte wählen" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {serviceOptions.map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {opt}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                </div>
-
                 <Field
                   id="field-problem"
-                  label="Welches Ziel oder Problem haben Sie aktuell?"
+                  label="Was möchten Sie erreichen oder lösen?"
                   error={errors.problem}
                   required
                 >
@@ -254,30 +267,10 @@ export function ContactForm() {
                     placeholder="Beschreiben Sie kurz, was Sie erreichen möchten oder was aktuell nicht funktioniert."
                     rows={4}
                     aria-invalid={!!errors.problem}
+                    aria-describedby={
+                      errors.problem ? "field-problem-error" : undefined
+                    }
                   />
-                </Field>
-
-                {/* Budget-Feld ist optional – lässt sich leicht entfernen */}
-                <Field
-                  id="field-budget"
-                  label="Ungefähres Projektbudget"
-                  optional
-                >
-                  <Select
-                    value={state.budget}
-                    onValueChange={(v) => update("budget", v)}
-                  >
-                    <SelectTrigger id="field-budget">
-                      <SelectValue placeholder="Optional – können Sie überspringen" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {budgetOptions.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
                 </Field>
 
                 {status === "error" && (
@@ -308,8 +301,8 @@ export function ContactForm() {
 
                 <p className="flex items-center justify-center gap-2 text-center text-sm text-stone-500">
                   <ShieldCheck className="size-4 text-success-600" />
-                  Ihre Daten werden nur zur Kontaktaufnahme bezüglich Ihrer Anfrage
-                  verwendet.
+                  Ihre Angaben werden ausschließlich zur Kontaktaufnahme wegen
+                  Ihrer Anfrage verwendet und nicht weitergegeben.
                 </p>
 
                 {isDemo && (
@@ -370,7 +363,11 @@ function Field({
 
 function SuccessState({ isDemo }: { isDemo: boolean }) {
   return (
-    <div className="flex flex-col items-center py-8 text-center">
+    <div
+      role="status"
+      aria-live="polite"
+      className="flex flex-col items-center py-8 text-center"
+    >
       <span className="grid size-16 place-items-center rounded-full bg-success-100 text-success-600">
         <CheckCircle2 className="size-9" />
       </span>

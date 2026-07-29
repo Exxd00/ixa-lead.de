@@ -9,14 +9,23 @@ interface RevealProps {
   /** تأخير الظهور بالمللي ثانية لإنشاء تتابع ناعم */
   delay?: number;
   as?: ElementType;
+  /** Keep above-the-fold content visible during SSR to protect LCP. */
+  immediate?: boolean;
 }
 
-export function Reveal({ children, className, delay = 0, as }: RevealProps) {
+export function Reveal({
+  children,
+  className,
+  delay = 0,
+  as,
+  immediate = false,
+}: RevealProps) {
   const Tag = (as ?? "div") as ElementType;
   const ref = useRef<HTMLElement | null>(null);
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(immediate);
 
   useEffect(() => {
+    if (immediate) return;
     const node = ref.current;
     if (!node) return;
 
@@ -43,7 +52,7 @@ export function Reveal({ children, className, delay = 0, as }: RevealProps) {
 
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [immediate]);
 
   return (
     <Tag

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { caseStudies } from "@/data/site";
 import { ShareableCaseStudyCard } from "@/components/case-studies/ShareableCaseStudyCard";
 
@@ -9,6 +10,10 @@ export const metadata: Metadata = {
 };
 
 export default function ErfolgsgeschichtenPage() {
+  if (process.env.NODE_ENV === "production") {
+    notFound();
+  }
+
   return (
     <main className="min-h-screen bg-stone-50 px-5 py-16 sm:py-20">
       <div className="mx-auto max-w-4xl">

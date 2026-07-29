@@ -26,14 +26,14 @@ export function SectionHeading({
       )}
     >
       {eyebrow && (
-        <span className="live-badge">
-          <span className="live-dot" aria-hidden="true" />
+        <span className="inline-flex items-center gap-2.5 text-xs font-bold uppercase tracking-[0.14em] text-primary">
+          <span className="h-px w-5 bg-primary" aria-hidden="true" />
           {eyebrow}
         </span>
       )}
       <h2
         className={cn(
-          "text-2xl font-bold leading-tight text-navy sm:text-3xl md:text-[2.15rem]",
+          "text-3xl font-bold leading-[1.1] tracking-[-0.035em] text-navy sm:text-4xl",
           align === "center" && "max-w-3xl",
         )}
       >

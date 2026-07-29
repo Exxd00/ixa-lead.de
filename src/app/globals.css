@@ -4,33 +4,31 @@
 
 @layer base {
   :root {
-    /* Klares, kühles Neutral-Weiß statt warmem Leinen oder Werkstatt-Papier */
-    --background: 220 14% 97%;
+    --background: 42 30% 98%;
     --foreground: 220 20% 14%;
 
-    --card: 0 0% 100%;
+    --card: 42 35% 99%;
     --card-foreground: 220 20% 14%;
     --popover: 0 0% 100%;
     --popover-foreground: 220 20% 14%;
 
-    /* Signal-Blau — die eine Akzentfarbe, an Tracking/Live-Daten geknüpft */
-    --primary: 224 90% 58%;
+    --primary: 224 84% 56%;
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 220 14% 93%;
+    --secondary: 40 18% 93%;
     --secondary-foreground: 220 20% 14%;
 
-    --muted: 220 14% 93%;
+    --muted: 40 18% 93%;
     --muted-foreground: 220 10% 45%;
 
-    --accent: 220 16% 91%;
+    --accent: 40 18% 91%;
     --accent-foreground: 220 20% 14%;
 
     --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 220 13% 88%;
-    --input: 220 13% 86%;
+    --border: 35 14% 86%;
+    --input: 35 14% 84%;
     --ring: 224 90% 58%;
     --radius: 0.75rem;
   }
@@ -111,13 +109,11 @@
     @apply outline-none focus-visible:ring-2 focus-visible:ring-primary/70 focus-visible:ring-offset-2 focus-visible:ring-offset-background;
   }
 
-  /* Dunkler Hero-Hintergrund: tiefes Graphit statt "near-black + ein Akzent" —
-     zwei driftende Glow-Flächen (Blau + Koralle) statt eines flachen Verlaufs. */
   .hero-wash {
     background:
-      radial-gradient(60% 50% at 15% 10%, hsl(224 90% 58% / 0.28), transparent 65%),
-      radial-gradient(50% 45% at 88% 82%, hsl(14 90% 58% / 0.16), transparent 60%),
-      linear-gradient(180deg, hsl(220 24% 9%), hsl(220 26% 6%));
+      radial-gradient(65% 55% at 10% 5%, hsl(224 84% 56% / 0.26), transparent 64%),
+      radial-gradient(46% 48% at 94% 92%, hsl(14 90% 58% / 0.14), transparent 68%),
+      linear-gradient(145deg, hsl(220 28% 9%), hsl(218 30% 6%));
   }
 
   .section-alt {

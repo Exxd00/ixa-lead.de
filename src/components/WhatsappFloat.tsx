@@ -23,11 +23,11 @@ export function WhatsappFloat() {
       rel="noopener noreferrer"
       aria-label="Über WhatsApp kontaktieren"
       onClick={() => track("whatsapp_click", { location: "float" })}
-      className="focus-ring group fixed bottom-6 right-6 z-40 hidden size-14 place-items-center rounded-full bg-success-500 text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-success-600 lg:grid"
+      className="focus-ring group fixed bottom-6 right-6 z-40 hidden size-14 place-items-center rounded-full bg-success-700 text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-success-800 lg:grid"
     >
       <span
         aria-hidden="true"
-        className="absolute inset-0 -z-10 rounded-full bg-success-500 opacity-50 blur-md transition-opacity group-hover:opacity-80"
+        className="absolute inset-0 -z-10 rounded-full bg-success-700 opacity-50 blur-md transition-opacity group-hover:opacity-80"
       />
       <WhatsAppIcon className="size-7" />
       <span className="pointer-events-none absolute right-full mr-3 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">

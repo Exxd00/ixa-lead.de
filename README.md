@@ -1,36 +1,48 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# IXA Leads
 
-## Getting Started
+Lead-Generation-Website für lokale Dienstleister in Nürnberg und Franken. Die Startseite verbindet Leistungsangebot, dokumentierte Portfolio-Ergebnisse und direkte Kontaktwege.
 
-First, run the development server:
+## Lokal starten
+
+Voraussetzung: Node.js 20 (siehe `.nvmrc`).
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Danach: [http://localhost:3000](http://localhost:3000)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Produktionsprüfung:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+npm run start
+```
 
-## Learn More
+## Formular verbinden
 
-To learn more about Next.js, take a look at the following resources:
+Das Formular sendet an `/api/contact`. Damit eine Anfrage als erfolgreich bestätigt wird, muss `LEAD_WEBHOOK_URL` auf einen echten Webhook von Google Apps Script, Make, Zapier oder einem CRM zeigen.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cp .env.example .env.local
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Ohne Webhook antwortet die API absichtlich mit `503`; dadurch sieht ein Besucher keine falsche Erfolgsmeldung und keine Anfrage geht still verloren.
 
-## Deploy on Vercel
+## Tracking
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Tracking bleibt in `src/data/site.ts` deaktiviert, bis echte IDs und eine passende Einwilligungslösung eingerichtet sind. GA4 und GTM nicht parallel für denselben Page View konfigurieren.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Vor Veröffentlichung
+
+- Ladungsfähige Anschrift und gegebenenfalls USt-IdNr im Impressum ergänzen.
+- Vollständige Datenschutzerklärung prüfen lassen.
+- Formular bis zum Zielsystem Ende-zu-Ende testen.
+- Consent Management einrichten, bevor Analytics oder Ads-Tags aktiviert werden.
+- Echte Gründer- und Projektbilder ergänzen, sobald sie vorliegen.
+
+## Ergebnis- und Audit-Dokumentation
+
+Die geprüften Lead-Sheet-/GA4-Zahlen, ihre genaue Bedeutung und die Bewertung aller neun Projekte stehen in [`docs/portfolio-audit-2026-07-29.md`](docs/portfolio-audit-2026-07-29.md).
