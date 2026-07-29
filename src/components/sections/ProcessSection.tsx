@@ -27,50 +27,42 @@ const steps = [
 
 export function ProcessSection() {
   return (
-    <section id="process" className="border-y border-navy/10 bg-[#f3f1eb] py-16 sm:py-20 lg:py-24">
+    <section
+      id="process"
+      className="border-y border-navy/10 bg-[#f3f1eb] py-14 sm:py-20 lg:py-24"
+    >
       <div className="container-lp">
         <SectionHeading
           eyebrow="Zusammenarbeit"
           title="Vier klare Schritte. Ein direkter Ansprechpartner."
-          description="Sie wissen vor dem Start, was gebaut, gemessen und als Nächstes verbessert wird."
+          description="Sie wissen jederzeit, was als Nächstes passiert."
         />
 
-        <div className="relative mt-12">
-          <div
-            aria-hidden="true"
-            className="absolute left-[12.5%] right-[12.5%] top-8 hidden h-px bg-navy/12 lg:block"
-          />
-          <ol className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            {steps.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <Reveal
-                  key={step.title}
-                  delay={index * 70}
-                  as="li"
-                  className="relative"
-                >
-                  <article className="h-full rounded-[1.35rem] border border-navy/10 bg-white p-5 shadow-soft sm:p-6">
-                    <div className="flex items-center justify-between">
-                      <span className="relative z-10 grid size-12 place-items-center rounded-2xl bg-navy text-white">
-                        <Icon className="size-5" />
-                      </span>
-                      <span className="font-mono text-sm font-bold text-primary">
-                        0{index + 1}
-                      </span>
-                    </div>
-                    <h3 className="mt-5 text-lg font-bold text-navy">
+        <ol className="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+          {steps.map((step, index) => {
+            const Icon = step.icon;
+            return (
+              <Reveal key={step.title} delay={index * 70} as="li">
+                <article className="flex h-full items-start gap-4 rounded-[1.25rem] border border-navy/10 bg-white p-4 shadow-soft lg:block lg:p-5">
+                  <span className="grid size-10 shrink-0 place-items-center rounded-xl bg-navy text-white">
+                    <Icon className="size-[18px]" />
+                  </span>
+                  <div className="min-w-0 lg:mt-4">
+                    <p className="font-mono text-[11px] font-bold text-primary">
+                      0{index + 1}
+                    </p>
+                    <h3 className="mt-0.5 text-base font-bold text-navy lg:text-lg">
                       {step.title}
                     </h3>
-                    <p className="mt-2 text-sm leading-relaxed text-stone-600">
+                    <p className="mt-1.5 text-[13px] leading-relaxed text-stone-600 lg:text-sm">
                       {step.text}
                     </p>
-                  </article>
-                </Reveal>
-              );
-            })}
-          </ol>
-        </div>
+                  </div>
+                </article>
+              </Reveal>
+            );
+          })}
+        </ol>
       </div>
     </section>
   );

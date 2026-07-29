@@ -16,7 +16,9 @@ export function Footer() {
               <span className="grid size-10 place-items-center rounded-xl bg-navy text-[13px] font-extrabold tracking-[-0.08em] text-white">
                 IXA
               </span>
-              <span className="text-lg font-bold text-navy">{siteConfig.name}</span>
+              <span className="text-lg font-bold text-navy">
+                {siteConfig.name}
+              </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-500">
               Messbare Kundengewinnungs-Systeme für lokale Dienstleister in
@@ -31,7 +33,7 @@ export function Footer() {
                 <li key={link.href}>
                   <a
                     href={link.href}
-                    className="focus-ring rounded-md text-stone-500 transition-colors hover:text-stamp"
+                    className="focus-ring rounded-md text-stone-500 transition-colors hover:text-primary"
                   >
                     {link.label}
                   </a>
@@ -59,7 +61,7 @@ export function Footer() {
                 <EmailLink location="footer" />
               </li>
               <li className="flex items-center gap-2 text-stone-500">
-                <MapPin className="size-4 text-stamp" />
+                <MapPin className="size-4 text-primary" />
                 {siteConfig.contact.location}
               </li>
             </ul>

@@ -8,98 +8,70 @@ const stages = [
     number: "01",
     icon: Search,
     title: "Gefunden werden",
-    text: "Local SEO, Google Business und Google Ads bringen Sie vor Menschen, die Ihre Leistung in Ihrer Region bereits suchen.",
-    points: ["Lokale Suchintention", "Google Ads", "Service- & Standortseiten"],
-    note: "Bei Möbelmontage (13 von 31) und Keller Montage (6 von 11) war Organisch die größte dokumentierte Quelle.",
-    service: "Local SEO & Sichtbarkeit",
+    text: "Ihr Angebot erscheint dort, wo Menschen in Ihrer Region bereits nach Ihrer Leistung suchen.",
   },
   {
     number: "02",
     icon: MousePointerClick,
     title: "Vertrauen & Kontakt",
-    text: "Eine schnelle mobile Website beantwortet die wichtigsten Fragen und bietet den passenden Kontaktweg ohne Umwege.",
-    points: [
-      "Mobile Conversion",
-      "Echte Beweise",
-      "Anruf, WhatsApp & Formular",
-    ],
-    note: "49 % der dokumentierten Kontakte kamen per Telefon oder WhatsApp – nicht über ein Formular.",
-    service: "Website / Landingpage",
+    text: "Eine klare mobile Website führt ohne Umwege zu Anruf, WhatsApp oder Formular.",
   },
   {
     number: "03",
     icon: BarChart3,
-    title: "Messen & nachfassen",
-    text: "GA4, Call- und Klick-Tracking sowie Google Sheets zeigen, welcher Kanal echte Kontaktaktionen auslöst.",
-    points: ["GA4 & GTM", "Lead-Sheets", "Webhook-Automation"],
-    note: "So werden Werbeklicks, Kontaktaktionen und später auch qualifizierte Aufträge sauber getrennt.",
-    service: "GA4 & Conversion-Tracking",
+    title: "Verstehen, was funktioniert",
+    text: "Anrufe, WhatsApp und Formulare werden getrennt erfasst. So sehen Sie, welcher Weg Anfragen bringt.",
   },
 ];
 
 export function ServicesSection() {
   return (
-    <section id="services" className="bg-white py-16 sm:py-20 lg:py-28">
+    <section id="services" className="bg-white py-14 sm:py-20 lg:py-24">
       <div className="container-lp">
         <SectionHeading
           eyebrow="Das IXA-System"
           title="Vom Suchmoment bis zur nachverfolgbaren Anfrage"
-          description="Kein Sammelsurium aus Einzelleistungen. Drei klar verbundene Stufen, die für lokale Dienstleister gemeinsam arbeiten."
+          description="Drei einfache Stufen, die gemeinsam arbeiten – ohne technischen Umweg für Sie."
         />
 
-        <div className="mt-12 grid gap-5 lg:grid-cols-3">
+        <div className="mt-9 grid gap-4 lg:grid-cols-3">
           {stages.map((stage, index) => {
             const Icon = stage.icon;
             return (
               <Reveal key={stage.title} delay={index * 80}>
-                <article className="group flex h-full flex-col rounded-[1.5rem] border border-navy/10 bg-[#fbfaf7] p-6 transition-all hover:-translate-y-1 hover:border-primary/25 hover:shadow-card sm:p-7">
+                <article className="group flex h-full items-start gap-4 rounded-[1.35rem] border border-navy/10 bg-[#fbfaf7] p-5 transition-all hover:border-primary/25 hover:shadow-card lg:block lg:p-6">
                   <div className="flex items-center justify-between">
-                    <span className="grid size-12 place-items-center rounded-2xl bg-navy text-white">
+                    <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-navy text-white">
                       <Icon className="size-5" />
                     </span>
-                    <span className="font-mono text-sm font-bold text-stone-300">
+                    <span className="hidden font-mono text-sm font-bold text-stone-300 lg:block">
                       {stage.number}
                     </span>
                   </div>
 
-                  <h3 className="mt-6 text-xl font-bold text-navy">
-                    {stage.title}
-                  </h3>
-                  <p className="mt-3 text-[15px] leading-relaxed text-stone-600">
-                    {stage.text}
-                  </p>
-
-                  <ul className="mt-5 space-y-2.5">
-                    {stage.points.map((point) => (
-                      <li
-                        key={point}
-                        className="flex items-center gap-2.5 text-sm font-semibold text-navy"
-                      >
-                        <span className="size-1.5 rounded-full bg-primary" />
-                        {point}
-                      </li>
-                    ))}
-                  </ul>
-
-                  <p className="mt-6 flex-1 rounded-xl border border-navy/10 bg-white px-4 py-3 text-xs leading-relaxed text-stone-500">
-                    {stage.note}
-                  </p>
-
-                  <CtaButton
-                    event="service_cta_click"
-                    location={`service_stage_${index + 1}`}
-                    service={stage.service}
-                    variant="ghost"
-                    size="default"
-                    icon={<ArrowRight className="order-last size-4" />}
-                    className="mt-4 w-full justify-between px-1 hover:bg-transparent hover:text-primary"
-                  >
-                    Kostenlose Erstanalyse
-                  </CtaButton>
+                  <div className="min-w-0 lg:mt-5">
+                    <h3 className="text-lg font-bold text-navy lg:text-xl">
+                      {stage.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-relaxed text-stone-600 lg:text-[15px]">
+                      {stage.text}
+                    </p>
+                  </div>
                 </article>
               </Reveal>
             );
           })}
+        </div>
+
+        <div className="mt-8 text-center">
+          <CtaButton
+            event="service_cta_click"
+            location="services"
+            service="Komplettes IXA-System"
+            icon={<ArrowRight className="order-last size-4" />}
+          >
+            Kostenlose Erstanalyse
+          </CtaButton>
         </div>
       </div>
     </section>

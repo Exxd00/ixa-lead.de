@@ -24,7 +24,7 @@ export function PrivacyDialog({
         <button
           type="button"
           className={cn(
-            "focus-ring rounded-md text-stone-500 transition-colors hover:text-stamp",
+            "focus-ring rounded-md text-stone-500 transition-colors hover:text-primary",
             className,
           )}
         >
@@ -35,32 +35,39 @@ export function PrivacyDialog({
         <DialogHeader>
           <DialogTitle className="text-xl text-navy">Datenschutz</DialogTitle>
           <DialogDescription>
-            Kurze Übersicht, wie die Daten aus dem Kontaktformular verwendet werden.
+            Kurze Übersicht, wie die Daten aus dem Kontaktformular verwendet
+            werden.
           </DialogDescription>
         </DialogHeader>
 
         <div className="space-y-4 text-sm leading-relaxed text-stone-600">
           <div>
-            <h3 className="mb-1 font-bold text-navy">Welche Daten wir erheben</h3>
+            <h3 className="mb-1 font-bold text-navy">
+              Welche Daten wir erheben
+            </h3>
             <p>
               Name, Kontaktweg (Telefon oder E-Mail), Link zur Website oder
-              Landingpage sowie Beschreibung von Problem und gewünschter Leistung.
+              Landingpage sowie Beschreibung von Problem und gewünschter
+              Leistung.
             </p>
           </div>
           <div>
-            <h3 className="mb-1 font-bold text-navy">Wie wir Ihre Daten verwenden</h3>
+            <h3 className="mb-1 font-bold text-navy">
+              Wie wir Ihre Daten verwenden
+            </h3>
             <p>
               Ausschließlich zur Kontaktaufnahme bezüglich Ihrer Anfrage. Wir
-              verkaufen Ihre Daten nicht und geben sie nicht zu Marketingzwecken an
-              Dritte weiter.
+              verkaufen Ihre Daten nicht und geben sie nicht zu Marketingzwecken
+              an Dritte weiter.
             </p>
           </div>
           <div>
             <h3 className="mb-1 font-bold text-navy">Mess-Tools</h3>
             <p>
-              Die Website kann Tools wie Google Analytics 4 und Google Tag Manager
-              nutzen, um die Leistung zu verstehen und die Erfahrung zu verbessern.
-              Anzeigen-Tracking lässt sich nach Ihren Einstellungen konfigurieren.
+              Die Website kann Tools wie Google Analytics 4 und Google Tag
+              Manager nutzen, um die Leistung zu verstehen und die Erfahrung zu
+              verbessern. Anzeigen-Tracking lässt sich nach Ihren Einstellungen
+              konfigurieren.
             </p>
           </div>
           <div>
@@ -71,13 +78,15 @@ export function PrivacyDialog({
             </p>
           </div>
           <div>
-            <h3 className="mb-1 font-bold text-navy">Kontakt zum Datenschutz</h3>
+            <h3 className="mb-1 font-bold text-navy">
+              Kontakt zum Datenschutz
+            </h3>
             <p>{siteConfig.contact.emailDisplay}</p>
           </div>
 
           <p className="rounded-lg border border-dashed border-stone-300 bg-stone-50 p-3 text-xs text-stone-500">
-            Dies ist eine kurze, anpassbare Übersicht – ersetzen Sie sie durch Ihre
-            vollständige, rechtsgültige Datenschutzerklärung.
+            Dies ist eine kurze, anpassbare Übersicht – ersetzen Sie sie durch
+            Ihre vollständige, rechtsgültige Datenschutzerklärung.
           </p>
         </div>
       </DialogContent>
