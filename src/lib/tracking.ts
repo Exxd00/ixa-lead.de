@@ -15,6 +15,8 @@ export type TrackingEvent =
   | "phone_click"
   | "email_click"
   | "form_start"
+  | "form_service_select"
+  | "form_option_select"
   | "form_submit_success"
   | "form_submit_error"
   | "link_hub_click"

@@ -7,7 +7,7 @@ import {
 } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton, WhatsappLink } from "@/components/cta";
-import { siteConfig } from "@/data/site";
+import { freeCheckServiceId, siteConfig } from "@/data/site";
 
 const promises = [
   "Sie sprechen direkt mit demjenigen, der Strategie und Umsetzung verantwortet.",
@@ -98,8 +98,14 @@ export function AboutSection() {
           </ul>
 
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-            <CtaButton location="about" size="lg">
-              Kostenlose Erstanalyse
+            <CtaButton
+              event="check_cta_click"
+              location="about"
+              service={freeCheckServiceId}
+              size="lg"
+              className="h-auto min-h-12 whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-12 sm:whitespace-nowrap sm:px-7 sm:py-0 sm:text-base"
+            >
+              Kostenlosen Website-Check starten
             </CtaButton>
             <WhatsappLink
               location="about"

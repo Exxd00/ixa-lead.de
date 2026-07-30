@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Menu, Phone, X } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { siteConfig } from "@/data/site";
+import { freeCheckServiceId, siteConfig } from "@/data/site";
 import { CtaButton } from "@/components/cta";
 import { track } from "@/lib/tracking";
 
@@ -83,8 +83,13 @@ export function Navbar() {
           >
             <Phone className="size-4" />
           </a>
-          <CtaButton location="navbar" size="default">
-            Kostenlose Erstanalyse
+          <CtaButton
+            event="check_cta_click"
+            location="navbar"
+            service={freeCheckServiceId}
+            size="default"
+          >
+            Kostenlosen Website-Check starten
           </CtaButton>
         </div>
 
@@ -134,12 +139,14 @@ export function Navbar() {
               Anrufen
             </a>
             <CtaButton
+              event="check_cta_click"
               location="mobile_menu"
+              service={freeCheckServiceId}
               size="lg"
-              className="h-12 px-3 text-sm"
+              className="h-auto min-h-12 whitespace-normal px-3 py-3 text-center text-sm leading-tight"
               onClick={() => setOpen(false)}
             >
-              Kostenlose Erstanalyse
+              Kostenlosen Website-Check starten
             </CtaButton>
           </div>
         </div>

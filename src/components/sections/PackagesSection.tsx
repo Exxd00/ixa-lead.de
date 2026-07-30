@@ -110,7 +110,7 @@ function PackageCard({ pkg }: { pkg: Package }) {
       <CtaButton
         event="package_cta_click"
         location={`package_${pkg.id}`}
-        service={pkg.formValue}
+        service={pkg.id}
         variant={pkg.highlighted ? "default" : "outline"}
         size="lg"
         icon={<ArrowRight className="order-last size-4" />}
@@ -152,8 +152,8 @@ export function PackagesSection() {
               </p>
               <p className="mt-1 text-sm leading-relaxed text-stone-600">
                 Neue Projektstarts vergebe ich nach verfügbarer Kapazität. Den
-                nächsten freien Starttermin klären wir in der kostenlosen
-                Erstanalyse.
+                nächsten freien Starttermin klären wir im kostenlosen
+                Website-Check.
               </p>
             </div>
           </div>
@@ -205,7 +205,7 @@ export function PackagesSection() {
                   <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-primary shadow-sm">
                     <Icon className="size-5" />
                   </span>
-                  <div className="min-w-0">
+                  <div className="flex min-w-0 flex-1 flex-col">
                     <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-primary">
                       {extra.eyebrow}
                     </p>
@@ -223,6 +223,17 @@ export function PackagesSection() {
                     <p className="mt-2 text-xs font-semibold text-success-800">
                       {extra.note}
                     </p>
+                    <CtaButton
+                      event="package_cta_click"
+                      location={`package_${extra.id}`}
+                      service={extra.id}
+                      variant="outline"
+                      size="default"
+                      icon={<ArrowRight className="order-last size-4" />}
+                      className="mt-5 h-auto min-h-11 self-start whitespace-normal px-4 py-2.5 text-left text-sm leading-tight"
+                    >
+                      {extra.cta}
+                    </CtaButton>
                   </div>
                 </article>
               </Reveal>

@@ -7,7 +7,7 @@ export const siteConfig = {
     phoneHref: "tel:+491629155408",
     whatsappNumber: "491629155408",
     whatsappMessage:
-      "Hallo IXA-Leads, ich interessiere mich für eine kostenlose Erstanalyse für mein lokales Unternehmen.",
+      "Hallo IXA-Leads, ich interessiere mich für den kostenlosen Website-Check für mein Unternehmen.",
     emailDisplay: "info@ixa-leads.de",
     emailHref: "mailto:info@ixa-leads.de",
     location: "Nürnberg & Franken",
@@ -30,6 +30,37 @@ export const siteConfig = {
   },
 };
 
+export const leadServiceOptions = [
+  {
+    id: "website-check",
+    label: "Kostenloser Website-Check",
+  },
+  {
+    id: "website-system",
+    label: "IXA Website-System – 1.000 € einmalig",
+  },
+  {
+    id: "startklar",
+    label: "Startklar-Kombi – 1.500 € einmalig",
+  },
+  {
+    id: "google-ads-setup",
+    label: "Google Ads Start – 500 € einmalig",
+  },
+  {
+    id: "betreuung",
+    label: "Betreuung & Optimierung – 500 € pro Monat",
+  },
+  {
+    id: "single-update",
+    label: "Einzelne Anpassung – 50–100 €",
+  },
+] as const;
+
+export type LeadServiceId = (typeof leadServiceOptions)[number]["id"];
+
+export const freeCheckServiceId: LeadServiceId = "website-check";
+
 export const packages = [
   {
     id: "website-system",
@@ -49,7 +80,6 @@ export const packages = [
       "Technische Veröffentlichung und Übergabe",
     ],
     cta: "Website-System anfragen",
-    formValue: "IXA Website-System – 1.000 € einmalig",
   },
   {
     id: "startklar",
@@ -69,7 +99,6 @@ export const packages = [
       "Startbereit übergeben; Werbebudget separat",
     ],
     cta: "Komplett starten",
-    formValue: "Startklar-Kombi – 1.500 € einmalig",
   },
   {
     id: "betreuung",
@@ -89,7 +118,6 @@ export const packages = [
       "Ein direkter Ansprechpartner",
     ],
     cta: "Betreuung besprechen",
-    formValue: "Betreuung & Optimierung – 500 € pro Monat",
   },
 ];
 
@@ -102,6 +130,7 @@ export const pricingExtras = [
     description:
       "Eine Kampagne wird vollständig eingerichtet, mit der Kontaktmessung verbunden und startklar übergeben.",
     note: "Werbebudget nicht enthalten.",
+    cta: "Google Ads anfragen",
   },
   {
     id: "single-update",
@@ -111,6 +140,7 @@ export const pricingExtras = [
     description:
       "Für kleine Änderungen an der Website oder an Google Ads. Den genauen Preis nenne ich vor der Umsetzung.",
     note: "Sie beauftragen nur, was Sie wirklich brauchen.",
+    cta: "Anpassung anfragen",
   },
 ];
 

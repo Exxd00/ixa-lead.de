@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  freeCheckServiceId,
+  leadServiceOptions,
+} from "@/data/site";
 
 /* =====================================================================
    Kontakt-Endpoint — IXA-Leads
@@ -21,6 +25,12 @@ const payloadKeys = [
   "neededService",
   "problem",
   "budget",
+  "serviceId",
+  "auditType",
+  "contactMethod",
+  "visitLocation",
+  "visitWindow",
+  "projectDetail",
 ] as const;
 
 type Payload = {
@@ -31,7 +41,33 @@ type Payload = {
   neededService?: string;
   problem?: string;
   budget?: string;
+  serviceId?: string;
+  auditType?: string;
+  contactMethod?: string;
+  visitLocation?: string;
+  visitWindow?: string;
+  projectDetail?: string;
 };
+
+function normalizeWebsite(value: string): string | null {
+  const candidate = value.trim();
+  if (!candidate || /\s/.test(candidate)) return null;
+
+  try {
+    const parsed = new URL(
+      /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`,
+    );
+    if (
+      (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+      !parsed.hostname.includes(".")
+    ) {
+      return null;
+    }
+    return parsed.toString();
+  } catch {
+    return null;
+  }
+}
 
 export async function POST(request: Request) {
   let parsed: unknown;
@@ -69,13 +105,95 @@ export async function POST(request: Request) {
       .map((key) => [key, (raw[key] as string).trim()]),
   ) as Payload;
 
-  // Minimale serverseitige Validierung
-  if (!data.name || !data.contact || !data.problem) {
+  const selectedService = leadServiceOptions.find(
+    (service) => service.id === data.serviceId,
+  );
+  if (!selectedService) {
     return NextResponse.json(
-      { ok: false, error: "missing_fields" },
+      { ok: false, error: "invalid_service" },
       { status: 422 },
     );
   }
+
+  if (!data.name || !data.contact) {
+    return NextResponse.json(
+      { ok: false, error: "missing_contact_fields" },
+      { status: 422 },
+    );
+  }
+
+  if (data.url) {
+    const website = normalizeWebsite(data.url);
+    if (!website) {
+      return NextResponse.json(
+        { ok: false, error: "invalid_website" },
+        { status: 422 },
+      );
+    }
+    data.url = website;
+  }
+
+  const isFreeCheck = data.serviceId === freeCheckServiceId;
+  if (isFreeCheck) {
+    if (data.auditType !== "written" && data.auditType !== "onsite") {
+      return NextResponse.json(
+        { ok: false, error: "invalid_audit_type" },
+        { status: 422 },
+      );
+    }
+
+    if (data.auditType === "written") {
+      if (!data.url) {
+        return NextResponse.json(
+          { ok: false, error: "invalid_website" },
+          { status: 422 },
+        );
+      }
+      if (
+        data.contactMethod !== "whatsapp" &&
+        data.contactMethod !== "email"
+      ) {
+        return NextResponse.json(
+          { ok: false, error: "invalid_contact_method" },
+          { status: 422 },
+        );
+      }
+
+      data.adService = "";
+      data.visitLocation = "";
+      data.visitWindow = "";
+      data.projectDetail = "";
+    } else {
+      if (
+        !data.adService ||
+        !data.visitLocation ||
+        !data.visitWindow ||
+        !data.problem
+      ) {
+        return NextResponse.json(
+          { ok: false, error: "missing_visit_details" },
+          { status: 422 },
+        );
+      }
+
+      data.contactMethod = "phone";
+      data.projectDetail = "";
+    }
+  } else {
+    if (!data.projectDetail || !data.problem) {
+      return NextResponse.json(
+        { ok: false, error: "missing_project_details" },
+        { status: 422 },
+      );
+    }
+
+    data.auditType = "";
+    data.contactMethod = "";
+    data.visitLocation = "";
+    data.visitWindow = "";
+  }
+
+  data.neededService = selectedService.label;
 
   const fields = [
     data.name,
@@ -85,6 +203,12 @@ export async function POST(request: Request) {
     data.neededService,
     data.problem,
     data.budget,
+    data.serviceId,
+    data.auditType,
+    data.contactMethod,
+    data.visitLocation,
+    data.visitWindow,
+    data.projectDetail,
   ];
   if (fields.some((value) => value && value.length > 2_000)) {
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { ArrowRight, BarChart3, MousePointerClick, Search } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/section-heading";
 import { CtaButton } from "@/components/cta";
+import { freeCheckServiceId } from "@/data/site";
 
 const stages = [
   {
@@ -65,12 +66,13 @@ export function ServicesSection() {
 
         <div className="mt-8 text-center">
           <CtaButton
-            event="service_cta_click"
+            event="check_cta_click"
             location="services"
-            service="Komplettes IXA-System"
+            service={freeCheckServiceId}
             icon={<ArrowRight className="order-last size-4" />}
+            className="h-auto min-h-12 whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-12 sm:whitespace-nowrap sm:px-7 sm:py-0 sm:text-base"
           >
-            Kostenlose Erstanalyse
+            Kostenlosen Website-Check starten
           </CtaButton>
         </div>
       </div>

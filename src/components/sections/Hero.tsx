@@ -2,6 +2,7 @@ import { ArrowRight, Check, MapPin } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton, WhatsappLink } from "@/components/cta";
 import { documentedCases } from "@/data/evidence";
+import { freeCheckServiceId } from "@/data/site";
 
 const featuredCase =
   documentedCases.find((study) => study.featured) ?? documentedCases[0];
@@ -56,12 +57,14 @@ export function Hero() {
           <Reveal immediate>
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
               <CtaButton
+                event="check_cta_click"
                 location="hero_primary"
+                service={freeCheckServiceId}
                 size="xl"
                 icon={<ArrowRight className="order-last" />}
-                className="w-full sm:w-auto"
+                className="h-auto min-h-14 w-full whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-14 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-0 sm:text-base"
               >
-                Kostenlose Erstanalyse
+                Kostenlosen Website-Check starten
               </CtaButton>
               <WhatsappLink
                 location="hero_secondary"
@@ -73,9 +76,8 @@ export function Hero() {
               </WhatsappLink>
             </div>
             <p className="mt-3 max-w-xl text-xs leading-relaxed text-white/55 sm:text-sm">
-              Ich prüfe Website, lokale Sichtbarkeit und Messbarkeit und gebe
-              Ihnen eine klare Empfehlung für den sinnvollsten nächsten Schritt
-              – unverbindlich.
+              Klare Einschätzung innerhalb von 24 Stunden – kostenlos und
+              unverbindlich.
             </p>
           </Reveal>
 
