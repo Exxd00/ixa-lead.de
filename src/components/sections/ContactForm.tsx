@@ -1,6 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
+import { Reveal } from "@/components/Reveal";
+import { SectionHeading } from "@/components/section-heading";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  type LeadServiceId,
+  freeCheckServiceId,
+  leadServiceOptions,
+  siteConfig,
+} from "@/data/site";
+import { buildWhatsappUrl, reportAdsConversion, track } from "@/lib/tracking";
+import { cn } from "@/lib/utils";
 import {
   AlertTriangle,
   Check,
@@ -14,19 +27,7 @@ import {
   Send,
   ShieldCheck,
 } from "lucide-react";
-import { Reveal } from "@/components/Reveal";
-import { SectionHeading } from "@/components/section-heading";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
-import { cn } from "@/lib/utils";
-import { buildWhatsappUrl, reportAdsConversion, track } from "@/lib/tracking";
-import {
-  freeCheckServiceId,
-  leadServiceOptions,
-  siteConfig,
-  type LeadServiceId,
-} from "@/data/site";
+import { useEffect, useRef, useState } from "react";
 
 type AuditType = "" | "written" | "onsite";
 type ContactMethod = "" | "whatsapp" | "email" | "phone";
@@ -39,6 +40,8 @@ type FormState = {
   contact: string;
   company: string;
   url: string;
+  serviceFocus: string;
+  serviceArea: string;
   visitLocation: string;
   visitWindow: string;
   projectDetail: string;
@@ -61,6 +64,8 @@ const initialState: FormState = {
   contact: "",
   company: "",
   url: "",
+  serviceFocus: "",
+  serviceArea: "",
   visitLocation: "",
   visitWindow: "",
   projectDetail: "",
@@ -145,7 +150,7 @@ const projectOptions: Partial<
 
 const serviceHeadingTitles: Partial<Record<LeadServiceId, string>> = {
   "website-system": "IXA Website-System anfragen",
-  startklar: "Startklar-Kombi anfragen",
+  startklar: "IXA Anfrage-System anfragen",
   "google-ads-setup": "Google Ads Start anfragen",
   betreuung: "Betreuung & Optimierung anfragen",
   "single-update": "Einzelne Anpassung anfragen",
@@ -182,6 +187,30 @@ function normalizedWebsite(value: string): string {
   return /^https?:\/\//i.test(candidate) ? candidate : `https://${candidate}`;
 }
 
+function sourceMetadata(entryPoint: string) {
+  const searchParams = new URLSearchParams(window.location.search);
+  let referrerHost = "";
+
+  if (document.referrer) {
+    try {
+      referrerHost = new URL(document.referrer).hostname;
+    } catch {
+      // Ignore malformed or browser-filtered referrers.
+    }
+  }
+
+  return {
+    entryPoint,
+    landingPath: window.location.pathname,
+    referrerHost,
+    utmSource: searchParams.get("utm_source")?.trim() ?? "",
+    utmMedium: searchParams.get("utm_medium")?.trim() ?? "",
+    utmCampaign: searchParams.get("utm_campaign")?.trim() ?? "",
+    utmTerm: searchParams.get("utm_term")?.trim() ?? "",
+    utmContent: searchParams.get("utm_content")?.trim() ?? "",
+  };
+}
+
 function validate(state: FormState): Errors {
   const errors: Errors = {};
   const isFreeCheck = state.serviceId === freeCheckServiceId;
@@ -196,6 +225,15 @@ function validate(state: FormState): Errors {
       "Bitte wählen Sie den schriftlichen oder persönlichen Check.";
   }
 
+  if (isLeadServiceId(state.serviceId)) {
+    if (!state.serviceFocus.trim()) {
+      errors.serviceFocus = "Bitte nennen Sie Ihre wichtigste Leistung.";
+    }
+    if (!state.serviceArea.trim()) {
+      errors.serviceArea = "Bitte nennen Sie Ihr Einsatzgebiet.";
+    }
+  }
+
   if (isFreeCheck && state.auditType === "written") {
     if (!websiteLooksValid(state.url)) {
       errors.url = "Bitte geben Sie eine gültige Website-Adresse ein.";
@@ -203,10 +241,7 @@ function validate(state: FormState): Errors {
     if (!state.name.trim()) {
       errors.name = "Bitte geben Sie Ihren Namen ein.";
     }
-    if (
-      state.contactMethod !== "whatsapp" &&
-      state.contactMethod !== "email"
-    ) {
+    if (state.contactMethod !== "whatsapp" && state.contactMethod !== "email") {
       errors.contactMethod = "Bitte wählen Sie WhatsApp oder E-Mail.";
     }
     if (!state.contact.trim()) {
@@ -279,7 +314,10 @@ function payloadFor(state: FormState) {
     name: state.name.trim(),
     contact: state.contact.trim(),
     url: state.url ? normalizedWebsite(state.url) : "",
-    adService: state.company.trim(),
+    company: state.company.trim(),
+    serviceFocus: state.serviceFocus.trim(),
+    serviceArea: state.serviceArea.trim(),
+    adService: "",
     neededService: selectedService?.label ?? "",
     problem: state.problem.trim(),
     budget: "",
@@ -292,9 +330,9 @@ function payloadFor(state: FormState) {
         : "",
     visitWindow:
       isFreeCheck && state.auditType === "onsite"
-        ? selectedVisitWindow?.label ?? ""
+        ? (selectedVisitWindow?.label ?? "")
         : "",
-    projectDetail: isFreeCheck ? "" : selectedProjectOption?.label ?? "",
+    projectDetail: isFreeCheck ? "" : (selectedProjectOption?.label ?? ""),
   };
 }
 
@@ -305,6 +343,7 @@ export function ContactForm() {
     "idle" | "loading" | "success" | "error"
   >("idle");
   const startedRef = useRef(false);
+  const submissionIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const handler = (event: Event) => {
@@ -321,6 +360,7 @@ export function ContactForm() {
       }));
       setErrors({});
       setStatus("idle");
+      submissionIdRef.current = null;
     };
 
     window.addEventListener("lp:select-service", handler);
@@ -367,6 +407,7 @@ export function ContactForm() {
     }));
     setErrors({});
     setStatus("idle");
+    submissionIdRef.current = null;
     track("form_service_select", { service: serviceId });
   };
 
@@ -385,6 +426,8 @@ export function ContactForm() {
       "contact",
       "company",
       "url",
+      "serviceFocus",
+      "serviceArea",
       "visitLocation",
       "visitWindow",
       "problem",
@@ -427,9 +470,18 @@ export function ContactForm() {
     }
 
     setStatus("loading");
+    const submissionId =
+      submissionIdRef.current ?? window.crypto.randomUUID();
+    submissionIdRef.current = submissionId;
+
     try {
       const endpoint = siteConfig.form.endpoint;
-      const payload = payloadFor(state);
+      const payload = {
+        ...payloadFor(state),
+        submissionId,
+        submissionType: "lead_form",
+        ...sourceMetadata("contact_form"),
+      };
       if (endpoint) {
         const response = await fetch(endpoint, {
           method: "POST",
@@ -450,11 +502,27 @@ export function ContactForm() {
         audit_type: state.auditType || undefined,
         contact_method: state.contactMethod || undefined,
         demo: !endpoint,
+        transaction_id: submissionId,
       });
       reportAdsConversion({
         service: state.serviceId,
         audit_type: state.auditType || undefined,
+        transaction_id: submissionId,
       });
+      submissionIdRef.current = null;
+      try {
+        window.sessionStorage.setItem(
+          "ixa_form_success",
+          JSON.stringify({
+            createdAt: Date.now(),
+            serviceId: state.serviceId,
+            auditType: state.auditType,
+          }),
+        );
+      } catch {
+        // The inline success state remains available if storage is blocked.
+      }
+      window.setTimeout(() => window.location.assign("/danke"), 180);
     } catch {
       setStatus("error");
       track("form_submit_error", {
@@ -467,15 +535,15 @@ export function ContactForm() {
 
   const headingTitle = selectedService
     ? isFreeCheck
-      ? "Kostenlosen Website-Check starten"
-      : serviceHeadingTitles[selectedService.id] ?? "Leistung anfragen"
+      ? "Anfrage-Potenzial kostenlos prüfen"
+      : (serviceHeadingTitles[selectedService.id] ?? "Leistung anfragen")
     : "Womit möchten Sie starten?";
 
   const headingDescription = isFreeCheck
-    ? "Wählen Sie im Formular zwischen einer schriftlichen Einschätzung innerhalb von 24 Stunden und einem persönlichen 30-Minuten-Termin bei Ihnen in Nürnberg."
+    ? "Wählen Sie zwischen einer schriftlichen Potenzialanalyse in weniger als 24 Stunden und einem persönlichen 30-Minuten-Termin bei Ihnen in Nürnberg."
     : selectedService
       ? "Ihre Auswahl ist bereits übernommen. Ergänzen Sie nur noch die wichtigsten Angaben zu Ihrem Vorhaben."
-      : "Wählen Sie den kostenlosen Website-Check oder direkt die Leistung, die zu Ihrem Vorhaben passt.";
+      : "Wählen Sie die kostenlose Potenzialanalyse oder direkt die Leistung, die zu Ihrem Vorhaben passt.";
 
   return (
     <section
@@ -492,16 +560,15 @@ export function ContactForm() {
         <Reveal delay={80} className="mx-auto mt-10 max-w-2xl">
           <div className="card-soft p-5 sm:p-8">
             <div className="mb-6 grid gap-3 min-[360px]:grid-cols-2">
-              <a
-                href={siteConfig.contact.phoneHref}
-                onClick={() =>
-                  track("phone_click", { location: "contact_form" })
-                }
-                className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
-              >
-                <Phone className="size-4" aria-hidden="true" />
-                Direkt anrufen
-              </a>
+              <CallbackRequestDialog location="contact_form">
+                <button
+                  type="button"
+                  className="focus-ring inline-flex min-h-12 items-center justify-center gap-2 rounded-xl border border-stone-200 bg-white px-3 text-sm font-semibold text-navy shadow-sm transition-colors hover:border-primary/40 hover:text-primary"
+                >
+                  <Phone className="size-4" aria-hidden="true" />
+                  Rückruf / Anruf
+                </button>
+              </CallbackRequestDialog>
               <a
                 href={buildWhatsappUrl()}
                 target="_blank"
@@ -560,7 +627,7 @@ export function ContactForm() {
                       className="space-y-3 rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                     >
                       <legend className="text-sm font-semibold text-navy">
-                        Wie möchten Sie Ihren kostenlosen Check erhalten?
+                        Wie möchten Sie Ihre kostenlose Analyse erhalten?
                         <span className="ml-1 text-stamp">*</span>
                       </legend>
                       <div className="grid gap-3 sm:grid-cols-2">
@@ -569,8 +636,8 @@ export function ContactForm() {
                           checked={state.auditType === "written"}
                           onChange={() => chooseAuditType("written")}
                           icon={<FileText className="size-5" />}
-                          title="Schriftlicher 3-Punkte-Check"
-                          description="Innerhalb von 24 Stunden an jedem Wochentag per WhatsApp oder E-Mail."
+                          title="Schriftliche Potenzialanalyse"
+                          description="In weniger als 24 Stunden an jedem Wochentag per WhatsApp oder E-Mail."
                           badge="Empfohlen"
                         />
                         <AuditTypeCard
@@ -578,7 +645,7 @@ export function ContactForm() {
                           checked={state.auditType === "onsite"}
                           onChange={() => chooseAuditType("onsite")}
                           icon={<MapPin className="size-5" />}
-                          title="30-Minuten-Vor-Ort-Check"
+                          title="30-Minuten-Analyse vor Ort"
                           description="Bei Ihnen im Unternehmen in Nürnberg. Termin nach persönlicher Bestätigung."
                         />
                       </div>
@@ -614,6 +681,13 @@ export function ContactForm() {
                           />
                         </Field>
 
+                        <BusinessScopeFields
+                          serviceFocus={state.serviceFocus}
+                          serviceArea={state.serviceArea}
+                          errors={errors}
+                          onChange={update}
+                        />
+
                         <Field
                           id="field-name"
                           label="Ihr Name"
@@ -646,7 +720,7 @@ export function ContactForm() {
                           className="space-y-2 rounded-xl focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/60"
                         >
                           <legend className="text-sm font-semibold text-navy">
-                            Wohin darf ich den Check senden?
+                            Wohin darf ich die Analyse senden?
                             <span className="ml-1 text-stamp">*</span>
                           </legend>
                           <div className="grid grid-cols-2 gap-3">
@@ -654,9 +728,7 @@ export function ContactForm() {
                               name="contact-method"
                               value="whatsapp"
                               checked={state.contactMethod === "whatsapp"}
-                              onChange={() =>
-                                chooseContactMethod("whatsapp")
-                              }
+                              onChange={() => chooseContactMethod("whatsapp")}
                               icon={<MessageCircle className="size-4" />}
                               label="WhatsApp"
                             />
@@ -705,10 +777,14 @@ export function ContactForm() {
                                   : "+49 …"
                               }
                               autoComplete={
-                                state.contactMethod === "email" ? "email" : "tel"
+                                state.contactMethod === "email"
+                                  ? "email"
+                                  : "tel"
                               }
                               inputMode={
-                                state.contactMethod === "email" ? "email" : "tel"
+                                state.contactMethod === "email"
+                                  ? "email"
+                                  : "tel"
                               }
                               aria-invalid={!!errors.contact}
                               aria-describedby={
@@ -741,7 +817,7 @@ export function ContactForm() {
                     {state.auditType === "onsite" && (
                       <div className="space-y-5 rounded-2xl border border-navy/10 bg-stone-50/70 p-4 sm:p-5">
                         <div className="rounded-xl border border-primary/15 bg-primary/[0.04] px-4 py-3 text-sm leading-relaxed text-stone-600">
-                          Der kostenlose Vor-Ort-Check ist für Unternehmen
+                          Die kostenlose Vor-Ort-Analyse ist für Unternehmen
                           innerhalb Nürnbergs. Den genauen Termin bestätige ich
                           persönlich.
                         </div>
@@ -790,6 +866,13 @@ export function ContactForm() {
                             />
                           </Field>
                         </div>
+
+                        <BusinessScopeFields
+                          serviceFocus={state.serviceFocus}
+                          serviceArea={state.serviceArea}
+                          errors={errors}
+                          onChange={update}
+                        />
 
                         <div className="grid gap-5 sm:grid-cols-2">
                           <Field
@@ -893,9 +976,7 @@ export function ContactForm() {
                             rows={3}
                             aria-invalid={!!errors.problem}
                             aria-describedby={
-                              errors.problem
-                                ? "field-problem-error"
-                                : undefined
+                              errors.problem ? "field-problem-error" : undefined
                             }
                           />
                         </Field>
@@ -949,12 +1030,15 @@ export function ContactForm() {
                       </Field>
                     </div>
 
+                    <BusinessScopeFields
+                      serviceFocus={state.serviceFocus}
+                      serviceArea={state.serviceArea}
+                      errors={errors}
+                      onChange={update}
+                    />
+
                     <div className="grid gap-5 sm:grid-cols-2">
-                      <Field
-                        id="field-company"
-                        label="Unternehmen"
-                        optional
-                      >
+                      <Field id="field-company" label="Unternehmen" optional>
                         <Input
                           id="field-company"
                           value={state.company}
@@ -1053,8 +1137,8 @@ export function ContactForm() {
                             <span>
                               {isFreeCheck
                                 ? state.auditType === "onsite"
-                                  ? "Kostenlosen Vor-Ort-Check anfragen"
-                                  : "Schriftlichen Website-Check anfordern"
+                                  ? "Kostenlose Vor-Ort-Analyse anfragen"
+                                  : "Potenzialanalyse kostenlos anfordern"
                                 : "Anfrage zu dieser Leistung senden"}
                             </span>
                           </>
@@ -1144,6 +1228,58 @@ function AuditTypeCard({
         {description}
       </span>
     </label>
+  );
+}
+
+function BusinessScopeFields({
+  serviceFocus,
+  serviceArea,
+  errors,
+  onChange,
+}: {
+  serviceFocus: string;
+  serviceArea: string;
+  errors: Errors;
+  onChange: (key: keyof FormState, value: string) => void;
+}) {
+  return (
+    <div className="grid gap-5 sm:grid-cols-2">
+      <Field
+        id="field-serviceFocus"
+        label="Ihre wichtigste Leistung"
+        error={errors.serviceFocus}
+        required
+      >
+        <Input
+          id="field-serviceFocus"
+          value={serviceFocus}
+          onChange={(event) => onChange("serviceFocus", event.target.value)}
+          placeholder="z. B. Rohrreinigung"
+          aria-invalid={!!errors.serviceFocus}
+          aria-describedby={
+            errors.serviceFocus ? "field-serviceFocus-error" : undefined
+          }
+        />
+      </Field>
+      <Field
+        id="field-serviceArea"
+        label="Ihr Einsatzgebiet"
+        error={errors.serviceArea}
+        required
+      >
+        <Input
+          id="field-serviceArea"
+          value={serviceArea}
+          onChange={(event) => onChange("serviceArea", event.target.value)}
+          placeholder="z. B. Nürnberg + 30 km"
+          autoComplete="address-level2"
+          aria-invalid={!!errors.serviceArea}
+          aria-describedby={
+            errors.serviceArea ? "field-serviceArea-error" : undefined
+          }
+        />
+      </Field>
+    </div>
   );
 }
 
@@ -1294,8 +1430,7 @@ function SuccessState({
     serviceId === freeCheckServiceId && auditType === "onsite";
 
   return (
-    <div
-      role="status"
+    <output
       aria-live="polite"
       className="flex flex-col items-center py-8 text-center"
     >
@@ -1304,14 +1439,14 @@ function SuccessState({
       </span>
       <h3 className="mt-5 text-xl font-bold text-navy">
         {isWrittenCheck
-          ? "Ihr Website-Check ist angefragt"
+          ? "Ihre Potenzialanalyse ist angefragt"
           : isOnsiteCheck
             ? "Ihre Terminanfrage ist eingegangen"
             : "Ihre Anfrage ist eingegangen"}
       </h3>
       <p className="mt-2 max-w-md text-[15px] leading-relaxed text-stone-600">
         {isWrittenCheck
-          ? "Sie erhalten Ihre kurze schriftliche Einschätzung innerhalb von 24 Stunden – an jedem Wochentag."
+          ? "Ich prüfe Leistung, Region und Kontaktweg. Ihre kurze schriftliche Einschätzung erhalten Sie in weniger als 24 Stunden."
           : isOnsiteCheck
             ? "Ich prüfe Ihre Angaben und melde mich persönlich, um den genauen Termin in Nürnberg zu bestätigen."
             : "Ich prüfe Ihre Angaben und melde mich, um den passenden nächsten Schritt mit Ihnen zu klären."}
@@ -1321,6 +1456,6 @@ function SuccessState({
           Demo-Modus: Es wurden keine Daten tatsächlich gesendet.
         </p>
       )}
-    </div>
+    </output>
   );
 }

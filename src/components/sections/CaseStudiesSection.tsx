@@ -1,3 +1,11 @@
+import { FrankenEvidencePost } from "@/components/case-studies/FrankenEvidencePost";
+import {
+  type ContactMethodKey,
+  type DocumentedCaseEvidence,
+  documentedCases,
+  portfolioEvidence,
+  projectLinks,
+} from "@/data/evidence";
 import type { LucideIcon } from "lucide-react";
 import {
   CalendarDays,
@@ -8,14 +16,6 @@ import {
   MessageCircle,
   Phone,
 } from "lucide-react";
-import { FrankenEvidencePost } from "@/components/case-studies/FrankenEvidencePost";
-import {
-  documentedCases,
-  portfolioEvidence,
-  projectLinks,
-  type ContactMethodKey,
-  type DocumentedCaseEvidence,
-} from "@/data/evidence";
 
 const numberFormatter = new Intl.NumberFormat("de-DE");
 
@@ -234,8 +234,9 @@ export function CaseStudiesSection() {
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
             Bei Franken Autoankauf 24 wurden Formular, Telefon und WhatsApp
-            zusammengeführt und getrennt dokumentiert. Das wichtigste Ergebnis
-            und der anonymisierte Originalauszug stehen direkt hier.
+            zusammengeführt und getrennt dokumentiert. Belegt sind eingegangene
+            Kontaktaktionen – nicht behauptete Aufträge oder Umsätze. Der
+            anonymisierte Originalauszug steht direkt hier.
           </p>
         </div>
 

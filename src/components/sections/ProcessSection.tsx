@@ -1,27 +1,22 @@
-import { Activity, Compass, Rocket, Wrench } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { SectionHeading } from "@/components/section-heading";
+import { Activity, Compass, Wrench } from "lucide-react";
 
 const steps = [
   {
     icon: Compass,
-    title: "Analyse",
+    title: "Ausgangslage verstehen",
     text: "Angebot, Region, Wettbewerb, bestehende Daten und der echte Weg Ihrer Kunden.",
   },
   {
     icon: Wrench,
-    title: "Aufbau",
+    title: "Anfrage-System aufbauen",
     text: "Website, Botschaft, lokale Seiten und Kontaktwege werden als ein System umgesetzt.",
   },
   {
     icon: Activity,
-    title: "Messung",
-    text: "Formular, Telefon und WhatsApp erhalten getrennte Events und eine saubere Lead-Erfassung.",
-  },
-  {
-    icon: Rocket,
-    title: "Optimierung",
-    text: "Wir verbessern auf Basis echter Kontakte – nicht aufgrund von Bauchgefühl oder Klickzahlen.",
+    title: "Messen und verbessern",
+    text: "Formular, Telefon und WhatsApp werden getrennt erfasst. Wir verbessern auf Basis echter Kontakte.",
   },
 ];
 
@@ -34,11 +29,11 @@ export function ProcessSection() {
       <div className="container-lp">
         <SectionHeading
           eyebrow="Zusammenarbeit"
-          title="Vier klare Schritte. Ein direkter Ansprechpartner."
+          title="Drei klare Schritte. Ein direkter Ansprechpartner."
           description="Sie wissen jederzeit, was als Nächstes passiert."
         />
 
-        <ol className="mt-9 grid gap-3 md:grid-cols-2 lg:grid-cols-4">
+        <ol className="mt-9 grid gap-3 md:grid-cols-3">
           {steps.map((step, index) => {
             const Icon = step.icon;
             return (

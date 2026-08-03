@@ -1,8 +1,8 @@
-import { ArrowRight, Check, MapPin } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton, WhatsappLink } from "@/components/cta";
 import { documentedCases } from "@/data/evidence";
 import { freeCheckServiceId } from "@/data/site";
+import { ArrowRight, Check, MapPin } from "lucide-react";
 
 const featuredCase =
   documentedCases.find((study) => study.featured) ?? documentedCases[0];
@@ -34,23 +34,24 @@ export function Hero() {
                 className="size-3.5 text-success-300"
                 aria-hidden="true"
               />
-              Kundengewinnung für Nürnberg & Franken
+              Für lokale Dienstleister in Nürnberg & Franken
             </span>
           </Reveal>
 
           <Reveal immediate>
             <h1 className="mt-6 max-w-3xl text-[2.35rem] font-bold leading-[1.04] tracking-[-0.045em] text-white sm:text-[3.3rem] lg:text-[4.25rem]">
-              Mehr messbare Anfragen.
+              Aus Google-Suchen werden Kontaktanfragen.
               <span className="mt-1 block text-white/50">
-                Weniger digitales Rätselraten.
+                Und Sie sehen, woher sie kommen.
               </span>
             </h1>
           </Reveal>
 
           <Reveal immediate>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
-              Ich verbinde Ihre Website, Google und klare Kontaktwege zu einem
-              System, das Anrufe, WhatsApp und Formulare sichtbar macht.
+              Für Betriebe, deren Kunden bereits nach einer konkreten Leistung
+              suchen: Website, Google Ads und Kontaktmessung als ein klares
+              System.
             </p>
           </Reveal>
 
@@ -64,7 +65,7 @@ export function Hero() {
                 icon={<ArrowRight className="order-last" />}
                 className="h-auto min-h-14 w-full whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-14 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-0 sm:text-base"
               >
-                Kostenlosen Website-Check starten
+                Anfrage-Potenzial kostenlos prüfen
               </CtaButton>
               <WhatsappLink
                 location="hero_secondary"
@@ -72,21 +73,21 @@ export function Hero() {
                 size="xl"
                 className="w-full border border-white/10 bg-white/10 text-white shadow-none hover:bg-white/15 sm:w-auto"
               >
-                Direkt per WhatsApp
+                Frage per WhatsApp senden
               </WhatsappLink>
             </div>
             <p className="mt-3 max-w-xl text-xs leading-relaxed text-white/55 sm:text-sm">
-              Klare Einschätzung innerhalb von 24 Stunden – kostenlos und
-              unverbindlich.
+              Schriftlich in weniger als 24 Stunden oder persönlich bei Ihnen in
+              Nürnberg – kostenlos und unverbindlich.
             </p>
           </Reveal>
 
           <Reveal immediate>
             <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/65">
               {[
-                "Direkter Ansprechpartner",
-                "Mobile zuerst",
-                "Daten dokumentiert",
+                "Für lokale Dienstleister",
+                "Für Mobilgeräte gebaut",
+                "Kontaktwege getrennt messbar",
               ].map((item) => (
                 <li key={item} className="flex items-center gap-2">
                   <span className="grid size-5 shrink-0 place-items-center rounded-full bg-success-400/15 text-success-300">

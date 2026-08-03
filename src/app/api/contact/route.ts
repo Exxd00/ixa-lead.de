@@ -1,26 +1,29 @@
-import { NextResponse } from "next/server";
 import {
+  callbackService,
   freeCheckServiceId,
   leadServiceOptions,
 } from "@/data/site";
-
-/* =====================================================================
-   Kontakt-Endpoint — IXA-Leads
-   Nimmt Formular-Anfragen entgegen, validiert sie und leitet sie – wenn
-   konfiguriert – per Webhook automatisch weiter (z. B. an Google Sheets,
-   Zapier oder Make). Ohne Webhook wird keine Anfrage als erfolgreich bestätigt.
-
-   Live schalten:
-   - LEAD_WEBHOOK_URL setzen (Zapier/Make/Google-Apps-Script Webhook), damit
-     Leads automatisch in Google Sheets & Co. landen (Lead-Automation).
-   ===================================================================== */
+import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const SCHEMA_VERSION = 1 as const;
+const SOURCE = "ixa-leads.de";
+const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const PHONE_PATTERN = /^[+\d][\d\s()./-]*$/;
+
 const payloadKeys = [
+  "submissionId",
+  "submissionType",
+  "entryPoint",
   "name",
   "contact",
   "url",
+  "company",
+  "serviceFocus",
+  "serviceArea",
   "adService",
   "neededService",
   "problem",
@@ -31,22 +34,69 @@ const payloadKeys = [
   "visitLocation",
   "visitWindow",
   "projectDetail",
+  "branch",
+  "capacity",
+  "orderValueRange",
+  "adBudgetReadiness",
+  "startTiming",
+  "landingPath",
+  "referrerHost",
+  "utmSource",
+  "utmMedium",
+  "utmCampaign",
+  "utmTerm",
+  "utmContent",
 ] as const;
 
-type Payload = {
-  name?: string;
-  contact?: string;
-  url?: string;
-  adService?: string;
-  neededService?: string;
-  problem?: string;
-  budget?: string;
-  serviceId?: string;
-  auditType?: string;
-  contactMethod?: string;
-  visitLocation?: string;
-  visitWindow?: string;
-  projectDetail?: string;
+type PayloadKey = (typeof payloadKeys)[number];
+type Payload = Partial<Record<PayloadKey, string>>;
+
+type Lead = Payload & {
+  submissionId: string;
+  submissionType: "callback" | "lead_form";
+  schemaVersion: typeof SCHEMA_VERSION;
+  source: typeof SOURCE;
+  receivedAt: string;
+};
+
+type SheetResponse = {
+  ok: true;
+  duplicate: boolean;
+  submissionId: string;
+};
+
+const fieldLimits: Partial<Record<PayloadKey, number>> = {
+  submissionId: 36,
+  submissionType: 32,
+  entryPoint: 160,
+  name: 160,
+  contact: 320,
+  url: 2_000,
+  company: 240,
+  serviceFocus: 500,
+  serviceArea: 500,
+  adService: 500,
+  neededService: 500,
+  problem: 2_000,
+  budget: 500,
+  serviceId: 100,
+  auditType: 40,
+  contactMethod: 40,
+  visitLocation: 500,
+  visitWindow: 500,
+  projectDetail: 2_000,
+  branch: 240,
+  capacity: 500,
+  orderValueRange: 500,
+  adBudgetReadiness: 500,
+  startTiming: 500,
+  landingPath: 1_000,
+  referrerHost: 255,
+  utmSource: 500,
+  utmMedium: 500,
+  utmCampaign: 500,
+  utmTerm: 500,
+  utmContent: 500,
 };
 
 function normalizeWebsite(value: string): string | null {
@@ -59,6 +109,8 @@ function normalizeWebsite(value: string): string | null {
     );
     if (
       (parsed.protocol !== "http:" && parsed.protocol !== "https:") ||
+      parsed.username ||
+      parsed.password ||
       !parsed.hostname.includes(".")
     ) {
       return null;
@@ -66,6 +118,195 @@ function normalizeWebsite(value: string): string | null {
     return parsed.toString();
   } catch {
     return null;
+  }
+}
+
+function isEmail(value: string): boolean {
+  return value.length <= 254 && EMAIL_PATTERN.test(value);
+}
+
+function isPhone(value: string): boolean {
+  const digits = value.replace(/\D/g, "");
+  return (
+    value.length <= 50 &&
+    PHONE_PATTERN.test(value) &&
+    digits.length >= 6 &&
+    digits.length <= 20
+  );
+}
+
+function isContact(value: string): boolean {
+  return isEmail(value) || isPhone(value);
+}
+
+function isSheetResponse(
+  value: unknown,
+  submissionId: string,
+): value is SheetResponse {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+  const response = value as Record<string, unknown>;
+  return (
+    response.ok === true &&
+    typeof response.duplicate === "boolean" &&
+    response.submissionId === submissionId
+  );
+}
+
+function safeErrorLog(event: string, detail?: string | number) {
+  // Intentionally never log the lead, webhook URL, response body, or secrets.
+  if (detail === undefined) {
+    console.error(`[contact] ${event}`);
+    return;
+  }
+  console.error(`[contact] ${event}`, detail);
+}
+
+async function forwardToSheet(
+  webhookUrl: string,
+  webhookSecret: string,
+  lead: Lead,
+): Promise<boolean> {
+  try {
+    const response = await fetch(webhookUrl, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ...lead, _secret: webhookSecret }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(10_000),
+    });
+
+    if (!response.ok) {
+      safeErrorLog("sheet_http_error", response.status);
+      return false;
+    }
+
+    let result: unknown;
+    try {
+      result = await response.json();
+    } catch {
+      safeErrorLog("sheet_invalid_json");
+      return false;
+    }
+
+    if (!isSheetResponse(result, lead.submissionId)) {
+      safeErrorLog("sheet_invalid_acknowledgement");
+      return false;
+    }
+
+    // Both a newly written row and an acknowledged duplicate are successful.
+    return true;
+  } catch {
+    safeErrorLog("sheet_request_failed");
+    return false;
+  }
+}
+
+const notificationFields: Array<[keyof Lead, string]> = [
+  ["submissionId", "Eingang-ID"],
+  ["receivedAt", "Empfangen (UTC)"],
+  ["submissionType", "Formulartyp"],
+  ["serviceId", "Leistung-ID"],
+  ["neededService", "Gewünschte Leistung"],
+  ["branch", "Branche"],
+  ["auditType", "Analyse-Art"],
+  ["contactMethod", "Kontaktweg"],
+  ["name", "Name"],
+  ["contact", "Kontakt"],
+  ["company", "Unternehmen"],
+  ["url", "Website"],
+  ["serviceFocus", "Hauptleistung"],
+  ["serviceArea", "Einsatzgebiet"],
+  ["adService", "Bestehende Werbung"],
+  ["budget", "Budget"],
+  ["capacity", "Freie Kapazität"],
+  ["orderValueRange", "Auftragswert"],
+  ["adBudgetReadiness", "Werbebudget"],
+  ["startTiming", "Startzeitpunkt"],
+  ["visitLocation", "Termin-Ort"],
+  ["visitWindow", "Terminwunsch"],
+  ["projectDetail", "Projektsituation"],
+  ["problem", "Anliegen"],
+  ["entryPoint", "Einstieg"],
+  ["landingPath", "Landingpage"],
+  ["referrerHost", "Referrer"],
+  ["utmSource", "UTM Source"],
+  ["utmMedium", "UTM Medium"],
+  ["utmCampaign", "UTM Campaign"],
+  ["utmTerm", "UTM Term"],
+  ["utmContent", "UTM Content"],
+];
+
+function escapeHtml(value: string): string {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function notificationContent(lead: Lead) {
+  const fields = notificationFields.flatMap(([key, label]) => {
+    const value = lead[key];
+    return typeof value === "string" && value ? [[label, value] as const] : [];
+  });
+  const text = [
+    "Neue Anfrage über ixa-leads.de",
+    "",
+    ...fields.map(([label, value]) => `${label}: ${value}`),
+  ].join("\n");
+  const rows = fields
+    .map(
+      ([label, value]) =>
+        `<tr><th align="left" style="padding:8px 12px;border-bottom:1px solid #e7e5e4">${escapeHtml(label)}</th><td style="padding:8px 12px;border-bottom:1px solid #e7e5e4;white-space:pre-wrap">${escapeHtml(value)}</td></tr>`,
+    )
+    .join("");
+
+  return {
+    text,
+    html: `<div style="font-family:Arial,sans-serif;color:#172033"><h1 style="font-size:20px">Neue Anfrage über ixa-leads.de</h1><table style="border-collapse:collapse;width:100%;max-width:760px">${rows}</table></div>`,
+  };
+}
+
+async function sendLeadNotification(lead: Lead): Promise<void> {
+  const apiKey = process.env.RESEND_API_KEY?.trim();
+  const from = process.env.RESEND_FROM_EMAIL?.trim();
+  const to = process.env.LEAD_NOTIFICATION_EMAIL?.trim();
+
+  if (!apiKey || !from || !to) {
+    safeErrorLog("resend_not_configured");
+    return;
+  }
+
+  const content = notificationContent(lead);
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "Idempotency-Key": `lead-notification/${lead.submissionId}`,
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject: "Neue Anfrage über ixa-leads.de",
+        text: content.text,
+        html: content.html,
+      }),
+      cache: "no-store",
+      signal: AbortSignal.timeout(5_000),
+    });
+
+    if (!response.ok) {
+      safeErrorLog("resend_http_error", response.status);
+    }
+  } catch {
+    // The lead is already stored. Notification errors must not fail the form.
+    safeErrorLog("resend_request_failed");
   }
 }
 
@@ -105,9 +346,29 @@ export async function POST(request: Request) {
       .map((key) => [key, (raw[key] as string).trim()]),
   ) as Payload;
 
-  const selectedService = leadServiceOptions.find(
-    (service) => service.id === data.serviceId,
-  );
+  const oversizedField = payloadKeys.some((key) => {
+    const value = data[key];
+    const limit = fieldLimits[key] ?? 2_000;
+    return value !== undefined && value.length > limit;
+  });
+  if (oversizedField) {
+    return NextResponse.json(
+      { ok: false, error: "payload_too_large" },
+      { status: 413 },
+    );
+  }
+
+  if (!data.submissionId || !UUID_V4_PATTERN.test(data.submissionId)) {
+    return NextResponse.json(
+      { ok: false, error: "invalid_submission_id" },
+      { status: 422 },
+    );
+  }
+
+  const isCallback = data.serviceId === callbackService.id;
+  const selectedService = isCallback
+    ? callbackService
+    : leadServiceOptions.find((service) => service.id === data.serviceId);
   if (!selectedService) {
     return NextResponse.json(
       { ok: false, error: "invalid_service" },
@@ -115,7 +376,7 @@ export async function POST(request: Request) {
     );
   }
 
-  if (!data.name || !data.contact) {
+  if (!data.contact || (!isCallback && !data.name)) {
     return NextResponse.json(
       { ok: false, error: "missing_contact_fields" },
       { status: 422 },
@@ -134,7 +395,42 @@ export async function POST(request: Request) {
   }
 
   const isFreeCheck = data.serviceId === freeCheckServiceId;
-  if (isFreeCheck) {
+  if (isCallback) {
+    if (!isPhone(data.contact)) {
+      return NextResponse.json(
+        { ok: false, error: "invalid_phone" },
+        { status: 422 },
+      );
+    }
+
+    data.submissionType = "callback";
+    data.entryPoint ||= "callback";
+    data.url = "";
+    data.company = "";
+    data.serviceFocus = "";
+    data.serviceArea = "";
+    data.adService = "";
+    data.problem = "";
+    data.budget = "";
+    data.auditType = "";
+    data.contactMethod = "phone";
+    data.visitLocation = "";
+    data.visitWindow = "";
+    data.projectDetail = "";
+    data.branch = "";
+    data.capacity = "";
+    data.orderValueRange = "";
+    data.adBudgetReadiness = "";
+    data.startTiming = "";
+  } else if (!data.serviceFocus || !data.serviceArea) {
+    return NextResponse.json(
+      { ok: false, error: "missing_business_scope" },
+      { status: 422 },
+    );
+  } else if (isFreeCheck) {
+    data.submissionType = "lead_form";
+    data.entryPoint ||= "contact_form";
+
     if (data.auditType !== "written" && data.auditType !== "onsite") {
       return NextResponse.json(
         { ok: false, error: "invalid_audit_type" },
@@ -149,12 +445,18 @@ export async function POST(request: Request) {
           { status: 422 },
         );
       }
-      if (
-        data.contactMethod !== "whatsapp" &&
-        data.contactMethod !== "email"
-      ) {
+      if (data.contactMethod !== "whatsapp" && data.contactMethod !== "email") {
         return NextResponse.json(
           { ok: false, error: "invalid_contact_method" },
+          { status: 422 },
+        );
+      }
+      if (
+        (data.contactMethod === "email" && !isEmail(data.contact)) ||
+        (data.contactMethod === "whatsapp" && !isPhone(data.contact))
+      ) {
+        return NextResponse.json(
+          { ok: false, error: "invalid_contact" },
           { status: 422 },
         );
       }
@@ -165,7 +467,7 @@ export async function POST(request: Request) {
       data.projectDetail = "";
     } else {
       if (
-        !data.adService ||
+        !data.company ||
         !data.visitLocation ||
         !data.visitWindow ||
         !data.problem
@@ -175,11 +477,26 @@ export async function POST(request: Request) {
           { status: 422 },
         );
       }
+      if (!isPhone(data.contact)) {
+        return NextResponse.json(
+          { ok: false, error: "invalid_phone" },
+          { status: 422 },
+        );
+      }
 
       data.contactMethod = "phone";
       data.projectDetail = "";
     }
   } else {
+    data.submissionType = "lead_form";
+    data.entryPoint ||= "contact_form";
+
+    if (!isContact(data.contact)) {
+      return NextResponse.json(
+        { ok: false, error: "invalid_contact" },
+        { status: 422 },
+      );
+    }
     if (!data.projectDetail || !data.problem) {
       return NextResponse.json(
         { ok: false, error: "missing_project_details" },
@@ -195,59 +512,34 @@ export async function POST(request: Request) {
 
   data.neededService = selectedService.label;
 
-  const fields = [
-    data.name,
-    data.contact,
-    data.url,
-    data.adService,
-    data.neededService,
-    data.problem,
-    data.budget,
-    data.serviceId,
-    data.auditType,
-    data.contactMethod,
-    data.visitLocation,
-    data.visitWindow,
-    data.projectDetail,
-  ];
-  if (fields.some((value) => value && value.length > 2_000)) {
-    return NextResponse.json(
-      { ok: false, error: "payload_too_large" },
-      { status: 413 },
-    );
-  }
-
-  const lead = {
+  const lead: Lead = {
     ...data,
-    source: "ixa-leads.de",
+    submissionId: data.submissionId,
+    submissionType: isCallback ? "callback" : "lead_form",
+    schemaVersion: SCHEMA_VERSION,
+    source: SOURCE,
     receivedAt: new Date().toISOString(),
   };
 
-  // Optionaler Webhook (Lead-Automation → Google Sheets / Zapier / Make)
-  const webhook = process.env.LEAD_WEBHOOK_URL;
-  if (!webhook) {
-    console.error("[contact] LEAD_WEBHOOK_URL ist nicht konfiguriert.");
+  const webhookUrl = process.env.LEAD_WEBHOOK_URL?.trim();
+  const webhookSecret = process.env.LEAD_WEBHOOK_SECRET?.trim();
+  if (!webhookUrl || !webhookSecret) {
+    safeErrorLog("sheet_not_configured");
     return NextResponse.json(
       { ok: false, error: "form_not_configured" },
       { status: 503 },
     );
   }
 
-  try {
-    const res = await fetch(webhook, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(lead),
-      signal: AbortSignal.timeout(10_000),
-    });
-    if (!res.ok) throw new Error(`webhook_status_${res.status}`);
-  } catch (err) {
-    console.error("[contact] Webhook-Weiterleitung fehlgeschlagen:", err);
+  const saved = await forwardToSheet(webhookUrl, webhookSecret, lead);
+  if (!saved) {
     return NextResponse.json(
       { ok: false, error: "forwarding_failed" },
       { status: 502 },
     );
   }
 
-  return NextResponse.json({ ok: true });
+  await sendLeadNotification(lead);
+
+  return NextResponse.json({ ok: true, submissionId: lead.submissionId });
 }

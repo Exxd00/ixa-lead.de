@@ -1,14 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { MessageCircle, Phone } from "lucide-react";
+import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
+import { buildWhatsappUrl, track } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
-import { track, buildWhatsappUrl } from "@/lib/tracking";
-import { siteConfig } from "@/data/site";
+import { MessageCircle, Phone } from "lucide-react";
+import { useEffect, useState } from "react";
 
 /**
- * Kompaktes, schwebendes Kontakt-Dock für Mobil/Tablet.
- * Es bleibt bewusst schmaler als der Viewport und verschwindet am Formular,
+ * Zwei kompakte, schwebende Kontakt-Buttons für Mobil/Tablet.
+ * Sie verschwinden am Formular,
  * im Footer sowie bei geöffneter Bildschirmtastatur.
  */
 export function MobileCtaBar() {
@@ -79,23 +79,24 @@ export function MobileCtaBar() {
     <div
       aria-hidden={isHidden}
       className={cn(
-        "fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] left-1/2 z-40 -translate-x-1/2 transition-[transform,opacity] duration-200 ease-out lg:hidden",
+        "fixed bottom-[calc(1rem+env(safe-area-inset-bottom))] right-4 z-40 transition-[transform,opacity] duration-200 ease-out lg:hidden",
         isHidden
           ? "pointer-events-none translate-y-4 scale-95 opacity-0"
           : "translate-y-0 scale-100 opacity-100",
       )}
     >
-      <div className="flex items-center gap-2 rounded-2xl border border-stone-200 bg-white/95 p-2 shadow-card backdrop-blur-md">
-        <a
-          href={siteConfig.contact.phoneHref}
-          tabIndex={isHidden ? -1 : undefined}
-          aria-label={`${siteConfig.contact.phoneDisplay} anrufen`}
-          onClick={() => track("phone_click", { location: "mobile_bar" })}
-          className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-navy px-4 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-navy/90"
-        >
-          <Phone className="size-5" aria-hidden="true" />
-          Anrufen
-        </a>
+      <div className="flex items-center gap-2">
+        <CallbackRequestDialog location="mobile_bar">
+          <button
+            type="button"
+            tabIndex={isHidden ? -1 : undefined}
+            aria-label="Rückruf oder direkten Anruf auswählen"
+            className="focus-ring grid size-12 place-items-center rounded-full border-2 border-white bg-navy text-white shadow-card transition-colors hover:bg-navy/90"
+          >
+            <Phone className="size-5" aria-hidden="true" />
+            <span className="sr-only">Rückruf</span>
+          </button>
+        </CallbackRequestDialog>
         <a
           href={buildWhatsappUrl()}
           target="_blank"
@@ -103,10 +104,10 @@ export function MobileCtaBar() {
           tabIndex={isHidden ? -1 : undefined}
           aria-label="Über WhatsApp kontaktieren"
           onClick={() => track("whatsapp_click", { location: "mobile_bar" })}
-          className="focus-ring inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-success-700 px-4 text-sm font-semibold text-white shadow-soft transition-colors hover:bg-success-800"
+          className="focus-ring grid size-12 place-items-center rounded-full border-2 border-white bg-success-700 text-white shadow-card transition-colors hover:bg-success-800"
         >
           <MessageCircle className="size-5" aria-hidden="true" />
-          WhatsApp
+          <span className="sr-only">WhatsApp</span>
         </a>
       </div>
     </div>

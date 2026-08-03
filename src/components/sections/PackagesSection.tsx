@@ -1,3 +1,8 @@
+import { Reveal } from "@/components/Reveal";
+import { CtaButton } from "@/components/cta";
+import { SectionHeading } from "@/components/section-heading";
+import { packages, pricingExtras } from "@/data/site";
+import { cn } from "@/lib/utils";
 import {
   ArrowRight,
   CalendarCheck2,
@@ -6,17 +11,14 @@ import {
   Megaphone,
   Wrench,
 } from "lucide-react";
-import { Reveal } from "@/components/Reveal";
-import { SectionHeading } from "@/components/section-heading";
-import { CtaButton } from "@/components/cta";
-import { cn } from "@/lib/utils";
-import { packages, pricingExtras } from "@/data/site";
 
 type Package = (typeof packages)[number];
+type PricingExtra = (typeof pricingExtras)[number];
 
 function PackageCard({ pkg }: { pkg: Package }) {
   return (
     <article
+      data-floating-cta-avoid
       className={cn(
         "relative flex h-full min-w-0 flex-col rounded-[1.5rem] border p-6 sm:p-7",
         pkg.highlighted
@@ -107,20 +109,72 @@ function PackageCard({ pkg }: { pkg: Package }) {
         ))}
       </ul>
 
-      <CtaButton
-        event="package_cta_click"
-        location={`package_${pkg.id}`}
-        service={pkg.id}
-        variant={pkg.highlighted ? "default" : "outline"}
-        size="lg"
-        icon={<ArrowRight className="order-last size-4" />}
-        className={cn(
-          "mt-8 w-full px-3 text-sm sm:px-5 sm:text-base",
-          pkg.highlighted && "bg-white text-navy shadow-none hover:bg-white/90",
-        )}
-      >
-        {pkg.cta}
-      </CtaButton>
+      <div>
+        <CtaButton
+          event="package_cta_click"
+          location={`package_${pkg.id}`}
+          service={pkg.id}
+          variant={pkg.highlighted ? "default" : "outline"}
+          size="lg"
+          icon={<ArrowRight className="order-last size-4" />}
+          className={cn(
+            "mt-8 w-full px-3 text-sm sm:px-5 sm:text-base",
+            pkg.highlighted &&
+              "bg-white text-navy shadow-none hover:bg-white/90",
+          )}
+        >
+          {pkg.cta}
+        </CtaButton>
+      </div>
+    </article>
+  );
+}
+
+function PricingExtraCard({
+  extra,
+  index,
+}: {
+  extra: PricingExtra;
+  index: number;
+}) {
+  const Icon = index === 0 ? Megaphone : Wrench;
+
+  return (
+    <article
+      data-floating-cta-avoid
+      className="flex h-full items-start gap-4 rounded-[1.25rem] border border-navy/10 bg-[#fbfaf7] p-5 sm:p-6"
+    >
+      <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-primary shadow-sm">
+        <Icon className="size-5" />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col">
+        <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-primary">
+          {extra.eyebrow}
+        </p>
+        <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+          <h3 className="text-lg font-bold text-navy">{extra.name}</h3>
+          <p className="font-mono text-sm font-bold text-navy">{extra.price}</p>
+        </div>
+        <p className="mt-2 text-sm leading-relaxed text-stone-600">
+          {extra.description}
+        </p>
+        <p className="mt-2 text-xs font-semibold text-success-800">
+          {extra.note}
+        </p>
+        <div>
+          <CtaButton
+            event="package_cta_click"
+            location={`package_${extra.id}`}
+            service={extra.id}
+            variant="outline"
+            size="default"
+            icon={<ArrowRight className="order-last size-4" />}
+            className="mt-5 h-auto min-h-11 self-start whitespace-normal px-4 py-2.5 text-left text-sm leading-tight"
+          >
+            {extra.cta}
+          </CtaButton>
+        </div>
+      </div>
     </article>
   );
 }
@@ -137,8 +191,8 @@ export function PackagesSection() {
       <div className="container-lp">
         <SectionHeading
           eyebrow="Klare Preise"
-          title="Einmal aufbauen. Nur weiterzahlen, wenn Sie Betreuung möchten."
-          description="Das komplette Website-System kostet 1.000 € einmalig – inklusive Kontaktwegen, Tracking und Messung. Google Ads und laufende Betreuung buchen Sie nur, wenn Sie sie wirklich brauchen."
+          title="Ein klarer Systemstart. Danach nur, was Ihr Betrieb wirklich braucht."
+          description="Das Website-System kostet 1.000 € einmalig. Mit Google-Ads-Start kostet das komplette Anfrage-System 1.500 € einmalig. Laufende Betreuung ist optional."
         />
 
         <Reveal className="mx-auto mt-8 max-w-3xl">
@@ -152,8 +206,8 @@ export function PackagesSection() {
               </p>
               <p className="mt-1 text-sm leading-relaxed text-stone-600">
                 Neue Projektstarts vergebe ich nach verfügbarer Kapazität. Den
-                nächsten freien Starttermin klären wir im kostenlosen
-                Website-Check.
+                nächsten freien Starttermin klären wir in der kostenlosen
+                Potenzialanalyse.
               </p>
             </div>
           </div>
@@ -195,50 +249,33 @@ export function PackagesSection() {
           ))}
         </div>
 
-        <div className="mx-auto mt-8 grid max-w-5xl gap-4 md:grid-cols-2">
-          {pricingExtras.map((extra, index) => {
-            const Icon = index === 0 ? Megaphone : Wrench;
+        <details className="group mx-auto mt-5 max-w-5xl rounded-[1.25rem] border border-navy/10 bg-[#fbfaf7] md:hidden">
+          <summary className="flex cursor-pointer list-none items-center justify-between gap-4 rounded-[1.25rem] px-5 py-4 text-left [&::-webkit-details-marker]:hidden">
+            <span>
+              <span className="block text-sm font-bold text-navy">
+                Einzelne Leistungen &amp; Anpassungen
+              </span>
+              <span className="mt-0.5 block text-xs text-stone-500">
+                Google Ads oder kleine Änderungen separat ansehen
+              </span>
+            </span>
+            <span className="grid size-9 shrink-0 place-items-center rounded-full bg-white text-primary shadow-sm">
+              <ChevronDown className="size-4 transition-transform duration-200 group-open:rotate-180" />
+            </span>
+          </summary>
+          <div className="grid gap-4 border-t border-navy/10 p-3">
+            {pricingExtras.map((extra, index) => (
+              <PricingExtraCard key={extra.id} extra={extra} index={index} />
+            ))}
+          </div>
+        </details>
 
-            return (
-              <Reveal key={extra.id} delay={index * 60}>
-                <article className="flex h-full items-start gap-4 rounded-[1.25rem] border border-navy/10 bg-[#fbfaf7] p-5 sm:p-6">
-                  <span className="grid size-10 shrink-0 place-items-center rounded-full bg-white text-primary shadow-sm">
-                    <Icon className="size-5" />
-                  </span>
-                  <div className="flex min-w-0 flex-1 flex-col">
-                    <p className="text-[11px] font-bold uppercase tracking-[0.13em] text-primary">
-                      {extra.eyebrow}
-                    </p>
-                    <div className="mt-2 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
-                      <h3 className="text-lg font-bold text-navy">
-                        {extra.name}
-                      </h3>
-                      <p className="font-mono text-sm font-bold text-navy">
-                        {extra.price}
-                      </p>
-                    </div>
-                    <p className="mt-2 text-sm leading-relaxed text-stone-600">
-                      {extra.description}
-                    </p>
-                    <p className="mt-2 text-xs font-semibold text-success-800">
-                      {extra.note}
-                    </p>
-                    <CtaButton
-                      event="package_cta_click"
-                      location={`package_${extra.id}`}
-                      service={extra.id}
-                      variant="outline"
-                      size="default"
-                      icon={<ArrowRight className="order-last size-4" />}
-                      className="mt-5 h-auto min-h-11 self-start whitespace-normal px-4 py-2.5 text-left text-sm leading-tight"
-                    >
-                      {extra.cta}
-                    </CtaButton>
-                  </div>
-                </article>
-              </Reveal>
-            );
-          })}
+        <div className="mx-auto mt-8 hidden max-w-5xl gap-4 md:grid md:grid-cols-2">
+          {pricingExtras.map((extra, index) => (
+            <Reveal key={extra.id} delay={index * 60}>
+              <PricingExtraCard extra={extra} index={index} />
+            </Reveal>
+          ))}
         </div>
 
         <p className="mx-auto mt-7 max-w-3xl text-center text-xs leading-relaxed text-stone-500">

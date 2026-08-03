@@ -23,24 +23,42 @@ npm run start
 
 ## Formular verbinden
 
-Das Formular sendet an `/api/contact`. Damit eine Anfrage als erfolgreich bestätigt wird, muss `LEAD_WEBHOOK_URL` auf einen echten Webhook von Google Apps Script, Make, Zapier oder einem CRM zeigen.
+Das Formular sendet an `/api/contact`. Eine Anfrage wird erst als erfolgreich
+bestätigt, wenn die Google-Apps-Script-Web-App den gleichen `submissionId`
+zurückgibt. Wiederholte Übertragungen mit derselben ID werden im Sheet nicht
+doppelt angelegt.
 
 ```bash
 cp .env.example .env.local
 ```
 
-Ohne Webhook antwortet die API absichtlich mit `503`; dadurch sieht ein Besucher keine falsche Erfolgsmeldung und keine Anfrage geht still verloren.
+Für Google Sheets müssen `LEAD_WEBHOOK_URL` und `LEAD_WEBHOOK_SECRET` gesetzt
+sein. Ohne diese Variablen antwortet die API absichtlich mit `503`; dadurch
+sieht ein Besucher keine falsche Erfolgsmeldung und keine Anfrage geht still
+verloren. Das identische Geheimnis wird als Script Property `WEBHOOK_SECRET`
+im Apps-Script-Projekt hinterlegt und gehört niemals in eine
+`NEXT_PUBLIC_...`-Variable.
+
+Nach dem erfolgreichen Speichern sendet Resend eine interne Benachrichtigung.
+Dafür werden `RESEND_API_KEY`, `RESEND_FROM_EMAIL` und
+`LEAD_NOTIFICATION_EMAIL` benötigt. Ein vorübergehender Mailfehler lässt den
+bereits im Sheet gespeicherten Lead nicht fehlschlagen. Die Resend-Anfrage
+nutzt den `submissionId` außerdem als Idempotenzschlüssel.
 
 ## Tracking
 
-Tracking bleibt in `src/data/site.ts` deaktiviert, bis echte IDs und eine passende Einwilligungslösung eingerichtet sind. GA4 und GTM nicht parallel für denselben Page View konfigurieren.
+Google Analytics 4 wird über `NEXT_PUBLIC_GA4_ID` konfiguriert. Google
+Analytics, Vercel Web Analytics und Speed Insights starten erst nach der
+ausdrücklichen Statistik-Einwilligung des Besuchers. Google Ads ist weiterhin
+deaktiviert. GA4 und GTM dürfen nicht parallel für denselben Page View
+konfiguriert werden.
 
 ## Vor Veröffentlichung
 
 - Ladungsfähige Anschrift und gegebenenfalls USt-IdNr im Impressum ergänzen.
 - Vollständige Datenschutzerklärung prüfen lassen.
 - Formular bis zum Zielsystem Ende-zu-Ende testen.
-- Consent Management einrichten, bevor Analytics oder Ads-Tags aktiviert werden.
+- Resend-Domain und Google-Apps-Script-Web-App vollständig verifizieren.
 - Echte Gründer- und Projektbilder ergänzen, sobald sie vorliegen.
 
 ## Ergebnis- und Audit-Dokumentation

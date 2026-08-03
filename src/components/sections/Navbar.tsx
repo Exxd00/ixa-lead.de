@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { Menu, Phone, X } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { freeCheckServiceId, siteConfig } from "@/data/site";
+import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
 import { CtaButton } from "@/components/cta";
-import { track } from "@/lib/tracking";
+import { freeCheckServiceId, siteConfig } from "@/data/site";
+import { cn } from "@/lib/utils";
+import { Menu, Phone, X } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 
 const links = [
   { label: "Ergebnisse", href: "#results" },
@@ -42,8 +43,8 @@ export function Navbar() {
       )}
     >
       <nav className="container-lp flex h-[72px] items-center justify-between gap-4">
-        <a
-          href="#home"
+        <Link
+          href="/#home"
           className="focus-ring group inline-flex shrink-0 items-center gap-3 rounded-lg"
           aria-label={`${siteConfig.name} – Startseite`}
           onClick={() => setOpen(false)}
@@ -60,7 +61,7 @@ export function Navbar() {
               Nürnberg
             </span>
           </span>
-        </a>
+        </Link>
 
         <div className="hidden items-center gap-1 lg:flex">
           {links.map((link) => (
@@ -75,21 +76,22 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
-          <a
-            href={siteConfig.contact.phoneHref}
-            aria-label={`Anrufen: ${siteConfig.contact.phoneDisplay}`}
-            onClick={() => track("phone_click", { location: "navbar" })}
-            className="focus-ring hidden size-11 place-items-center rounded-xl border border-navy/10 bg-white text-navy transition-colors hover:border-primary/30 hover:text-primary xl:grid"
-          >
-            <Phone className="size-4" />
-          </a>
+          <CallbackRequestDialog location="navbar">
+            <button
+              type="button"
+              aria-label="Rückruf oder direkten Anruf auswählen"
+              className="focus-ring hidden size-11 place-items-center rounded-xl border border-navy/10 bg-white text-navy transition-colors hover:border-primary/30 hover:text-primary xl:grid"
+            >
+              <Phone className="size-4" />
+            </button>
+          </CallbackRequestDialog>
           <CtaButton
             event="check_cta_click"
             location="navbar"
             service={freeCheckServiceId}
             size="default"
           >
-            Kostenlosen Website-Check starten
+            Potenzial kostenlos prüfen
           </CtaButton>
         </div>
 
@@ -127,17 +129,16 @@ export function Navbar() {
             </a>
           ))}
           <div className="grid gap-2 pt-3">
-            <a
-              href={siteConfig.contact.phoneHref}
-              onClick={() => {
-                setOpen(false);
-                track("phone_click", { location: "mobile_menu" });
-              }}
-              className="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-navy/15 bg-white text-sm font-bold text-navy"
-            >
-              <Phone className="size-4" />
-              Anrufen
-            </a>
+            <CallbackRequestDialog location="mobile_menu">
+              <button
+                type="button"
+                onClick={() => setOpen(false)}
+                className="focus-ring inline-flex h-12 items-center justify-center gap-2 rounded-xl border border-navy/15 bg-white text-sm font-bold text-navy"
+              >
+                <Phone className="size-4" />
+                Rückruf / Anruf
+              </button>
+            </CallbackRequestDialog>
             <CtaButton
               event="check_cta_click"
               location="mobile_menu"
@@ -146,7 +147,7 @@ export function Navbar() {
               className="h-auto min-h-12 whitespace-normal px-3 py-3 text-center text-sm leading-tight"
               onClick={() => setOpen(false)}
             >
-              Kostenlosen Website-Check starten
+              Potenzial kostenlos prüfen
             </CtaButton>
           </div>
         </div>

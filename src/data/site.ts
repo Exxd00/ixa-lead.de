@@ -7,25 +7,25 @@ export const siteConfig = {
     phoneHref: "tel:+491629155408",
     whatsappNumber: "491629155408",
     whatsappMessage:
-      "Hallo IXA-Leads, ich interessiere mich für den kostenlosen Website-Check für mein Unternehmen.",
+      "Hallo IXA-Leads, ich möchte das Anfrage-Potenzial meines Unternehmens kostenlos prüfen lassen.",
     emailDisplay: "info@ixa-leads.de",
     emailHref: "mailto:info@ixa-leads.de",
     location: "Nürnberg & Franken",
   },
   tracking: {
-    enabled: false,
-    gtmId: "GTM-XXXXXXX",
-    ga4Id: "G-XXXXXXXXXX",
-    adsConversionId: "AW-XXXXXXXXX",
-    adsConversionLabel: "XXXXXXXXXXXXXXXX",
+    enabled: Boolean(process.env.NEXT_PUBLIC_GA4_ID),
+    ga4Id: process.env.NEXT_PUBLIC_GA4_ID?.trim() ?? "",
+    adsEnabled: false,
+    adsConversionId: "",
+    adsConversionLabel: "",
   },
   form: {
     endpoint: "/api/contact",
   },
   seo: {
-    title: "IXA Leads | Messbare Anfragen für lokale Unternehmen in Nürnberg",
+    title: "IXA Leads | Nachvollziehbare Anfragen für lokale Dienstleister",
     description:
-      "Website, Local SEO, Google Ads und Tracking als ein System: IXA Leads macht Formular-, Telefon- und WhatsApp-Kontakte für lokale Dienstleister in Nürnberg und Franken nachvollziehbar.",
+      "Website, Google Ads und Kontaktmessung als ein verständliches System für lokale Dienstleister in Nürnberg und Franken, deren Kunden bereits bei Google suchen.",
     url: "https://ixa-leads.de",
   },
 };
@@ -33,7 +33,7 @@ export const siteConfig = {
 export const leadServiceOptions = [
   {
     id: "website-check",
-    label: "Kostenloser Website-Check",
+    label: "Kostenlose Anfrage-Potenzialanalyse",
   },
   {
     id: "website-system",
@@ -41,7 +41,7 @@ export const leadServiceOptions = [
   },
   {
     id: "startklar",
-    label: "Startklar-Kombi – 1.500 € einmalig",
+    label: "IXA Anfrage-System – 1.500 € einmalig",
   },
   {
     id: "google-ads-setup",
@@ -60,6 +60,11 @@ export const leadServiceOptions = [
 export type LeadServiceId = (typeof leadServiceOptions)[number]["id"];
 
 export const freeCheckServiceId: LeadServiceId = "website-check";
+
+export const callbackService = {
+  id: "callback",
+  label: "Rückrufwunsch",
+} as const;
 
 export const packages = [
   {
@@ -83,12 +88,12 @@ export const packages = [
   },
   {
     id: "startklar",
-    eyebrow: "Website + Google Ads",
-    name: "Startklar-Kombi",
+    eyebrow: "Empfohlener Systemstart",
+    name: "IXA Anfrage-System",
     price: "1.500 €",
     retainer: "einmalig",
     tagline:
-      "Website-System und eine startbereite Google-Ads-Kampagne aus einer Hand.",
+      "Website, Google-Ads-Start und Kontaktmessung als ein klarer Einstieg.",
     highlighted: true,
     badge: "Empfohlener Start",
     features: [
@@ -98,7 +103,7 @@ export const packages = [
       "Werbung mit der Kontaktmessung verbunden",
       "Startbereit übergeben; Werbebudget separat",
     ],
-    cta: "Komplett starten",
+    cta: "Anfrage-System besprechen",
   },
   {
     id: "betreuung",
@@ -138,7 +143,7 @@ export const pricingExtras = [
     name: "Einzelne Anpassung",
     price: "50–100 € je Auftrag",
     description:
-      "Für kleine Änderungen an der Website oder an Google Ads. Den genauen Preis nenne ich vor der Umsetzung.",
+      "Für bestehende Kunden oder klar abgegrenzte kleine Änderungen an Website oder Google Ads. Den genauen Preis nenne ich vor der Umsetzung.",
     note: "Sie beauftragen nur, was Sie wirklich brauchen.",
     cta: "Anpassung anfragen",
   },
@@ -147,7 +152,7 @@ export const pricingExtras = [
 export const faqs = [
   {
     q: "Schalten Sie Google-Ads-Kampagnen?",
-    a: "Ja. Die einmalige Einrichtung kostet 500 € und ist auch in der Startklar-Kombi enthalten. Wenn ich Website und Anzeigen anschließend laufend pflegen und optimieren soll, ist das über die monatliche Betreuung möglich. Das Werbebudget zahlen Sie separat direkt an Google.",
+    a: "Ja. Die einmalige Einrichtung kostet 500 € und ist auch im IXA Anfrage-System enthalten. Wenn ich Website und Anzeigen anschließend laufend pflegen und optimieren soll, ist das über die monatliche Betreuung möglich. Das Werbebudget zahlen Sie separat direkt an Google.",
   },
   {
     q: "Garantieren Sie eine bestimmte Zahl an Kunden?",
@@ -159,11 +164,11 @@ export const faqs = [
   },
   {
     q: "Kann meine bestehende Website verbessert werden, statt neu zu bauen?",
-    a: "Oft ja. Wenn die vorhandene Struktur und Technik tragfähig sind, verbessere ich gezielt Geschwindigkeit, Struktur, Kontaktwege und Tracking. Ist die Basis zu schwach, ist ein Neuaufbau meist der schnellere und günstigere Weg. Ein kostenloser Check klärt das vorab.",
+    a: "Oft ja. Wenn die vorhandene Struktur und Technik tragfähig sind, verbessere ich gezielt Geschwindigkeit, Struktur, Kontaktwege und Tracking. Ist die Basis zu schwach, ist ein Neuaufbau meist der schnellere und günstigere Weg. Die kostenlose Potenzialanalyse klärt das vorab.",
   },
   {
     q: "Mit welchen Branchen arbeiten Sie?",
-    a: "Am besten passe ich zu lokalen Unternehmen, die über Anrufe, Formulare oder Buchungen Anfragen gewinnen – etwa Handwerk und Sanierung, Fahrzeug- und Ankaufdienste, Versicherungen und Finanzberatung, Gastronomie sowie weitere lokale Dienstleister in Nürnberg und Franken.",
+    a: "Am besten passt IXA zu lokalen Dienstleistern, nach deren Leistung Menschen bereits konkret bei Google suchen – etwa Handwerk, Notdienste, Fahrzeugankauf, Montage, Reinigung oder Reparatur. Entscheidend ist nicht die Branche, sondern ein klarer Auftragswert, freie Kapazität und ein Kontaktweg über Telefon, WhatsApp oder Formular.",
   },
   {
     q: "Verbinden Sie das Formular mit meinen Systemen?",

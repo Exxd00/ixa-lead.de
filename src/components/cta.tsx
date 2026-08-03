@@ -1,12 +1,13 @@
 "use client";
 
-import type { ComponentProps, ReactNode } from "react";
-import { MessageCircle, Phone, Mail } from "lucide-react";
+import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { scrollToContact } from "@/lib/contact";
-import { track, buildWhatsappUrl, type TrackingEvent } from "@/lib/tracking";
 import { siteConfig } from "@/data/site";
+import { scrollToContact } from "@/lib/contact";
+import { type TrackingEvent, buildWhatsappUrl, track } from "@/lib/tracking";
+import { cn } from "@/lib/utils";
+import { Mail, MessageCircle, Phone } from "lucide-react";
+import type { ComponentProps, ReactNode } from "react";
 
 type ButtonVariant = ComponentProps<typeof Button>["variant"];
 type ButtonSize = ComponentProps<typeof Button>["size"];
@@ -126,18 +127,21 @@ export function PhoneLink({
   withIcon?: boolean;
 }) {
   return (
-    <a
-      href={siteConfig.contact.phoneHref}
-      dir="ltr"
-      className={cn(
-        "inline-flex items-center gap-2 rounded-md font-medium text-navy transition-colors hover:text-primary focus-ring",
-        className,
-      )}
-      onClick={() => track("phone_click", { location })}
-    >
-      {withIcon && <Phone className="size-4 text-primary" aria-hidden="true" />}
-      <span>{siteConfig.contact.phoneDisplay}</span>
-    </a>
+    <CallbackRequestDialog location={location}>
+      <button
+        type="button"
+        dir="ltr"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-md font-medium text-navy transition-colors hover:text-primary focus-ring",
+          className,
+        )}
+      >
+        {withIcon && (
+          <Phone className="size-4 text-primary" aria-hidden="true" />
+        )}
+        <span>{siteConfig.contact.phoneDisplay}</span>
+      </button>
+    </CallbackRequestDialog>
   );
 }
 

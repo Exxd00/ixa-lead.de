@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
-import { JetBrains_Mono, Plus_Jakarta_Sans, Space_Grotesk } from "next/font/google";
+import {
+  JetBrains_Mono,
+  Plus_Jakarta_Sans,
+  Space_Grotesk,
+} from "next/font/google";
 import "./globals.css";
-import ClientBody from "./ClientBody";
-import Script from "next/script";
+import { MeasurementConsent } from "@/components/MeasurementConsent";
 import { siteConfig } from "@/data/site";
+import ClientBody from "./ClientBody";
 
 /* Fließtext: klar, professionell, gut lesbar */
 const jakarta = Plus_Jakarta_Sans({
@@ -38,13 +42,12 @@ export const metadata: Metadata = {
   applicationName: siteConfig.name,
   authors: [{ name: siteConfig.name }],
   keywords: [
-    "Landingpage",
-    "Google Ads",
+    "Website für lokale Dienstleister",
+    "Webdesign Nürnberg",
+    "Google Ads Nürnberg",
     "Conversion-Tracking",
-    "GA4",
-    "Google Tag Manager",
-    "Conversion-Optimierung",
-    "Webentwickler",
+    "Kontaktmessung",
+    "Lokale Kundengewinnung",
   ],
   alternates: {
     canonical: siteConfig.seo.url,
@@ -80,7 +83,7 @@ const schema = {
   founder: siteConfig.owner,
   areaServed: ["Nürnberg", "Franken", "Bayern"],
   serviceType:
-    "Digitale Kundengewinnung: Websites, Google Ads, GA4- und Conversion-Tracking, Local SEO und Lead-Automation",
+    "Anfrage-Systeme für lokale Dienstleister: Websites, Google Ads und Kontaktmessung",
   knowsAbout: [
     "Website & Conversion",
     "Google Ads",
@@ -91,15 +94,63 @@ const schema = {
     "Google Business Profile",
     "Lead Automation",
   ],
+  hasOfferCatalog: {
+    "@type": "OfferCatalog",
+    name: "Leistungen und Preise",
+    itemListElement: [
+      {
+        "@type": "Offer",
+        price: "1000",
+        priceCurrency: "EUR",
+        itemOffered: {
+          "@type": "Service",
+          name: "IXA Website-System inklusive Kontaktmessung",
+        },
+      },
+      {
+        "@type": "Offer",
+        price: "1500",
+        priceCurrency: "EUR",
+        itemOffered: {
+          "@type": "Service",
+          name: "IXA Anfrage-System mit Website und Google-Ads-Start",
+        },
+      },
+      {
+        "@type": "Offer",
+        price: "500",
+        priceCurrency: "EUR",
+        itemOffered: {
+          "@type": "Service",
+          name: "Google Ads Start",
+        },
+      },
+      {
+        "@type": "Offer",
+        price: "500",
+        priceCurrency: "EUR",
+        priceSpecification: {
+          "@type": "UnitPriceSpecification",
+          price: "500",
+          priceCurrency: "EUR",
+          unitText: "MONAT",
+        },
+        itemOffered: {
+          "@type": "Service",
+          name: "Laufende Betreuung und Optimierung",
+        },
+      },
+    ],
+  },
 };
+
+const schemaJson = JSON.stringify(schema).replace(/</g, "\\u003c");
 
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const { enabled, gtmId, ga4Id } = siteConfig.tracking;
-
   return (
     <html
       lang="de"
@@ -108,41 +159,7 @@ export default function RootLayout({
     >
       <head>
         {/* بيانات Schema المنظمة */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(schema) }}
-        />
-
-        {/* =================================================================
-            Google Tag Manager — يُحمّل فقط بعد تفعيل التتبع وإضافة معرّف حقيقي
-            ================================================================= */}
-        {enabled && gtmId && !gtmId.includes("XXXX") && (
-          <Script id="gtm" strategy="afterInteractive">
-            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
-              new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
-              j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
-              'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
-              })(window,document,'script','dataLayer','${gtmId}');`}
-          </Script>
-        )}
-
-        {/* =================================================================
-            Google Analytics 4 — يُحمّل فقط بعد تفعيل التتبع وإضافة معرّف حقيقي
-            ================================================================= */}
-        {enabled && ga4Id && !ga4Id.includes("XXXX") && (
-          <>
-            <Script
-              src={`https://www.googletagmanager.com/gtag/js?id=${ga4Id}`}
-              strategy="afterInteractive"
-            />
-            <Script id="ga4" strategy="afterInteractive">
-              {`window.dataLayer = window.dataLayer || [];
-                function gtag(){dataLayer.push(arguments);}
-                gtag('js', new Date());
-                gtag('config', '${ga4Id}');`}
-            </Script>
-          </>
-        )}
+        <script type="application/ld+json">{schemaJson}</script>
       </head>
       <body suppressHydrationWarning className="antialiased">
         {/* Feines Papierkorn über der gesamten Seite — Teil der warmen Bildsprache */}
@@ -150,19 +167,8 @@ export default function RootLayout({
           aria-hidden="true"
           className="grain-overlay pointer-events-none fixed inset-0 z-[999]"
         />
-        {/* GTM noscript — يظهر فقط بعد التفعيل */}
-        {enabled && gtmId && !gtmId.includes("XXXX") && (
-          <noscript>
-            <iframe
-              title="gtm"
-              src={`https://www.googletagmanager.com/ns.html?id=${gtmId}`}
-              height="0"
-              width="0"
-              style={{ display: "none", visibility: "hidden" }}
-            />
-          </noscript>
-        )}
         <ClientBody>{children}</ClientBody>
+        <MeasurementConsent />
       </body>
     </html>
   );

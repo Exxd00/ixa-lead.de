@@ -1,3 +1,6 @@
+import { Reveal } from "@/components/Reveal";
+import { CtaButton, WhatsappLink } from "@/components/cta";
+import { freeCheckServiceId, siteConfig } from "@/data/site";
 import {
   Check,
   Languages,
@@ -5,9 +8,6 @@ import {
   MessageCircle,
   UserRound,
 } from "lucide-react";
-import { Reveal } from "@/components/Reveal";
-import { CtaButton, WhatsappLink } from "@/components/cta";
-import { freeCheckServiceId, siteConfig } from "@/data/site";
 
 const promises = [
   "Sie sprechen direkt mit demjenigen, der Strategie und Umsetzung verantwortet.",
@@ -58,7 +58,7 @@ export function AboutSection() {
                 <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                   <Languages className="size-5 text-success-300" />
                   <p className="mt-3 text-sm font-bold">
-                    Zwei Märkte verstanden
+                    Zweisprachig erreichbar
                   </p>
                   <p className="mt-1 text-xs leading-relaxed text-white/50">
                     Deutsch & Arabisch
@@ -80,8 +80,8 @@ export function AboutSection() {
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-stone-600">
             Ich begleite lokale Dienstleister von der ersten Analyse bis zur
             Auswertung. Dabei zählt nicht, wie viele Seiten oder Klicks ein
-            System produziert, sondern ob daraus nachvollziehbare Kontakte und
-            später qualifizierte Aufträge entstehen.
+            System produziert, sondern ob Kontakte nachvollziehbar sind und
+            welche davon später zu Angeboten und Aufträgen werden.
           </p>
 
           <ul className="mt-7 space-y-4">
@@ -105,7 +105,7 @@ export function AboutSection() {
               size="lg"
               className="h-auto min-h-12 whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-12 sm:whitespace-nowrap sm:px-7 sm:py-0 sm:text-base"
             >
-              Kostenlosen Website-Check starten
+              Anfrage-Potenzial kostenlos prüfen
             </CtaButton>
             <WhatsappLink
               location="about"

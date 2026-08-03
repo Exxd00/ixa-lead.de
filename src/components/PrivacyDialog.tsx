@@ -10,6 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/data/site";
+import { openAnalyticsConsentSettings } from "@/lib/consent";
 
 export function PrivacyDialog({
   className,
@@ -35,8 +36,8 @@ export function PrivacyDialog({
         <DialogHeader>
           <DialogTitle className="text-xl text-navy">Datenschutz</DialogTitle>
           <DialogDescription>
-            Kurze Übersicht, wie die Daten aus dem Kontaktformular verwendet
-            werden.
+            Wie wir Anfragen bearbeiten und optionale Statistikdienste
+            einsetzen.
           </DialogDescription>
         </DialogHeader>
 
@@ -46,9 +47,9 @@ export function PrivacyDialog({
               Welche Daten wir erheben
             </h3>
             <p>
-              Name, Kontaktweg (Telefon oder E-Mail), Link zur Website oder
-              Landingpage sowie Beschreibung von Problem und gewünschter
-              Leistung.
+              Wir verarbeiten die Angaben, die Sie im Anfrage- oder
+              Rückrufformular eintragen. Dazu können Name, Telefon oder E-Mail,
+              Website, ausgewählte Leistung und Ihre Nachricht gehören.
             </p>
           </div>
           <div>
@@ -56,25 +57,71 @@ export function PrivacyDialog({
               Wie wir Ihre Daten verwenden
             </h3>
             <p>
-              Ausschließlich zur Kontaktaufnahme bezüglich Ihrer Anfrage. Wir
-              verkaufen Ihre Daten nicht und geben sie nicht zu Marketingzwecken
-              an Dritte weiter.
+              Wir nutzen diese Angaben, um Ihre Anfrage zu prüfen, zu
+              beantworten und einen gewünschten Termin oder Rückruf
+              vorzubereiten. Rechtsgrundlage ist die Durchführung
+              vorvertraglicher Maßnahmen auf Ihre Anfrage hin (Art. 6 Abs. 1
+              lit. b DSGVO). Ihre Daten werden nicht verkauft.
             </p>
           </div>
           <div>
-            <h3 className="mb-1 font-bold text-navy">Mess-Tools</h3>
+            <h3 className="mb-1 font-bold text-navy">
+              Google Sheets und Resend
+            </h3>
             <p>
-              Die Website kann Tools wie Google Analytics 4 und Google Tag
-              Manager nutzen, um die Leistung zu verstehen und die Erfahrung zu
-              verbessern. Anzeigen-Tracking lässt sich nach Ihren Einstellungen
-              konfigurieren.
+              Nach dem Absenden werden die Anfrageangaben serverseitig in Google
+              Sheets gespeichert. Resend versendet dazu eine Benachrichtigung
+              per E-Mail an den Verantwortlichen. Diese Dienste werden nur zur
+              Bearbeitung Ihrer Anfrage eingesetzt; Ihre Formularangaben werden
+              nicht an die unten genannten Messdienste übermittelt.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-1 font-bold text-navy">Hosting</h3>
+            <p>
+              Die Website wird über Vercel bereitgestellt. Dabei verarbeitet
+              Vercel technisch erforderliche Verbindungs- und Sicherheitsdaten,
+              um die Website auszuliefern und vor Missbrauch zu schützen. Diese
+              Verarbeitung ist für den Betrieb der Website erforderlich.
+            </p>
+          </div>
+          <div>
+            <h3 className="mb-1 font-bold text-navy">Optionale Statistik</h3>
+            <p>
+              Google Analytics 4 (Google Ireland Limited) sowie Vercel Web
+              Analytics und Speed Insights helfen uns, Nutzung und technische
+              Leistung der Website zu verstehen. Diese Dienste starten erst,
+              wenn Sie „Statistik erlauben“ wählen. Die Rechtsgrundlage ist Ihre
+              Einwilligung (Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG).
+              Werbe- und Personalisierungsspeicher von Google bleiben
+              deaktiviert.
+            </p>
+            <button
+              className="focus-ring mt-2 rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-bold text-navy transition-colors hover:bg-stone-50"
+              onClick={openAnalyticsConsentSettings}
+              type="button"
+            >
+              Statistik-Einstellungen ändern
+            </button>
+          </div>
+          <div>
+            <h3 className="mb-1 font-bold text-navy">
+              Speicherung und Widerruf
+            </h3>
+            <p>
+              Ihre Statistik-Auswahl wird lokal auf Ihrem Gerät gespeichert. Sie
+              können sie jederzeit über den Button oben ändern. Anfragedaten
+              speichern wir nur so lange, wie sie für die Bearbeitung und
+              gesetzliche Aufbewahrungspflichten erforderlich sind.
             </p>
           </div>
           <div>
             <h3 className="mb-1 font-bold text-navy">Ihre Rechte</h3>
             <p>
-              Sie können Ihre Daten jederzeit über die angegebenen Kontaktwege
-              korrigieren oder löschen lassen.
+              Sie können Auskunft, Berichtigung, Löschung, Einschränkung oder
+              Datenübertragbarkeit verlangen und einer Verarbeitung
+              widersprechen. Außerdem können Sie sich bei einer zuständigen
+              Datenschutzaufsichtsbehörde beschweren.
             </p>
           </div>
           <div>
@@ -84,9 +131,9 @@ export function PrivacyDialog({
             <p>{siteConfig.contact.emailDisplay}</p>
           </div>
 
-          <p className="rounded-lg border border-dashed border-stone-300 bg-stone-50 p-3 text-xs text-stone-500">
-            Dies ist eine kurze, anpassbare Übersicht – ersetzen Sie sie durch
-            Ihre vollständige, rechtsgültige Datenschutzerklärung.
+          <p className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-xs text-stone-500">
+            Verantwortlich: {siteConfig.owner}, {siteConfig.name}. Weitere
+            Anbieterangaben finden Sie im Impressum.
           </p>
         </div>
       </DialogContent>

@@ -1,8 +1,8 @@
-import { MapPin } from "lucide-react";
-import { PhoneLink, EmailLink, WhatsappTextLink } from "@/components/cta";
-import { PrivacyDialog } from "@/components/PrivacyDialog";
 import { ImpressumDialog } from "@/components/ImpressumDialog";
-import { siteConfig, footerLinks } from "@/data/site";
+import { PrivacyDialog } from "@/components/PrivacyDialog";
+import { EmailLink, PhoneLink, WhatsappTextLink } from "@/components/cta";
+import { footerLinks, siteConfig } from "@/data/site";
+import { MapPin } from "lucide-react";
 
 export function Footer() {
   const year = new Date().getFullYear();
@@ -21,7 +21,7 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-500">
-              Messbare Kundengewinnungs-Systeme für lokale Dienstleister in
+              Nachvollziehbare Anfrage-Systeme für lokale Dienstleister in
               Nürnberg und Franken – persönlich geplant, gebaut und ausgewertet.
             </p>
           </div>

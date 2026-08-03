@@ -1,8 +1,8 @@
-import { ArrowRight, BarChart3, MousePointerClick, Search } from "lucide-react";
 import { Reveal } from "@/components/Reveal";
-import { SectionHeading } from "@/components/section-heading";
 import { CtaButton } from "@/components/cta";
+import { SectionHeading } from "@/components/section-heading";
 import { freeCheckServiceId } from "@/data/site";
+import { ArrowRight, BarChart3, MousePointerClick, Search } from "lucide-react";
 
 const stages = [
   {
@@ -72,7 +72,7 @@ export function ServicesSection() {
             icon={<ArrowRight className="order-last size-4" />}
             className="h-auto min-h-12 whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-12 sm:whitespace-nowrap sm:px-7 sm:py-0 sm:text-base"
           >
-            Kostenlosen Website-Check starten
+            Anfrage-Potenzial kostenlos prüfen
           </CtaButton>
         </div>
       </div>

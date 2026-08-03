@@ -1,10 +1,10 @@
 /* =====================================================================
-   أدوات القياس (Tracking)
-   كل الأحداث تُدفع إلى dataLayer ليمكن ربطها لاحقًا بـ GTM / GA4 / Google Ads.
-   لا توجد معرّفات وهمية تعمل فعليًا — راجع src/data/site.ts لإضافة القيم الحقيقية.
+   Consent-aware measurement. Optional events go directly to GA4 only after
+   the visitor has allowed statistics; form/contact values are filtered out.
    ===================================================================== */
 
 import { siteConfig } from "@/data/site";
+import { hasAnalyticsConsent } from "@/lib/consent";
 
 export type TrackingEvent =
   | "hero_cta_click"
@@ -13,6 +13,9 @@ export type TrackingEvent =
   | "check_cta_click"
   | "whatsapp_click"
   | "phone_click"
+  | "callback_open"
+  | "callback_submit_success"
+  | "callback_submit_error"
   | "email_click"
   | "form_start"
   | "form_service_select"
@@ -27,21 +30,41 @@ type DataLayerObject = Record<string, unknown>;
 
 declare global {
   interface Window {
-    dataLayer?: DataLayerObject[];
+    dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
   }
 }
 
-/** يدفع حدثًا إلى dataLayer (آمن على الخادم وفي المتصفح). */
-export function track(event: TrackingEvent, params: DataLayerObject = {}): void {
+const privateParameterPattern =
+  /(email|e-mail|phone|telefon|name|message|nachricht|contact|kontakt|website|url)/i;
+
+function analyticsSafeParams(params: DataLayerObject): DataLayerObject {
+  return Object.fromEntries(
+    Object.entries(params).filter(
+      ([key, value]) =>
+        !privateParameterPattern.test(key) &&
+        (typeof value === "string" ||
+          typeof value === "number" ||
+          typeof value === "boolean"),
+    ),
+  );
+}
+
+/** Sends an event only after the visitor has allowed optional statistics. */
+export function track(
+  event: TrackingEvent,
+  params: DataLayerObject = {},
+): void {
   if (typeof window === "undefined") return;
 
-  window.dataLayer = window.dataLayer || [];
-  window.dataLayer.push({
-    event,
-    ...params,
-    timestamp: Date.now(),
-  });
+  if (!hasAnalyticsConsent()) {
+    if (process.env.NODE_ENV !== "production") {
+      console.info(`[tracking:consent-required] ${event}`, params);
+    }
+    return;
+  }
+
+  window.gtag?.("event", event, analyticsSafeParams(params));
 
   // تسجيل مساعد أثناء التطوير عندما تكون معرّفات القياس غير مفعّلة
   if (!siteConfig.tracking.enabled && process.env.NODE_ENV !== "production") {
@@ -56,8 +79,17 @@ export function track(event: TrackingEvent, params: DataLayerObject = {}): void 
 export function reportAdsConversion(extra: DataLayerObject = {}): void {
   if (typeof window === "undefined") return;
 
-  const { enabled, adsConversionId, adsConversionLabel } = siteConfig.tracking;
-  if (!enabled || !window.gtag) return;
+  const { adsEnabled, adsConversionId, adsConversionLabel } =
+    siteConfig.tracking;
+  if (
+    !adsEnabled ||
+    !hasAnalyticsConsent() ||
+    !adsConversionId ||
+    !adsConversionLabel ||
+    !window.gtag
+  ) {
+    return;
+  }
 
   window.gtag("event", "conversion", {
     send_to: `${adsConversionId}/${adsConversionLabel}`,
