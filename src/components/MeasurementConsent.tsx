@@ -9,7 +9,7 @@ import {
   saveAnalyticsConsent,
 } from "@/lib/consent";
 import { Analytics } from "@vercel/analytics/react";
-import { SpeedInsights } from "@vercel/speed-insights/next";
+import { SpeedInsights } from "@vercel/speed-insights/react";
 import Script from "next/script";
 import { useCallback, useEffect, useState } from "react";
 
@@ -203,7 +203,15 @@ export function MeasurementConsent() {
   }, []);
 
   const selectConsent = useCallback((nextConsent: AnalyticsConsent) => {
+    const previousConsent = readAnalyticsConsent();
     saveAnalyticsConsent(nextConsent);
+
+    // Vercel's browser scripts cannot be reliably unloaded after they have
+    // started. A reload guarantees that revoking consent leaves no optional
+    // measurement runtime active on the page.
+    if (previousConsent === "granted" && nextConsent === "denied") {
+      window.location.reload();
+    }
   }, []);
 
   const configureGoogleAnalytics = useCallback(() => {
