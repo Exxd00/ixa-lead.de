@@ -23,7 +23,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
  */
 export function WhatsappFloat() {
   return (
-    <div className="fixed bottom-6 right-6 z-40 hidden items-center gap-2 lg:flex">
+    <div className="fixed bottom-6 right-6 z-40 hidden flex-col items-center gap-2 lg:flex">
       <CallbackRequestDialog location="desktop_float">
         <button
           type="button"
@@ -31,7 +31,7 @@ export function WhatsappFloat() {
           className="focus-ring group relative grid size-12 place-items-center rounded-full border-2 border-white bg-navy text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-navy/90"
         >
           <Phone className="size-5" aria-hidden="true" />
-          <span className="pointer-events-none absolute bottom-full right-0 mb-3 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
+          <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
             Rückruf oder Anruf
           </span>
         </button>
@@ -45,7 +45,7 @@ export function WhatsappFloat() {
         className="focus-ring group relative grid size-12 place-items-center rounded-full border-2 border-white bg-success-700 text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-success-800"
       >
         <WhatsAppIcon className="size-6" />
-        <span className="pointer-events-none absolute bottom-full right-0 mb-3 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
+        <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
           Per WhatsApp schreiben
         </span>
       </a>

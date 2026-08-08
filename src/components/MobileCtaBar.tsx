@@ -85,7 +85,7 @@ export function MobileCtaBar() {
           : "translate-y-0 scale-100 opacity-100",
       )}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex flex-col items-center gap-2">
         <CallbackRequestDialog location="mobile_bar">
           <button
             type="button"
