@@ -138,6 +138,9 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
       <p className="mt-2 text-[10px] leading-relaxed text-stone-400">
         {study.ga4.period}; nicht mit dem Lead-Sheet verrechnet.
       </p>
+      <p className="mt-4 border-t border-stone-100 pt-3 text-[11px] font-semibold text-navy">
+        Kontaktaktionen ≠ qualifizierte Anfragen ≠ Aufträge.
+      </p>
     </article>
   );
 }
@@ -202,56 +205,66 @@ function PortfolioSummary() {
           Vier Projekte zusammen; Franken Autoankauf 24 ist bereits enthalten.
           Grundlage sind {portfolioEvidence.caseCount} getrennte Lead-Sheets.
         </p>
+        <p className="mt-2 text-[11px] font-semibold text-navy">
+          Kontaktaktionen ≠ qualifizierte Anfragen ≠ Aufträge.
+        </p>
       </div>
     </section>
   );
 }
 
-export function CaseStudiesSection() {
-  const featuredCase =
-    documentedCases.find((study) => study.featured) ?? documentedCases[0];
-  const supportingCases = documentedCases.filter(
-    (study) => study.id !== featuredCase.id && study.id !== "keller-montage",
-  );
-  const highlightedDomains = new Set([
-    "frankenautoankauf24.de",
-    "rohrreinigung-kraft.de",
-    "mobelmontage-nurnberg.de",
-  ]);
-  const additionalProjects = projectLinks.filter(
-    (project) => !highlightedDomains.has(project.domain),
-  );
+const featuredCase =
+  documentedCases.find((study) => study.featured) ?? documentedCases[0];
+const supportingCases = documentedCases.filter(
+  (study) => study.id !== featuredCase.id && study.id !== "keller-montage",
+);
+const highlightedDomains = new Set([
+  "frankenautoankauf24.de",
+  "rohrreinigung-kraft.de",
+  "mobelmontage-nurnberg.de",
+]);
+const additionalProjects = projectLinks.filter(
+  (project) => !highlightedDomains.has(project.domain),
+);
 
+export function FeaturedProofSection() {
   return (
     <section id="results" className="py-16 sm:py-20 lg:py-24">
       <div className="container-lp">
         <div className="max-w-3xl">
           <p className="text-sm font-semibold text-primary">
-            Ergebnis aus einem echten Projekt
+            Stärkster dokumentierter Nachweis
           </p>
           <h2 className="mt-3 text-3xl font-bold leading-tight text-navy sm:text-4xl">
-            Nachvollziehbar statt nur versprochen
+            Franken Autoankauf 24: nachvollziehbar statt nur versprochen
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
-            Bei Franken Autoankauf 24 wurden Formular, Telefon und WhatsApp
-            zusammengeführt und getrennt dokumentiert. Belegt sind eingegangene
-            Kontaktaktionen – nicht behauptete Aufträge oder Umsätze. Der
-            anonymisierte Originalauszug steht direkt hier.
+            Formular, Telefon und WhatsApp wurden getrennt dokumentiert. Belegt
+            sind 211 eingegangene Kontaktaktionen – nicht behauptete Aufträge
+            oder Umsätze. Der anonymisierte Originalauszug steht direkt hier.
           </p>
         </div>
 
         <div className="mt-8 sm:mt-10">
           <FrankenEvidencePost study={featuredCase} />
         </div>
+      </div>
+    </section>
+  );
+}
 
-        <details className="group mt-5 overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
+export function CaseStudiesSection() {
+  return (
+    <section className="border-y border-stone-200 bg-[#f3f1eb] py-14 sm:py-16 lg:py-20">
+      <div className="container-lp">
+        <details className="group overflow-hidden rounded-2xl border border-stone-200 bg-white shadow-soft">
           <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-4 p-4 marker:content-none sm:p-5 [&::-webkit-details-marker]:hidden">
             <div>
               <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
-                Optional vertiefen
+                Weitere echte Projekte
               </p>
               <h3 className="mt-1 text-lg font-bold text-navy sm:text-xl">
-                Weitere Nachweise &amp; Projekte
+                Case Studies mit getrennten Messzeiträumen
               </h3>
             </div>
             <span className="inline-flex shrink-0 items-center gap-2 text-xs font-semibold text-primary">

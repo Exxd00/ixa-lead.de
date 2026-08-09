@@ -97,6 +97,7 @@ export function FrankenEvidencePost({
   return (
     <>
       <article
+        data-floating-cta-avoid
         id={`ergebnis-${study.id}`}
         aria-labelledby="franken-post-title"
         className="scroll-mt-28 overflow-hidden rounded-[2rem] border border-navy/10 bg-white shadow-card"
@@ -162,6 +163,9 @@ export function FrankenEvidencePost({
               Die Website bündelt drei einfache Kontaktwege. Jeder Eingang wird
               getrennt dokumentiert, damit sichtbar bleibt, was tatsächlich
               ankommt.
+            </p>
+            <p className="mt-4 rounded-xl bg-primary/[0.05] px-4 py-3 text-xs font-bold leading-relaxed text-navy">
+              Kontaktaktionen ≠ qualifizierte Anfragen ≠ Aufträge.
             </p>
           </div>
 

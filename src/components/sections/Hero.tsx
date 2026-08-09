@@ -1,5 +1,5 @@
 import { Reveal } from "@/components/Reveal";
-import { CtaButton, WhatsappLink } from "@/components/cta";
+import { CtaButton } from "@/components/cta";
 import { documentedCases } from "@/data/evidence";
 import { freeCheckServiceId } from "@/data/site";
 import { ArrowRight, Check, MapPin } from "lucide-react";
@@ -49,9 +49,10 @@ export function Hero() {
 
           <Reveal immediate>
             <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
-              Für Betriebe, deren Kunden bereits nach einer konkreten Leistung
-              suchen: Website, Google Ads und Kontaktmessung als ein klares
-              System.
+              Für lokale Dienstleistungsbetriebe, bei denen Menschen bereits
+              aktiv bei Google nach einer konkreten Leistung suchen. IXA prüft,
+              baut und verbessert den nachvollziehbaren Weg bis zur
+              Kontaktanfrage.
             </p>
           </Reveal>
 
@@ -67,18 +68,16 @@ export function Hero() {
               >
                 Anfrage-Potenzial kostenlos prüfen
               </CtaButton>
-              <WhatsappLink
-                location="hero_secondary"
-                variant="light"
-                size="xl"
-                className="w-full border border-white/10 bg-white/10 text-white shadow-none hover:bg-white/15 sm:w-auto"
+              <a
+                href="#results"
+                className="focus-ring inline-flex min-h-14 w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-7 text-sm font-bold text-white transition-colors hover:bg-white/15 sm:w-auto sm:text-base"
               >
-                Frage per WhatsApp senden
-              </WhatsappLink>
+                Ergebnisse ansehen
+              </a>
             </div>
             <p className="mt-3 max-w-xl text-xs leading-relaxed text-white/55 sm:text-sm">
-              Schriftlich in weniger als 24 Stunden oder persönlich bei Ihnen in
-              Nürnberg – kostenlos und unverbindlich.
+              Kostenlose persönliche Ersteinschätzung · keine feste Kundenzahl
+              versprochen
             </p>
           </Reveal>
 

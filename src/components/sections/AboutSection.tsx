@@ -11,8 +11,9 @@ import {
 
 const promises = [
   "Sie sprechen direkt mit demjenigen, der Strategie und Umsetzung verantwortet.",
-  "Ich trenne Kontaktaktionen, qualifizierte Leads und Aufträge klar voneinander.",
-  "Ich verspreche keine feste Kundenzahl – ich baue die Grundlage, um ehrlich zu messen und zu verbessern.",
+  "Strategie und Umsetzung bleiben nah beim Inhaber – kein Weiterreichen direkt nach dem Verkauf.",
+  "Ich trenne Kontaktaktionen, qualifizierte Anfragen und Aufträge klar voneinander.",
+  "Messung und Optimierung bleiben transparent; erfundene Erfolgsversprechen gibt es nicht.",
 ];
 
 export function AboutSection() {
@@ -81,7 +82,8 @@ export function AboutSection() {
             Ich begleite lokale Dienstleister von der ersten Analyse bis zur
             Auswertung. Dabei zählt nicht, wie viele Seiten oder Klicks ein
             System produziert, sondern ob Kontakte nachvollziehbar sind und
-            welche davon später zu Angeboten und Aufträgen werden.
+            welche davon laut dokumentiertem Kundenfeedback qualifiziert sind,
+            zu einem Angebot führen oder tatsächlich beauftragt werden.
           </p>
 
           <ul className="mt-7 space-y-4">

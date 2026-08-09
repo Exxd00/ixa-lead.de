@@ -25,7 +25,7 @@ export const siteConfig = {
   seo: {
     title: "IXA Leads | Nachvollziehbare Anfragen für lokale Dienstleister",
     description:
-      "Website, Google Ads und Kontaktmessung als ein verständliches System für lokale Dienstleister in Nürnberg und Franken, deren Kunden bereits bei Google suchen.",
+      "IXA prüft, baut und optimiert messbare Anfrage-Systeme für lokale Dienstleister in Nürnberg und Franken, deren Kunden bereits aktiv bei Google suchen.",
     url: "https://ixa-leads.de",
   },
 };
@@ -36,24 +36,16 @@ export const leadServiceOptions = [
     label: "Kostenlose Anfrage-Potenzialanalyse",
   },
   {
-    id: "website-system",
-    label: "IXA Website-System – 1.000 € einmalig",
-  },
-  {
     id: "startklar",
-    label: "IXA Anfrage-System – 1.500 € einmalig",
+    label: "IXA Anfrage-System – 90 Tage",
   },
   {
-    id: "google-ads-setup",
-    label: "Google Ads Start – 500 € einmalig",
+    id: "website-system",
+    label: "Website-System als digitale Grundlage",
   },
   {
     id: "betreuung",
-    label: "Betreuung & Optimierung – 500 € pro Monat",
-  },
-  {
-    id: "single-update",
-    label: "Einzelne Anpassung – 50–100 €",
+    label: "IXA Anfrage-Optimierung – optional nach 90 Tagen",
   },
 ] as const;
 
@@ -66,128 +58,49 @@ export const callbackService = {
   label: "Rückrufwunsch",
 } as const;
 
-export const packages = [
-  {
-    id: "website-system",
-    eyebrow: "Einmaliger Aufbau",
-    name: "IXA Website-System",
-    price: "1.000 €",
-    retainer: "einmalig",
-    tagline:
-      "Eine komplette Website inklusive Kontaktwegen, Tracking und Messung – nicht nur schönes Design.",
-    highlighted: false,
-    badge: "",
-    features: [
-      "Individuelle, mobil optimierte Website",
-      "Anruf, WhatsApp und Formular klar eingebunden",
-      "Tracking und Messung von Anfang an inklusive",
-      "Kontaktwege übersichtlich dokumentiert",
-      "Technische Veröffentlichung und Übergabe",
-    ],
-    cta: "Website-System anfragen",
-  },
-  {
-    id: "startklar",
-    eyebrow: "Empfohlener Systemstart",
-    name: "IXA Anfrage-System",
-    price: "1.500 €",
-    retainer: "einmalig",
-    tagline:
-      "Website, Google-Ads-Start und Kontaktmessung als ein klarer Einstieg.",
-    highlighted: true,
-    badge: "Empfohlener Start",
-    features: [
-      "Alles aus dem IXA Website-System",
-      "Eine Google-Ads-Kampagne vollständig eingerichtet",
-      "Region, Suchbegriffe und Anzeigen abgestimmt",
-      "Werbung mit der Kontaktmessung verbunden",
-      "Startbereit übergeben; Werbebudget separat",
-    ],
-    cta: "Anfrage-System besprechen",
-  },
-  {
-    id: "betreuung",
-    eyebrow: "Laufende Begleitung",
-    name: "Betreuung & Optimierung",
-    price: "500 €",
-    retainer: "pro Monat",
-    tagline:
-      "Für Betriebe, die Website und Anzeigen nicht selbst pflegen möchten.",
-    highlighted: false,
-    badge: "",
-    features: [
-      "Website laufend pflegen",
-      "Kleinere Anpassungen im vereinbarten Rahmen",
-      "Google Ads regelmäßig prüfen und optimieren",
-      "Kontaktwege und Messung kontrollieren",
-      "Ein direkter Ansprechpartner",
-    ],
-    cta: "Betreuung besprechen",
-  },
-];
-
-export const pricingExtras = [
-  {
-    id: "google-ads-setup",
-    eyebrow: "Auch einzeln buchbar",
-    name: "Google Ads Start",
-    price: "500 € einmalig",
-    description:
-      "Eine Kampagne wird vollständig eingerichtet, mit der Kontaktmessung verbunden und startklar übergeben.",
-    note: "Werbebudget nicht enthalten.",
-    cta: "Google Ads anfragen",
-  },
-  {
-    id: "single-update",
-    eyebrow: "Flexibel nach dem Start",
-    name: "Einzelne Anpassung",
-    price: "50–100 € je Auftrag",
-    description:
-      "Für bestehende Kunden oder klar abgegrenzte kleine Änderungen an Website oder Google Ads. Den genauen Preis nenne ich vor der Umsetzung.",
-    note: "Sie beauftragen nur, was Sie wirklich brauchen.",
-    cta: "Anpassung anfragen",
-  },
-];
-
 export const faqs = [
   {
-    q: "Schalten Sie Google-Ads-Kampagnen?",
-    a: "Ja. Die einmalige Einrichtung kostet 500 € und ist auch im IXA Anfrage-System enthalten. Wenn ich Website und Anzeigen anschließend laufend pflegen und optimieren soll, ist das über die monatliche Betreuung möglich. Das Werbebudget zahlen Sie separat direkt an Google.",
+    q: "Warum umfasst das IXA Anfrage-System 90 Tage?",
+    a: "Die Veröffentlichung einer Website oder der Start einer Google-Ads-Kampagne ist nur der Anfang. Erst mit realen Such-, Klick-, Kontakt- und Kundenfeedback-Daten lässt sich besser beurteilen, welche Suchbegriffe, Anzeigen und Kontaktwege funktionieren. Deshalb umfasst das IXA Anfrage-System neben Analyse und Aufbau auch eine erste Optimierungsphase.",
   },
   {
-    q: "Garantieren Sie eine bestimmte Zahl an Kunden?",
-    a: "Nein. Eine feste Zahl lässt sich nicht seriös garantieren, weil das Ergebnis von Kampagne, Angebot, Markt, Wettbewerb, Reaktionszeit und weiteren Faktoren abhängt. Ich verpflichte mich zur vereinbarten Umsetzung, zu besserer Nutzererfahrung, zu getesteten Formularen und Buttons und zu sauber eingerichtetem Tracking – auf dieser Basis lässt sich ehrlich optimieren.",
+    q: "Brauche ich zuerst eine Website?",
+    a: "Wenn noch keine geeignete Website oder Landingpage vorhanden ist, kann sie Teil des Anfrage-Systems sein. Ist bereits eine passende Seite vorhanden, muss nicht unnötig neu gebaut werden.",
   },
   {
-    q: "Brauche ich eine komplette Website oder reicht eine einzelne Seite?",
-    a: "Das hängt von Ihrem Ziel ab. Wer für eine konkrete Leistung wirbt, fährt oft mit einer einzelnen Landingpage besser. Wer mehrere Leistungen oder Orte abdecken will, braucht eine strukturierte Website mit Service- und Städteseiten. Ich empfehle die Lösung nach Bedarf – nicht nach Projektgröße.",
+    q: "Bringt eine Website automatisch neue Kunden?",
+    a: "Nein. Eine Website schafft die Grundlage für Information, Vertrauen und Kontakt. Neue Besucher entstehen jedoch nicht automatisch. Je nach Situation können Google-Suche, Empfehlungen oder Google Ads zusätzliche Sichtbarkeit schaffen.",
   },
   {
-    q: "Kann meine bestehende Website verbessert werden, statt neu zu bauen?",
-    a: "Oft ja. Wenn die vorhandene Struktur und Technik tragfähig sind, verbessere ich gezielt Geschwindigkeit, Struktur, Kontaktwege und Tracking. Ist die Basis zu schwach, ist ein Neuaufbau meist der schnellere und günstigere Weg. Die kostenlose Potenzialanalyse klärt das vorab.",
+    q: "Muss ich direkt mit Google Ads starten?",
+    a: "Nein. Wir prüfen zuerst die Ausgangslage. Wenn Website, Angebot, Kapazität oder Messung noch nicht bereit sind, kann es sinnvoll sein, diese Punkte zuerst zu verbessern.",
   },
   {
-    q: "Mit welchen Branchen arbeiten Sie?",
-    a: "Am besten passt IXA zu lokalen Dienstleistern, nach deren Leistung Menschen bereits konkret bei Google suchen – etwa Handwerk, Notdienste, Fahrzeugankauf, Montage, Reinigung oder Reparatur. Entscheidend ist nicht die Branche, sondern ein klarer Auftragswert, freie Kapazität und ein Kontaktweg über Telefon, WhatsApp oder Formular.",
+    q: "Wie viele neue Kunden bekomme ich?",
+    a: "Eine feste Kundenzahl lässt sich seriös nicht garantieren. Suchnachfrage, Wettbewerb, Werbebudget, Angebot, Preis, Erreichbarkeit, Kapazität und Abschlussquote beeinflussen das Ergebnis. IXA misst deshalb Kontaktaktionen und optimiert anhand realer Daten, ohne Kontakte automatisch als Kunden oder Aufträge darzustellen.",
   },
   {
-    q: "Verbinden Sie das Formular mit meinen Systemen?",
-    a: "Ja. Auf Wunsch laufen Anfragen per Webhook automatisch in Google Sheets und weitere Tools. So geht keine Anfrage im E-Mail-Postfach unter und Sie können schneller reagieren.",
+    q: "Was ist der Unterschied zwischen Kontaktaktion, qualifizierter Anfrage und Auftrag?",
+    a: "Eine Kontaktaktion ist zunächst ein Anruf, eine WhatsApp-Nachricht oder ein Formular. Eine qualifizierte Anfrage liegt vor, wenn Bedarf, angebotene Leistung und Region grundsätzlich passen. Ein Auftrag entsteht erst, wenn sich der Interessent tatsächlich für den Betrieb entscheidet.",
   },
   {
-    q: "Wie lange dauert ein Projekt?",
-    a: "Das hängt von Umfang, Zahl der Seiten, Bereitschaft der Inhalte und den Tracking- und Automations-Anforderungen ab. Umfang, Schritte und Dauer werden vor Beginn klar festgelegt.",
+    q: "Was passiert, wenn mein Betrieb bereits genug Anfragen erhält?",
+    a: "Dann prüfen wir zuerst, ob zusätzliche Werbung überhaupt der richtige Hebel ist. Wenn bereits ausreichend Nachfrage vorhanden ist, aber zu wenige Aufträge entstehen, kann der Engpass beispielsweise bei Erreichbarkeit, Qualifizierung, Angebot, Preis oder Abschluss liegen.",
   },
   {
-    q: "Testen Sie das Tracking vor dem Launch?",
-    a: "Ja. Events, Formulare und Kontakt-Buttons werden vor dem Launch so weit wie möglich getestet, damit die wichtigsten Conversions wie vereinbart funktionieren.",
+    q: "Muss ich den gesamten Betrag sofort bezahlen?",
+    a: "Nein. Nach vorheriger Vereinbarung kann die Gesamtinvestition auf klar definierte Projektphasen verteilt werden. Gesamtpreis, Leistungsumfang und Zahlungstermine werden vor Projektbeginn transparent festgelegt.",
+  },
+  {
+    q: "Ist das Google-Werbebudget im Preis enthalten?",
+    a: "Nein. Das Werbebudget ist vom IXA-Honorar getrennt und wird direkt an Google bezahlt.",
   },
 ];
 
 export const footerLinks = [
-  { label: "Leistungen", href: "#services" },
-  { label: "Pakete", href: "#packages" },
-  { label: "Ablauf", href: "#process" },
+  { label: "Anfrage-System", href: "#services" },
+  { label: "90 Tage", href: "#process" },
+  { label: "Investition", href: "#packages" },
   { label: "FAQ", href: "#faq" },
   { label: "Kontakt", href: "#contact" },
 ];

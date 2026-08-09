@@ -439,13 +439,11 @@ export async function POST(request: Request) {
     }
 
     if (data.auditType === "written") {
-      if (!data.url) {
-        return NextResponse.json(
-          { ok: false, error: "invalid_website" },
-          { status: 422 },
-        );
-      }
-      if (data.contactMethod !== "whatsapp" && data.contactMethod !== "email") {
+      if (
+        data.contactMethod !== "whatsapp" &&
+        data.contactMethod !== "email" &&
+        data.contactMethod !== "phone"
+      ) {
         return NextResponse.json(
           { ok: false, error: "invalid_contact_method" },
           { status: 422 },
@@ -453,10 +451,19 @@ export async function POST(request: Request) {
       }
       if (
         (data.contactMethod === "email" && !isEmail(data.contact)) ||
-        (data.contactMethod === "whatsapp" && !isPhone(data.contact))
+        ((data.contactMethod === "whatsapp" ||
+          data.contactMethod === "phone") &&
+          !isPhone(data.contact))
       ) {
         return NextResponse.json(
           { ok: false, error: "invalid_contact" },
+          { status: 422 },
+        );
+      }
+
+      if (!data.company || !data.projectDetail || !data.capacity) {
+        return NextResponse.json(
+          { ok: false, error: "missing_qualification_details" },
           { status: 422 },
         );
       }
@@ -497,7 +504,7 @@ export async function POST(request: Request) {
         { status: 422 },
       );
     }
-    if (!data.projectDetail || !data.problem) {
+    if (!data.company || !data.projectDetail || !data.capacity) {
       return NextResponse.json(
         { ok: false, error: "missing_project_details" },
         { status: 422 },

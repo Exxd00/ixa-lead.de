@@ -11,8 +11,8 @@ import { useEffect, useState } from "react";
 const links = [
   { label: "Ergebnisse", href: "#results" },
   { label: "System", href: "#services" },
-  { label: "Preise", href: "#packages" },
-  { label: "Ablauf", href: "#process" },
+  { label: "90 Tage", href: "#process" },
+  { label: "Investition", href: "#packages" },
   { label: "Kontakt", href: "#contact" },
 ];
 

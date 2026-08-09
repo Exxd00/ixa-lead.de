@@ -1,7 +1,7 @@
 "use client";
 
 import { siteConfig } from "@/data/site";
-import { ArrowLeft, CheckCircle2, Clock3, MapPin } from "lucide-react";
+import { ArrowLeft, Check, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -59,11 +59,6 @@ export function DankeContent() {
     );
   }
 
-  const isWrittenAnalysis =
-    receipt.serviceId === "website-check" && receipt.auditType === "written";
-  const isOnsiteAnalysis =
-    receipt.serviceId === "website-check" && receipt.auditType === "onsite";
-
   return (
     <main className="hero-wash relative isolate grid min-h-screen place-items-center overflow-hidden px-5 py-12 text-white">
       <div
@@ -84,37 +79,41 @@ export function DankeContent() {
           Erfolgreich übermittelt
         </p>
         <h1 className="mt-3 text-3xl font-bold tracking-tight text-white sm:text-4xl">
-          Danke für Ihre Anfrage.
+          Danke. Jetzt prüfen wir zuerst, ob ein Anfrage-System sinnvoll ist.
         </h1>
         <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-white/70">
-          {isWrittenAnalysis
-            ? "Ich prüfe Leistung, Region und Kontaktweg. Ihre kurze schriftliche Einschätzung erhalten Sie in weniger als 24 Stunden."
-            : isOnsiteAnalysis
-              ? "Ich prüfe Ihre Angaben und melde mich persönlich, um den Termin in Nürnberg zu bestätigen."
-              : "Ich prüfe Ihre Angaben und melde mich persönlich, um den passenden nächsten Schritt zu klären."}
+          Wir schauen uns Ihre Leistung, Zielregion, aktuelle Ausgangslage und
+          freie Kapazität an.
         </p>
 
-        <div className="mt-7 grid gap-3 text-left sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
-            <Clock3 className="size-5 text-success-300" aria-hidden="true" />
-            <p className="mt-2 text-sm font-bold text-white">
-              Persönlich geprüft
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-white/55">
-              Ihre Angaben landen direkt bei mir und werden nicht automatisch
-              bewertet.
-            </p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-black/15 p-4">
-            <MapPin className="size-5 text-success-300" aria-hidden="true" />
-            <p className="mt-2 text-sm font-bold text-white">
-              Direkt aus Nürnberg
-            </p>
-            <p className="mt-1 text-xs leading-relaxed text-white/55">
-              Persönlich bearbeitet von {siteConfig.owner}.
-            </p>
-          </div>
+        <div className="mt-7 rounded-2xl border border-white/10 bg-black/15 p-5 text-left">
+          <p className="text-sm font-bold text-white">
+            Die persönliche Einschätzung kann zum Beispiel lauten:
+          </p>
+          <ul className="mt-4 space-y-3">
+            {[
+              "Ein Anfrage-System ist aktuell sinnvoll.",
+              "Zuerst sollte ein anderer Engpass gelöst werden.",
+              "Zusätzliche Werbung ist momentan nicht die wirtschaftlich sinnvollste nächste Maßnahme.",
+            ].map((item) => (
+              <li key={item} className="flex items-start gap-3">
+                <Check
+                  className="mt-0.5 size-4 shrink-0 text-success-300"
+                  strokeWidth={3}
+                />
+                <span className="text-sm leading-relaxed text-white/65">
+                  {item}
+                </span>
+              </li>
+            ))}
+          </ul>
         </div>
+
+        <p className="mx-auto mt-5 max-w-md text-sm font-semibold leading-relaxed text-white/70">
+          Wir empfehlen keinen Kampagnenstart nur deshalb, weil jemand Werbung
+          buchen möchte. Ihre Angaben werden persönlich von {siteConfig.owner}
+          geprüft.
+        </p>
 
         <Link
           href="/"
