@@ -65,19 +65,11 @@ export const faqs = [
   },
   {
     q: "Brauche ich zuerst eine Website?",
-    a: "Wenn noch keine geeignete Website oder Landingpage vorhanden ist, kann sie Teil des Anfrage-Systems sein. Ist bereits eine passende Seite vorhanden, muss nicht unnötig neu gebaut werden.",
-  },
-  {
-    q: "Bringt eine Website automatisch neue Kunden?",
-    a: "Nein. Eine Website schafft die Grundlage für Information, Vertrauen und Kontakt. Neue Besucher entstehen jedoch nicht automatisch. Je nach Situation können Google-Suche, Empfehlungen oder Google Ads zusätzliche Sichtbarkeit schaffen.",
+    a: "Wenn noch keine geeignete Website oder Landingpage vorhanden ist, kann sie Teil des Anfrage-Systems sein. Ist bereits eine passende Seite vorhanden, wird nicht unnötig neu gebaut. Eine Website schafft Vertrauen und ermöglicht Kontakt, erzeugt aber nicht automatisch neue Besucher.",
   },
   {
     q: "Muss ich direkt mit Google Ads starten?",
     a: "Nein. Wir prüfen zuerst die Ausgangslage. Wenn Website, Angebot, Kapazität oder Messung noch nicht bereit sind, kann es sinnvoll sein, diese Punkte zuerst zu verbessern.",
-  },
-  {
-    q: "Wie viele neue Kunden bekomme ich?",
-    a: "Eine feste Kundenzahl lässt sich seriös nicht garantieren. Suchnachfrage, Wettbewerb, Werbebudget, Angebot, Preis, Erreichbarkeit, Kapazität und Abschlussquote beeinflussen das Ergebnis. IXA misst deshalb Kontaktaktionen und optimiert anhand realer Daten, ohne Kontakte automatisch als Kunden oder Aufträge darzustellen.",
   },
   {
     q: "Was ist der Unterschied zwischen Kontaktaktion, qualifizierter Anfrage und Auftrag?",
@@ -88,12 +80,8 @@ export const faqs = [
     a: "Dann prüfen wir zuerst, ob zusätzliche Werbung überhaupt der richtige Hebel ist. Wenn bereits ausreichend Nachfrage vorhanden ist, aber zu wenige Aufträge entstehen, kann der Engpass beispielsweise bei Erreichbarkeit, Qualifizierung, Angebot, Preis oder Abschluss liegen.",
   },
   {
-    q: "Muss ich den gesamten Betrag sofort bezahlen?",
-    a: "Nein. Nach vorheriger Vereinbarung kann die Gesamtinvestition auf klar definierte Projektphasen verteilt werden. Gesamtpreis, Leistungsumfang und Zahlungstermine werden vor Projektbeginn transparent festgelegt.",
-  },
-  {
-    q: "Ist das Google-Werbebudget im Preis enthalten?",
-    a: "Nein. Das Werbebudget ist vom IXA-Honorar getrennt und wird direkt an Google bezahlt.",
+    q: "Wie werden Honorar und Google-Werbebudget bezahlt?",
+    a: "Die Gesamtinvestition kann wie auf der Seite gezeigt auf klar definierte Projektphasen verteilt werden. Das Google-Werbebudget ist vom IXA-Honorar getrennt und wird direkt an Google bezahlt. Leistungsumfang, Gesamtpreis und Zahlungstermine werden vor Projektbeginn transparent festgelegt.",
   },
 ];
 

@@ -4,7 +4,6 @@ import {
   type DocumentedCaseEvidence,
   documentedCases,
   portfolioEvidence,
-  projectLinks,
 } from "@/data/evidence";
 import type { LucideIcon } from "lucide-react";
 import {
@@ -138,9 +137,6 @@ function SupportingCase({ study }: { study: DocumentedCaseEvidence }) {
       <p className="mt-2 text-[10px] leading-relaxed text-stone-400">
         {study.ga4.period}; nicht mit dem Lead-Sheet verrechnet.
       </p>
-      <p className="mt-4 border-t border-stone-100 pt-3 text-[11px] font-semibold text-navy">
-        Kontaktaktionen ≠ qualifizierte Anfragen ≠ Aufträge.
-      </p>
     </article>
   );
 }
@@ -205,9 +201,6 @@ function PortfolioSummary() {
           Vier Projekte zusammen; Franken Autoankauf 24 ist bereits enthalten.
           Grundlage sind {portfolioEvidence.caseCount} getrennte Lead-Sheets.
         </p>
-        <p className="mt-2 text-[11px] font-semibold text-navy">
-          Kontaktaktionen ≠ qualifizierte Anfragen ≠ Aufträge.
-        </p>
       </div>
     </section>
   );
@@ -218,15 +211,6 @@ const featuredCase =
 const supportingCases = documentedCases.filter(
   (study) => study.id !== featuredCase.id && study.id !== "keller-montage",
 );
-const highlightedDomains = new Set([
-  "frankenautoankauf24.de",
-  "rohrreinigung-kraft.de",
-  "mobelmontage-nurnberg.de",
-]);
-const additionalProjects = projectLinks.filter(
-  (project) => !highlightedDomains.has(project.domain),
-);
-
 export function FeaturedProofSection() {
   return (
     <section id="results" className="py-16 sm:py-20 lg:py-24">
@@ -283,45 +267,6 @@ export function CaseStudiesSection() {
                 <SupportingCase key={study.id} study={study} />
               ))}
             </div>
-            <details className="group/projects mt-5 border-t border-stone-200 pt-4">
-              <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-500 marker:content-none hover:bg-white hover:text-navy [&::-webkit-details-marker]:hidden">
-                Weitere Projekte
-                <ChevronDown
-                  className="size-4 transition-transform group-open/projects:rotate-180"
-                  aria-hidden="true"
-                />
-              </summary>
-              <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                {additionalProjects.map((project) => (
-                  <li key={project.url}>
-                    <a
-                      href={project.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="focus-ring group/link flex h-full items-center justify-between gap-4 rounded-xl border border-stone-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-soft"
-                    >
-                      <span className="min-w-0">
-                        <span className="block text-sm font-bold text-navy">
-                          {project.label}
-                        </span>
-                        <span className="mt-1 block truncate font-mono text-xs text-stone-400">
-                          {project.domain}
-                        </span>
-                        {"note" in project && project.note && (
-                          <span className="mt-1.5 block text-[11px] leading-snug text-stone-400">
-                            {project.note}
-                          </span>
-                        )}
-                      </span>
-                      <ExternalLink
-                        className="size-4 shrink-0 text-stone-300 transition-colors group-hover/link:text-primary"
-                        aria-hidden="true"
-                      />
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </details>
           </div>
         </details>
       </div>

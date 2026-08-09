@@ -65,8 +65,7 @@ export function PackagesSection() {
                 </div>
                 <p className="mt-6 text-sm leading-relaxed text-white/60">
                   Leistungsumfang, Gesamtpreis und Zahlungstermine werden vor
-                  Projektstart transparent vereinbart. Es wird keine feste Zahl
-                  von Kunden, Leads, Aufträgen oder Umsatz versprochen.
+                  Projektstart transparent vereinbart.
                 </p>
                 <CtaButton
                   event="package_cta_click"

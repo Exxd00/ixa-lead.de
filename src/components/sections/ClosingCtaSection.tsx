@@ -40,8 +40,7 @@ export function ClosingCtaSection() {
               Anfrage-Potenzial kostenlos prüfen
             </CtaButton>
             <p className="mt-3 text-xs font-semibold text-white/50">
-              Kostenlose persönliche Ersteinschätzung · keine feste Kundenzahl
-              versprochen
+              Kostenlose persönliche Ersteinschätzung
             </p>
           </div>
         </Reveal>

@@ -10,10 +10,9 @@ import {
 } from "lucide-react";
 
 const promises = [
-  "Sie sprechen direkt mit demjenigen, der Strategie und Umsetzung verantwortet.",
-  "Strategie und Umsetzung bleiben nah beim Inhaber – kein Weiterreichen direkt nach dem Verkauf.",
-  "Ich trenne Kontaktaktionen, qualifizierte Anfragen und Aufträge klar voneinander.",
-  "Messung und Optimierung bleiben transparent; erfundene Erfolgsversprechen gibt es nicht.",
+  "Sie sprechen von der Analyse bis zur Optimierung direkt mit mir.",
+  "Strategie und Umsetzung werden nach dem Verkauf nicht weitergereicht.",
+  "Messung, Entscheidungen und nächste Schritte bleiben transparent.",
 ];
 
 export function AboutSection() {
@@ -80,10 +79,9 @@ export function AboutSection() {
           </h2>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-stone-600">
             Ich begleite lokale Dienstleister von der ersten Analyse bis zur
-            Auswertung. Dabei zählt nicht, wie viele Seiten oder Klicks ein
-            System produziert, sondern ob Kontakte nachvollziehbar sind und
-            welche davon laut dokumentiertem Kundenfeedback qualifiziert sind,
-            zu einem Angebot führen oder tatsächlich beauftragt werden.
+            Auswertung. Entscheidend ist ein nachvollziehbares Anfrage-System,
+            das mit echten Such-, Kontakt- und Kundenfeedback-Daten verbessert
+            werden kann.
           </p>
 
           <ul className="mt-7 space-y-4">

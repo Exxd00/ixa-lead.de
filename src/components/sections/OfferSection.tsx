@@ -39,8 +39,7 @@ export function OfferSection() {
                   verbessert.
                 </p>
                 <p className="mt-4 text-sm leading-relaxed text-white/50">
-                  Keine feste Anzahl von Kunden, Leads, Aufträgen oder Umsatz.
-                  Entscheidend ist ein nachvollziehbarer Prozess und eine
+                  Entscheidend sind ein nachvollziehbarer Prozess und eine
                   ehrliche Datengrundlage.
                 </p>
               </div>
