@@ -1,43 +1,37 @@
 const SCHEMA_VERSION = 1;
+const SHEET_NAME = "Anfragen";
 
 const HEADERS = [
-  "Eingang-ID",
-  "Empfangen UTC",
-  "Quelle",
-  "Formulartyp",
-  "Einstieg",
-  "Leistung-ID",
+  "Eingegangen",
   "Gewünschte Leistung",
-  "Branche",
-  "Analyse-Art",
-  "Kontaktweg",
-  "Name",
-  "Kontakt",
   "Unternehmen",
+  "Ansprechpartner",
+  "Telefon / E-Mail",
   "Website",
   "Hauptleistung",
-  "Einsatzgebiet",
+  "Zielregion",
+  "Ausgangslage",
   "Freie Kapazität",
-  "Auftragswert",
-  "Werbebudget",
-  "Startzeitpunkt",
-  "Termin-Ort",
-  "Terminwunsch",
-  "Projektsituation",
-  "Anliegen",
-  "Landingpage",
-  "Referrer",
-  "UTM Source",
-  "UTM Medium",
-  "UTM Campaign",
-  "UTM Term",
-  "UTM Content",
+  "Typischer Auftragswert",
+  "Größtes Problem",
+  "GCLID",
+  "Kontaktweg",
   "Status",
-  "Erstkontakt",
-  "Qualifizierung",
-  "Angebot EUR",
-  "Ergebnis",
+  "Erreicht",
+  "Qualifizierte Anfrage",
+  "Angebot / Termin",
+  "Auftrag",
+  "Umsatz",
   "Notizen",
+  "Eingang-ID (intern)",
+];
+
+const HEADER_COLORS = [
+  "#3157D5", "#3157D5", "#3157D5", "#3157D5", "#3157D5",
+  "#3157D5", "#3157D5", "#3157D5", "#3157D5", "#3157D5",
+  "#3157D5", "#3157D5", "#3157D5", "#3157D5", "#D97706",
+  "#0F766E", "#6D28D9", "#B45309", "#15803D", "#166534",
+  "#475569", "#94A3B8",
 ];
 
 function doGet() {
@@ -72,13 +66,13 @@ function doPost(e) {
       const spreadsheetId = properties.getProperty("SPREADSHEET_ID");
       if (!spreadsheetId) throw new Error("missing_spreadsheet_id");
 
-      const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-      const sheet = prepareSheet_(spreadsheet);
+      const sheet = prepareSheet_(SpreadsheetApp.openById(spreadsheetId));
       const lastRow = sheet.getLastRow();
+      const idColumn = HEADERS.indexOf("Eingang-ID (intern)") + 1;
 
       if (lastRow > 1) {
         const existing = sheet
-          .getRange(2, 1, lastRow - 1, 1)
+          .getRange(2, idColumn, lastRow - 1, 1)
           .createTextFinder(body.submissionId)
           .matchEntireCell(true)
           .matchCase(true)
@@ -93,45 +87,35 @@ function doPost(e) {
         }
       }
 
+      const receivedAt = new Date(body.receivedAt || "");
       const row = [
-        body.submissionId,
-        body.receivedAt,
-        body.source,
-        body.submissionType,
-        body.entryPoint,
-        body.serviceId,
+        Number.isNaN(receivedAt.getTime()) ? body.receivedAt : receivedAt,
         body.neededService,
-        body.branch,
-        body.auditType,
-        body.contactMethod,
+        body.company,
         body.name,
         body.contact,
-        body.company,
         body.url,
         body.serviceFocus,
         body.serviceArea,
+        body.projectDetail,
         body.capacity,
         body.orderValueRange,
-        body.adBudgetReadiness,
-        body.startTiming,
-        body.visitLocation,
-        body.visitWindow,
-        body.projectDetail,
         body.problem,
-        body.landingPath,
-        body.referrerHost,
-        body.utmSource,
-        body.utmMedium,
-        body.utmCampaign,
-        body.utmTerm,
-        body.utmContent,
+        body.gclid,
+        body.contactMethod || body.submissionType,
         "Neu",
+        false,
+        false,
+        "",
+        false,
         "",
         "",
-        "",
-        "",
-        "",
-      ].map(safeCell_);
+        body.submissionId,
+      ].map((value) =>
+        value instanceof Date || typeof value === "boolean"
+          ? value
+          : safeCell_(value),
+      );
 
       sheet
         .getRange(sheet.getLastRow() + 1, 1, 1, HEADERS.length)
@@ -158,28 +142,102 @@ function setupSheet() {
   if (!spreadsheetId) throw new Error("missing_spreadsheet_id");
 
   const sheet = prepareSheet_(SpreadsheetApp.openById(spreadsheetId));
-  sheet.autoResizeColumns(1, HEADERS.length);
   return { ok: true, sheet: sheet.getName(), columns: HEADERS.length };
 }
 
 function prepareSheet_(spreadsheet) {
-  let sheet = spreadsheet.getSheetByName("Leads");
-  if (!sheet) sheet = spreadsheet.insertSheet("Leads");
+  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
+  if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
 
   if (sheet.getLastRow() === 0) {
     sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-    sheet.setFrozenRows(1);
   } else {
     const currentHeaders = sheet
       .getRange(1, 1, 1, HEADERS.length)
       .getDisplayValues()[0];
-
     if (currentHeaders.join("\u001f") !== HEADERS.join("\u001f")) {
       throw new Error("header_mismatch");
     }
   }
 
+  formatSheet_(sheet);
   return sheet;
+}
+
+function formatSheet_(sheet) {
+  const maxRows = Math.max(sheet.getMaxRows(), 2);
+  const statusColumn = HEADERS.indexOf("Status") + 1;
+  const reachedColumn = HEADERS.indexOf("Erreicht") + 1;
+  const qualifiedColumn = HEADERS.indexOf("Qualifizierte Anfrage") + 1;
+  const orderColumn = HEADERS.indexOf("Auftrag") + 1;
+  const revenueColumn = HEADERS.indexOf("Umsatz") + 1;
+  const idColumn = HEADERS.indexOf("Eingang-ID (intern)") + 1;
+
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(2);
+  sheet.setRowHeight(1, 42);
+  sheet
+    .getRange(1, 1, 1, HEADERS.length)
+    .setBackgrounds([HEADER_COLORS])
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setVerticalAlignment("middle")
+    .setHorizontalAlignment("left")
+    .setWrap(true);
+
+  const widths = [
+    145, 230, 180, 170, 200, 220, 180, 180, 260, 260, 170,
+    280, 200, 120, 140, 100, 170, 180, 100, 120, 280, 100,
+  ];
+  widths.forEach((width, index) => sheet.setColumnWidth(index + 1, width));
+
+  sheet.getRange(2, 1, maxRows - 1, 1).setNumberFormat("dd.MM.yyyy HH:mm");
+  sheet
+    .getRange(2, 1, maxRows - 1, HEADERS.length)
+    .setVerticalAlignment("top")
+    .setWrap(true);
+  sheet.getRange(2, revenueColumn, maxRows - 1, 1).setNumberFormat('#,##0.00 "€"');
+
+  sheet.getRange(2, reachedColumn, maxRows - 1, 1).insertCheckboxes();
+  sheet.getRange(2, qualifiedColumn, maxRows - 1, 1).insertCheckboxes();
+  sheet.getRange(2, orderColumn, maxRows - 1, 1).insertCheckboxes();
+
+  const statusValues = [
+    "Neu",
+    "Kontaktiert",
+    "Qualifiziert",
+    "Angebot / Termin",
+    "Auftrag",
+    "Nicht passend",
+  ];
+  const statusValidation = SpreadsheetApp.newDataValidation()
+    .requireValueInList(statusValues, true)
+    .setAllowInvalid(false)
+    .build();
+  sheet.getRange(2, statusColumn, maxRows - 1, 1).setDataValidation(statusValidation);
+
+  const statusRange = sheet.getRange(2, statusColumn, maxRows - 1, 1);
+  const statusRules = [
+    ["Neu", "#FEF3C7", "#92400E"],
+    ["Kontaktiert", "#DBEAFE", "#1E40AF"],
+    ["Qualifiziert", "#EDE9FE", "#5B21B6"],
+    ["Angebot / Termin", "#FFEDD5", "#9A3412"],
+    ["Auftrag", "#DCFCE7", "#166534"],
+    ["Nicht passend", "#FEE2E2", "#991B1B"],
+  ].map(([value, background, fontColor]) =>
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenTextEqualTo(value)
+      .setBackground(background)
+      .setFontColor(fontColor)
+      .setRanges([statusRange])
+      .build(),
+  );
+  sheet.setConditionalFormatRules(statusRules);
+
+  if (!sheet.getFilter()) {
+    sheet.getRange(1, 1, maxRows, HEADERS.length).createFilter();
+  }
+  sheet.hideColumns(idColumn);
 }
 
 function safeCell_(value) {

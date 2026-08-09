@@ -46,6 +46,7 @@ const payloadKeys = [
   "utmCampaign",
   "utmTerm",
   "utmContent",
+  "gclid",
 ] as const;
 
 type PayloadKey = (typeof payloadKeys)[number];
@@ -97,6 +98,7 @@ const fieldLimits: Partial<Record<PayloadKey, number>> = {
   utmCampaign: 500,
   utmTerm: 500,
   utmContent: 500,
+  gclid: 500,
 };
 
 function normalizeWebsite(value: string): string | null {
@@ -205,38 +207,18 @@ async function forwardToSheet(
 }
 
 const notificationFields: Array<[keyof Lead, string]> = [
-  ["submissionId", "Eingang-ID"],
-  ["receivedAt", "Empfangen (UTC)"],
-  ["submissionType", "Formulartyp"],
-  ["serviceId", "Leistung-ID"],
   ["neededService", "Gewünschte Leistung"],
-  ["branch", "Branche"],
-  ["auditType", "Analyse-Art"],
-  ["contactMethod", "Kontaktweg"],
-  ["name", "Name"],
-  ["contact", "Kontakt"],
   ["company", "Unternehmen"],
+  ["name", "Ansprechpartner"],
+  ["contact", "Telefon / E-Mail"],
   ["url", "Website"],
   ["serviceFocus", "Hauptleistung"],
-  ["serviceArea", "Einsatzgebiet"],
-  ["adService", "Bestehende Werbung"],
-  ["budget", "Budget"],
+  ["serviceArea", "Zielregion"],
+  ["projectDetail", "Aktuelle Ausgangslage"],
   ["capacity", "Freie Kapazität"],
-  ["orderValueRange", "Auftragswert"],
-  ["adBudgetReadiness", "Werbebudget"],
-  ["startTiming", "Startzeitpunkt"],
-  ["visitLocation", "Termin-Ort"],
-  ["visitWindow", "Terminwunsch"],
-  ["projectDetail", "Projektsituation"],
-  ["problem", "Anliegen"],
-  ["entryPoint", "Einstieg"],
-  ["landingPath", "Landingpage"],
-  ["referrerHost", "Referrer"],
-  ["utmSource", "UTM Source"],
-  ["utmMedium", "UTM Medium"],
-  ["utmCampaign", "UTM Campaign"],
-  ["utmTerm", "UTM Term"],
-  ["utmContent", "UTM Content"],
+  ["orderValueRange", "Typischer Auftragswert"],
+  ["problem", "Größtes Problem"],
+  ["gclid", "Google Click ID (GCLID)"],
 ];
 
 function escapeHtml(value: string): string {
@@ -249,25 +231,40 @@ function escapeHtml(value: string): string {
 }
 
 function notificationContent(lead: Lead) {
+  const receivedAt = new Intl.DateTimeFormat("de-DE", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "Europe/Berlin",
+  }).format(new Date(lead.receivedAt));
   const fields = notificationFields.flatMap(([key, label]) => {
     const value = lead[key];
-    return typeof value === "string" && value ? [[label, value] as const] : [];
+    return typeof value === "string" && value
+      ? [[key, label, value] as const]
+      : [];
   });
   const text = [
     "Neue Anfrage über ixa-leads.de",
+    `Eingegangen: ${receivedAt} Uhr`,
     "",
-    ...fields.map(([label, value]) => `${label}: ${value}`),
+    ...fields.map(([, label, value]) => `${label}: ${value}`),
   ].join("\n");
   const rows = fields
-    .map(
-      ([label, value]) =>
-        `<tr><th align="left" style="padding:8px 12px;border-bottom:1px solid #e7e5e4">${escapeHtml(label)}</th><td style="padding:8px 12px;border-bottom:1px solid #e7e5e4;white-space:pre-wrap">${escapeHtml(value)}</td></tr>`,
-    )
+    .map(([key, label, value]) => {
+      const escapedValue = escapeHtml(value);
+      const linkedValue =
+        key === "contact"
+          ? `<a href="${value.includes("@") ? `mailto:${escapedValue}` : `tel:${escapedValue}`}" style="color:#3157d5;font-weight:700;text-decoration:none">${escapedValue}</a>`
+          : key === "url"
+            ? `<a href="${escapedValue}" style="color:#3157d5;font-weight:700;text-decoration:none">${escapedValue}</a>`
+            : escapedValue;
+
+      return `<tr><th align="left" valign="top" style="width:34%;padding:14px 12px;border-bottom:1px solid #e7e5e4;color:#78716c;font-size:12px;line-height:1.5;font-weight:700;text-transform:uppercase;letter-spacing:.04em">${escapeHtml(label)}</th><td valign="top" style="padding:14px 12px;border-bottom:1px solid #e7e5e4;color:#172033;font-size:15px;line-height:1.55;font-weight:600;white-space:pre-wrap;word-break:break-word">${linkedValue}</td></tr>`;
+    })
     .join("");
 
   return {
     text,
-    html: `<div style="font-family:Arial,sans-serif;color:#172033"><h1 style="font-size:20px">Neue Anfrage über ixa-leads.de</h1><table style="border-collapse:collapse;width:100%;max-width:760px">${rows}</table></div>`,
+    html: `<!doctype html><html><body style="margin:0;padding:0;background:#f3f1eb;font-family:Arial,Helvetica,sans-serif;color:#172033"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f3f1eb"><tr><td align="center" style="padding:20px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#ffffff;border:1px solid #e7e5e4;border-radius:22px;overflow:hidden"><tr><td style="padding:28px 24px;background:#172033"><div style="font-size:12px;line-height:1.4;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#7dd3a7">IXA LEADS · NEUE ANFRAGE</div><h1 style="margin:10px 0 0;font-size:25px;line-height:1.2;color:#ffffff">${escapeHtml(lead.company || lead.name || "Neue Kontaktanfrage")}</h1><p style="margin:10px 0 0;font-size:14px;line-height:1.5;color:#cbd5e1">Eingegangen am ${escapeHtml(receivedAt)} Uhr</p></td></tr><tr><td style="padding:12px 16px 24px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border-collapse:collapse">${rows}</table><div style="margin-top:20px;padding:15px 16px;border-radius:14px;background:#eef2ff;color:#172033;font-size:13px;line-height:1.55"><strong>Persönlich bearbeiten:</strong> Bitte Kontakt aufnehmen und die Qualität der Anfrage später im Sheet dokumentieren.</div></td></tr><tr><td style="padding:16px 24px;background:#fafaf9;color:#78716c;font-size:11px;line-height:1.5;text-align:center">ixa-leads.de · Nürnberg &amp; Franken</td></tr></table></td></tr></table></body></html>`,
   };
 }
 
@@ -293,7 +290,7 @@ async function sendLeadNotification(lead: Lead): Promise<void> {
       body: JSON.stringify({
         from,
         to: [to],
-        subject: "Neue Anfrage über ixa-leads.de",
+        subject: `Neue Anfrage · ${lead.company || lead.name || "ixa-leads.de"}`,
         text: content.text,
         html: content.html,
       }),
@@ -471,7 +468,6 @@ export async function POST(request: Request) {
       data.adService = "";
       data.visitLocation = "";
       data.visitWindow = "";
-      data.projectDetail = "";
     } else {
       if (
         !data.company ||

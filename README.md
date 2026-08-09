@@ -39,11 +39,21 @@ verloren. Das identische Geheimnis wird als Script Property `WEBHOOK_SECRET`
 im Apps-Script-Projekt hinterlegt und gehört niemals in eine
 `NEXT_PUBLIC_...`-Variable.
 
+Der Empfänger in `integrations/google-apps-script/Code.gs` legt neue Anfragen
+im Tabellenblatt `Anfragen` ab. `setupSheet()` erstellt und formatiert die
+farbigen Spaltenköpfe, Statusauswahl und Kontrollfelder. Ein vorhandenes
+Tabellenblatt `Leads` bleibt als Archiv unverändert. Sichtbar gespeichert werden
+Formularangaben, Eingangszeit, GCLID und Felder für die spätere persönliche
+Bearbeitung. Die technische Eingang-ID liegt ausschließlich zur Vermeidung von
+Doppeleinträgen in einer ausgeblendeten letzten Spalte.
+
 Nach dem erfolgreichen Speichern sendet Resend eine interne Benachrichtigung.
 Dafür werden `RESEND_API_KEY`, `RESEND_FROM_EMAIL` und
 `LEAD_NOTIFICATION_EMAIL` benötigt. Ein vorübergehender Mailfehler lässt den
 bereits im Sheet gespeicherten Lead nicht fehlschlagen. Die Resend-Anfrage
-nutzt den `submissionId` außerdem als Idempotenzschlüssel.
+nutzt den `submissionId` intern als Idempotenzschlüssel. In der E-Mail selbst
+erscheinen nur Eingangszeit, Formularangaben und – sofern vorhanden – die
+GCLID.
 
 ## Tracking
 
