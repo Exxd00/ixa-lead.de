@@ -50,7 +50,12 @@ export function PackagesSection() {
                 <h3 className="mt-3 text-3xl font-bold text-white">
                   IXA Anfrage-System – 90 Tage
                 </h3>
-                <div className="mt-7 border-y border-white/10 py-6">
+                <p className="mt-4 text-sm font-semibold leading-relaxed text-white/70">
+                  Das Anfrage-System ist für Betriebe gedacht, bei denen
+                  zusätzliche Aufträge einen wirtschaftlich relevanten Wert
+                  haben – nicht für möglichst günstige Website-Projekte.
+                </p>
+                <div className="mt-6 border-y border-white/10 py-6">
                   <p className="font-mono text-4xl font-bold tracking-[-0.05em] text-white sm:text-5xl">
                     3.000 €
                   </p>

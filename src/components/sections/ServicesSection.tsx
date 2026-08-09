@@ -2,15 +2,7 @@ import { Reveal } from "@/components/Reveal";
 import { CtaButton } from "@/components/cta";
 import { SectionHeading } from "@/components/section-heading";
 import { freeCheckServiceId } from "@/data/site";
-import {
-  ArrowRight,
-  BarChart3,
-  Gauge,
-  MessageSquareText,
-  MousePointerClick,
-  Search,
-  Target,
-} from "lucide-react";
+import { ArrowRight, BarChart3, Gauge, Search, Target } from "lucide-react";
 
 const stages = [
   {
@@ -20,27 +12,17 @@ const stages = [
   },
   {
     icon: Target,
-    title: "Gefunden werden",
-    text: "Menschen erreichen, die bereits konkret nach Ihrer Leistung suchen. Eine vorhandene Seite wird genutzt oder verbessert; neu gebaut wird nur, wenn es sinnvoll ist.",
-  },
-  {
-    icon: MessageSquareText,
-    title: "Vertrauen aufbauen",
-    text: "Leistung, Region, Eignung und Kontaktmöglichkeiten müssen schnell verständlich sein.",
-  },
-  {
-    icon: MousePointerClick,
-    title: "Kontakt einfach machen",
-    text: "Telefon, WhatsApp und Formular klar sichtbar integrieren.",
+    title: "Aufbau",
+    text: "Den passenden Weg von der Google-Suche über eine fokussierte Seite bis zu Telefon, WhatsApp oder Formular aufbauen.",
   },
   {
     icon: BarChart3,
-    title: "Kontaktwege messen",
-    text: "Kontaktaktionen getrennt erfassen, damit sichtbar wird, welche Wege tatsächlich genutzt wurden.",
+    title: "Messung",
+    text: "Kontaktaktionen getrennt erfassen, damit sichtbar wird, welche Suchanfragen und Kontaktwege genutzt werden.",
   },
   {
     icon: Gauge,
-    title: "Mit echten Daten verbessern",
+    title: "Optimierung",
     text: "Suchbegriffe, Anzeigen, Landingpage und Kontaktwege anhand realer Daten und Kundenfeedback optimieren.",
   },
 ];
@@ -55,7 +37,7 @@ export function ServicesSection() {
           description="Nicht einzelne Tools stehen im Mittelpunkt, sondern ein klarer Prozess von der vorhandenen Nachfrage bis zur messbaren Kontaktaktion."
         />
 
-        <ol className="mx-auto mt-10 grid max-w-6xl gap-3 md:grid-cols-2 lg:grid-cols-3">
+        <ol className="mx-auto mt-10 grid max-w-6xl gap-3 sm:grid-cols-2 lg:grid-cols-4">
           {stages.map((stage, index) => {
             const Icon = stage.icon;
             return (

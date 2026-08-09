@@ -283,10 +283,14 @@ export function CaseStudiesSection() {
                 <SupportingCase key={study.id} study={study} />
               ))}
             </div>
-            <div className="mt-5 border-t border-stone-200 pt-5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary">
-                Weitere Live-Websites
-              </p>
+            <details className="group/projects mt-5 border-t border-stone-200 pt-4">
+              <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold text-stone-500 marker:content-none hover:bg-white hover:text-navy [&::-webkit-details-marker]:hidden">
+                Weitere Projekte
+                <ChevronDown
+                  className="size-4 transition-transform group-open/projects:rotate-180"
+                  aria-hidden="true"
+                />
+              </summary>
               <ul className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {additionalProjects.map((project) => (
                   <li key={project.url}>
@@ -317,7 +321,7 @@ export function CaseStudiesSection() {
                   </li>
                 ))}
               </ul>
-            </div>
+            </details>
           </div>
         </details>
       </div>

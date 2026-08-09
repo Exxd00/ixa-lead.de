@@ -27,11 +27,11 @@ export default function Home() {
         <FeaturedProofSection />
         <FitSection />
         <ServicesSection />
+        <OfferSection />
+        <PackagesSection />
+        <ProcessSection />
         <CaseStudiesSection />
         <ContactLifecycleSection />
-        <OfferSection />
-        <ProcessSection />
-        <PackagesSection />
         <AboutSection />
         <ContactForm />
         <FaqSection />

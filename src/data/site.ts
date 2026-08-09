@@ -99,7 +99,7 @@ export const faqs = [
 
 export const footerLinks = [
   { label: "Anfrage-System", href: "#services" },
-  { label: "90 Tage", href: "#process" },
+  { label: "90 Tage", href: "#offer" },
   { label: "Investition", href: "#packages" },
   { label: "FAQ", href: "#faq" },
   { label: "Kontakt", href: "#contact" },
