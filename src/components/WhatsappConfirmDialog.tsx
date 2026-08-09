@@ -10,7 +10,11 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { buildWhatsappUrl, track } from "@/lib/tracking";
+import {
+  buildWhatsappUrl,
+  conversionEvents,
+  track,
+} from "@/lib/tracking";
 import { ArrowUpRight, MessageCircle, ShieldCheck } from "lucide-react";
 import type { ReactElement } from "react";
 import { useState } from "react";
@@ -68,7 +72,7 @@ export function WhatsappConfirmDialog({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
-                track("whatsapp_click", { location });
+                track(conversionEvents.whatsapp, { location });
                 setOpen(false);
               }}
             >

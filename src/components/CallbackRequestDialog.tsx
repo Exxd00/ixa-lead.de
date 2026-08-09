@@ -11,7 +11,11 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { callbackService, siteConfig } from "@/data/site";
-import { reportAdsConversion, track } from "@/lib/tracking";
+import {
+  conversionEvents,
+  reportAdsConversion,
+  track,
+} from "@/lib/tracking";
 import {
   AlertTriangle,
   CheckCircle2,
@@ -115,7 +119,7 @@ export function CallbackRequestDialog({
       if (!response.ok) throw new Error("request_failed");
 
       setStatus("success");
-      track("callback_submit_success", {
+      track(conversionEvents.callback, {
         location,
         transaction_id: submissionId,
       });
@@ -255,7 +259,9 @@ export function CallbackRequestDialog({
               <a
                 href={siteConfig.contact.phoneHref}
                 onClick={() =>
-                  track("phone_click", { location: `${location}_confirmed` })
+                  track(conversionEvents.phoneCall, {
+                    location: `${location}_confirmed`,
+                  })
                 }
                 className="focus-ring inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-navy/10 bg-white px-4 text-sm font-semibold text-navy transition-colors hover:border-primary/30 hover:text-primary"
               >

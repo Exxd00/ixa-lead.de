@@ -11,10 +11,11 @@ export type TrackingEvent =
   | "service_cta_click"
   | "package_cta_click"
   | "check_cta_click"
-  | "whatsapp_click"
-  | "phone_click"
+  | "ixa_conversion_thank_you"
+  | "ixa_conversion_phone_call"
+  | "ixa_conversion_callback"
+  | "ixa_conversion_whatsapp"
   | "callback_open"
-  | "callback_submit_success"
   | "callback_submit_error"
   | "email_click"
   | "form_start"
@@ -25,6 +26,14 @@ export type TrackingEvent =
   | "link_hub_click"
   | "case_study_share_view_click"
   | "case_study_share_copy_click";
+
+/** Einheitliche Namen für die vier wichtigsten GA4-Ereignisse. */
+export const conversionEvents = {
+  thankYou: "ixa_conversion_thank_you",
+  phoneCall: "ixa_conversion_phone_call",
+  callback: "ixa_conversion_callback",
+  whatsapp: "ixa_conversion_whatsapp",
+} as const satisfies Record<string, TrackingEvent>;
 
 type DataLayerObject = Record<string, unknown>;
 

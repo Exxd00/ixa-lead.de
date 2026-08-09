@@ -1,6 +1,12 @@
 "use client";
 
 import { siteConfig } from "@/data/site";
+import {
+  analyticsConsentChangeEvent,
+  hasAnalyticsConsent,
+  type AnalyticsConsent,
+} from "@/lib/consent";
+import { conversionEvents, track } from "@/lib/tracking";
 import { ArrowLeft, Check, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -9,6 +15,8 @@ type SubmissionReceipt = {
   createdAt: number;
   serviceId: string;
   auditType: string;
+  submissionId?: string;
+  thankYouTracked?: boolean;
 };
 
 const receiptLifetime = 15 * 60 * 1_000;
@@ -45,8 +53,50 @@ export function DankeContent() {
       return;
     }
 
+    let trackingTimer: number | undefined;
+    let trackingAttempts = 0;
+
+    const trackThankYouPage = () => {
+      if (storedReceipt.thankYouTracked || !hasAnalyticsConsent()) return;
+
+      if (!window.gtag) {
+        trackingAttempts += 1;
+        if (trackingAttempts > 20) return;
+        trackingTimer = window.setTimeout(trackThankYouPage, 100);
+        return;
+      }
+
+      track(conversionEvents.thankYou, {
+        service: storedReceipt.serviceId,
+        transaction_id: storedReceipt.submissionId ?? "",
+      });
+      storedReceipt.thankYouTracked = true;
+
+      try {
+        window.sessionStorage.setItem(
+          "ixa_form_success",
+          JSON.stringify(storedReceipt),
+        );
+      } catch {
+        // Tracking still succeeded if session storage is unavailable.
+      }
+    };
+
+    const onConsentChange = (event: Event) => {
+      if ((event as CustomEvent<AnalyticsConsent>).detail === "granted") {
+        trackThankYouPage();
+      }
+    };
+
+    window.addEventListener(analyticsConsentChangeEvent, onConsentChange);
+    trackThankYouPage();
     setReceipt(storedReceipt);
     setChecked(true);
+
+    return () => {
+      window.removeEventListener(analyticsConsentChangeEvent, onConsentChange);
+      if (trackingTimer) window.clearTimeout(trackingTimer);
+    };
   }, []);
 
   if (!checked || !receipt) {

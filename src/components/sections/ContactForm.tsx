@@ -353,6 +353,7 @@ export function ContactForm() {
             createdAt: Date.now(),
             serviceId: state.serviceId,
             auditType: "potential",
+            submissionId,
           }),
         );
       } catch {
