@@ -2,6 +2,7 @@
 
 import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
 import { Reveal } from "@/components/Reveal";
+import { WhatsappConfirmDialog } from "@/components/WhatsappConfirmDialog";
 import { SectionHeading } from "@/components/section-heading";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,7 +12,7 @@ import {
   leadServiceOptions,
   siteConfig,
 } from "@/data/site";
-import { buildWhatsappUrl, reportAdsConversion, track } from "@/lib/tracking";
+import { reportAdsConversion, track } from "@/lib/tracking";
 import {
   AlertTriangle,
   ArrowLeft,
@@ -411,17 +412,14 @@ export function ContactForm() {
                     <Phone className="size-4" /> Rückruf
                   </button>
                 </CallbackRequestDialog>
-                <a
-                  href={buildWhatsappUrl()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  onClick={() =>
-                    track("whatsapp_click", { location: "contact_form" })
-                  }
-                  className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-xl bg-success-700 px-3 text-xs font-semibold text-white"
-                >
-                  <MessageCircle className="size-4" /> WhatsApp
-                </a>
+                <WhatsappConfirmDialog location="contact_form">
+                  <button
+                    type="button"
+                    className="focus-ring inline-flex min-h-10 items-center gap-2 rounded-xl bg-success-700 px-3 text-xs font-semibold text-white"
+                  >
+                    <MessageCircle className="size-4" /> WhatsApp
+                  </button>
+                </WhatsappConfirmDialog>
               </div>
             </div>
 

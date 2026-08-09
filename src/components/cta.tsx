@@ -1,10 +1,11 @@
 "use client";
 
 import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
+import { WhatsappConfirmDialog } from "@/components/WhatsappConfirmDialog";
 import { Button } from "@/components/ui/button";
 import { siteConfig } from "@/data/site";
 import { scrollToContact } from "@/lib/contact";
-import { type TrackingEvent, buildWhatsappUrl, track } from "@/lib/tracking";
+import { type TrackingEvent, track } from "@/lib/tracking";
 import { cn } from "@/lib/utils";
 import { Mail, MessageCircle, Phone } from "lucide-react";
 import type { ComponentProps, ReactNode } from "react";
@@ -74,18 +75,18 @@ export function WhatsappLink({
   showIcon?: boolean;
 }) {
   return (
-    <Button asChild variant={variant} size={size} className={className}>
-      <a
-        href={buildWhatsappUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
+    <WhatsappConfirmDialog location={location}>
+      <Button
+        type="button"
+        variant={variant}
+        size={size}
+        className={className}
         aria-label="Über WhatsApp kontaktieren"
-        onClick={() => track("whatsapp_click", { location })}
       >
         {showIcon && <MessageCircle aria-hidden="true" />}
         {children}
-      </a>
-    </Button>
+      </Button>
+    </WhatsappConfirmDialog>
   );
 }
 
@@ -100,19 +101,21 @@ export function WhatsappTextLink({
   label?: string;
 }) {
   return (
-    <a
-      href={buildWhatsappUrl()}
-      target="_blank"
-      rel="noopener noreferrer"
-      className={cn(
-        "inline-flex items-center gap-2 rounded-md font-medium text-navy transition-colors hover:text-success-700 focus-ring",
-        className,
-      )}
-      onClick={() => track("whatsapp_click", { location })}
-    >
-      <MessageCircle className="size-4 text-success-700" aria-hidden="true" />
-      <span>{label}</span>
-    </a>
+    <WhatsappConfirmDialog location={location}>
+      <button
+        type="button"
+        className={cn(
+          "inline-flex items-center gap-2 rounded-md font-medium text-navy transition-colors hover:text-success-700 focus-ring",
+          className,
+        )}
+      >
+        <MessageCircle
+          className="size-4 text-success-700"
+          aria-hidden="true"
+        />
+        <span>{label}</span>
+      </button>
+    </WhatsappConfirmDialog>
   );
 }
 

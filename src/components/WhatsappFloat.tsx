@@ -1,7 +1,7 @@
 "use client";
 
 import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
-import { buildWhatsappUrl, track } from "@/lib/tracking";
+import { WhatsappConfirmDialog } from "@/components/WhatsappConfirmDialog";
 import { Phone } from "lucide-react";
 
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -36,19 +36,18 @@ export function WhatsappFloat() {
           </span>
         </button>
       </CallbackRequestDialog>
-      <a
-        href={buildWhatsappUrl()}
-        target="_blank"
-        rel="noopener noreferrer"
-        aria-label="Über WhatsApp kontaktieren"
-        onClick={() => track("whatsapp_click", { location: "float" })}
-        className="focus-ring group relative grid size-12 place-items-center rounded-full border-2 border-white bg-success-700 text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-success-800"
-      >
-        <WhatsAppIcon className="size-6" />
-        <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
-          Per WhatsApp schreiben
-        </span>
-      </a>
+      <WhatsappConfirmDialog location="float">
+        <button
+          type="button"
+          aria-label="Über WhatsApp kontaktieren"
+          className="focus-ring group relative grid size-12 place-items-center rounded-full border-2 border-white bg-success-700 text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-success-800"
+        >
+          <WhatsAppIcon className="size-6" />
+          <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
+            Per WhatsApp schreiben
+          </span>
+        </button>
+      </WhatsappConfirmDialog>
     </div>
   );
 }
