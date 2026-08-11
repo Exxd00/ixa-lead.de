@@ -6,7 +6,6 @@ import { WhatsappConfirmDialog } from "@/components/WhatsappConfirmDialog";
 import { SectionHeading } from "@/components/section-heading";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
 import {
   freeCheckServiceId,
   leadServiceOptions,
@@ -58,19 +57,19 @@ const initialState: FormState = {
 };
 
 const situationOptions = [
-  "Noch keine geeignete Website",
-  "Website vorhanden, aber kaum Anfragen",
-  "Anfragen vorhanden, Herkunft unklar",
+  "Website vorhanden, aber zu wenige Anfragen",
   "Google Ads bereits aktiv",
-  "Ich möchte gezielt zusätzliche Anfragen testen",
-  "Ich bin noch nicht sicher, was sinnvoll ist",
+  "Herkunft der Anfragen unklar",
+  "Noch keine geeignete Website",
+  "Zusätzliche Nachfrage testen",
 ];
 
 const capacityOptions = [
-  "Aktuell keine zusätzliche Kapazität",
-  "Begrenzte Kapazität für einzelne zusätzliche Aufträge",
-  "Kapazität für mehrere zusätzliche Aufträge",
-  "Kapazität ist noch unklar",
+  "Aktuell keine zusätzlichen Aufträge",
+  "Etwa 1–2 zusätzliche Aufträge pro Monat",
+  "Etwa 3–5 zusätzliche Aufträge pro Monat",
+  "Mehr als 5 zusätzliche Aufträge pro Monat",
+  "Je nach Auftragsgröße unterschiedlich",
 ];
 
 const orderValueOptions = [
@@ -216,6 +215,18 @@ export function ContactForm() {
   const submissionIdRef = useRef<string | null>(null);
 
   useEffect(() => {
+    try {
+      const storedService = window.sessionStorage.getItem(
+        "ixa_selected_service",
+      );
+      if (storedService && serviceIds.has(storedService)) {
+        setState((current) => ({ ...current, serviceId: storedService }));
+      }
+      window.sessionStorage.removeItem("ixa_selected_service");
+    } catch {
+      // The default selection remains available.
+    }
+
     const handler = (event: Event) => {
       const serviceId = (event as CustomEvent<string>).detail;
       if (!serviceIds.has(serviceId)) return;
@@ -381,15 +392,9 @@ export function ContactForm() {
       <div className="container-lp">
         <SectionHeading
           eyebrow="Kostenlose Potenzialanalyse"
-          title="Anfrage-Potenzial kostenlos prüfen"
-          description="Sie erhalten eine kurze persönliche Einschätzung zu Suchnachfrage, aktueller Ausgangslage, Kontaktwegen und Messbarkeit – inklusive der wichtigsten nächsten Schritte."
+          title="Erst prüfen. Dann investieren."
+          description="Nicht jeder Betrieb braucht automatisch mehr Werbung. Wir prüfen zuerst, ob relevante Google-Suchnachfrage vorhanden ist, zusätzliche Aufträge wirtschaftlich sinnvoll sind und Ihr Betrieb freie Kapazität besitzt."
         />
-        <p className="mx-auto mt-4 max-w-3xl text-center text-sm leading-relaxed text-stone-500">
-          Die Potenzialanalyse ist keine automatische Verkaufszusage. Wir prüfen
-          zuerst, ob zusätzliche Nachfrage aktuell sinnvoll ist und ob ein IXA
-          Anfrage-System zu Ihrer Situation passt.
-        </p>
-
         <Reveal delay={70} className="mx-auto mt-9 max-w-3xl">
           <div
             id="potential-form-card"
@@ -553,7 +558,7 @@ export function ContactForm() {
                     <div className="grid gap-5 sm:grid-cols-2">
                       <Field
                         id="projectDetail"
-                        label="Wo stehen Sie aktuell?"
+                        label="Aktuelle Situation"
                         required
                         error={errors.projectDetail}
                       >
@@ -574,7 +579,7 @@ export function ContactForm() {
                       </Field>
                       <Field
                         id="capacity"
-                        label="Zusätzliche Kapazität"
+                        label="Wie viele zusätzliche Aufträge könnten Sie aktuell ungefähr übernehmen?"
                         required
                         error={errors.capacity}
                       >
@@ -593,48 +598,25 @@ export function ContactForm() {
                       </Field>
                     </div>
 
-                    <details className="group rounded-2xl border border-navy/10 bg-stone-50/60">
-                      <summary className="focus-ring flex cursor-pointer list-none items-center justify-between gap-3 rounded-2xl px-4 py-3 text-sm font-semibold text-navy [&::-webkit-details-marker]:hidden">
-                        Freiwillige Zusatzangaben
-                        <span className="text-xs font-normal text-stone-400">
-                          Auftragswert &amp; Problem
-                        </span>
-                      </summary>
-                      <div className="space-y-5 border-t border-stone-200 p-4">
-                        <Field
-                          id="orderValueRange"
-                          label="Typischer Auftragswert"
-                          optional
-                        >
-                          <select
-                            id="field-orderValueRange"
-                            value={state.orderValueRange}
-                            onChange={(e) =>
-                              update("orderValueRange", e.target.value)
-                            }
-                            className="focus-ring h-12 w-full rounded-xl border border-input bg-white px-3 text-sm text-navy"
-                          >
-                            <option value="">Keine Angabe</option>
-                            {orderValueOptions.map((option) => (
-                              <option key={option}>{option}</option>
-                            ))}
-                          </select>
-                        </Field>
-                        <Field
-                          id="problem"
-                          label="Was ist aktuell Ihr größtes Problem?"
-                          optional
-                        >
-                          <Textarea
-                            id="field-problem"
-                            value={state.problem}
-                            onChange={(e) => update("problem", e.target.value)}
-                            rows={3}
-                            placeholder="Ein oder zwei Sätze reichen aus."
-                          />
-                        </Field>
-                      </div>
-                    </details>
+                    <Field
+                      id="orderValueRange"
+                      label="Typischer Auftragswert"
+                      optional
+                    >
+                      <select
+                        id="field-orderValueRange"
+                        value={state.orderValueRange}
+                        onChange={(e) =>
+                          update("orderValueRange", e.target.value)
+                        }
+                        className="focus-ring h-12 w-full rounded-xl border border-input bg-white px-3 text-sm text-navy"
+                      >
+                        <option value="">Keine Angabe</option>
+                        {orderValueOptions.map((option) => (
+                          <option key={option}>{option}</option>
+                        ))}
+                      </select>
+                    </Field>
 
                     <button
                       type="button"

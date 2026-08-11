@@ -1,8 +1,7 @@
-import { Reveal } from "@/components/Reveal";
 import { CtaButton } from "@/components/cta";
 import { documentedCases } from "@/data/evidence";
 import { freeCheckServiceId } from "@/data/site";
-import { ArrowRight, Check, MapPin } from "lucide-react";
+import { ArrowRight, MapPin } from "lucide-react";
 
 const featuredCase =
   documentedCases.find((study) => study.featured) ?? documentedCases[0];
@@ -28,81 +27,57 @@ export function Hero() {
 
       <div className="container-lp grid items-center gap-12 lg:grid-cols-[1.08fr_.92fr] lg:gap-16">
         <div>
-          <Reveal immediate>
-            <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-2 text-xs font-bold uppercase tracking-[0.13em] text-white/75 backdrop-blur">
-              <MapPin
-                className="size-3.5 text-success-300"
-                aria-hidden="true"
-              />
-              Für lokale Dienstleister in Nürnberg & Franken
+          <span className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/[0.06] px-3.5 py-2 text-xs font-bold uppercase tracking-[0.13em] text-white/75 backdrop-blur">
+            <MapPin
+              className="size-3.5 text-success-300"
+              aria-hidden="true"
+            />
+            Für lokale Dienstleister in Nürnberg & Franken
+          </span>
+
+          <h1 className="mt-6 max-w-3xl text-[2.35rem] font-bold leading-[1.04] tracking-[-0.045em] text-white sm:text-[3.3rem] lg:text-[4.25rem]">
+            Aus Google-Suchen werden Kontaktanfragen.
+            <span className="mt-1 block text-white/50">
+              Und Sie sehen, woher sie kommen.
             </span>
-          </Reveal>
+          </h1>
 
-          <Reveal immediate>
-            <h1 className="mt-6 max-w-3xl text-[2.35rem] font-bold leading-[1.04] tracking-[-0.045em] text-white sm:text-[3.3rem] lg:text-[4.25rem]">
-              Aus Google-Suchen werden Kontaktanfragen.
-              <span className="mt-1 block text-white/50">
-                Und Sie sehen, woher sie kommen.
-              </span>
-            </h1>
-          </Reveal>
+          <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
+            IXA baut für lokale Dienstleistungsbetriebe in Nürnberg &amp;
+            Franken einen klaren Weg von der Google-Suche bis zur messbaren
+            Kontaktanfrage – mit passender Website oder Landingpage, Google Ads
+            und sauberer Kontaktmessung.
+          </p>
 
-          <Reveal immediate>
-            <p className="mt-6 max-w-xl text-base leading-relaxed text-white/70 sm:text-lg">
-              Für lokale Dienstleistungsbetriebe, bei denen Menschen bereits
-              aktiv bei Google nach einer konkreten Leistung suchen. IXA prüft,
-              baut und verbessert den nachvollziehbaren Weg bis zur
-              Kontaktanfrage.
-            </p>
-          </Reveal>
+          <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+            <CtaButton
+              event="check_cta_click"
+              location="hero_primary"
+              service={freeCheckServiceId}
+              size="xl"
+              icon={<ArrowRight className="order-last" />}
+              className="h-auto min-h-14 w-full whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-14 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-0 sm:text-base"
+            >
+              Anfrage-Potenzial kostenlos prüfen
+            </CtaButton>
+            <a
+              href="#results"
+              className="focus-ring inline-flex min-h-14 w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-7 text-sm font-bold text-white transition-colors hover:bg-white/15 sm:w-auto sm:text-base"
+            >
+              Ergebnisse ansehen
+            </a>
+          </div>
+          <p className="mt-3 max-w-xl text-xs leading-relaxed text-white/55 sm:text-sm">
+            Kostenlose persönliche Ersteinschätzung · keine feste Kundenzahl
+            versprochen
+          </p>
 
-          <Reveal immediate>
-            <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-              <CtaButton
-                event="check_cta_click"
-                location="hero_primary"
-                service={freeCheckServiceId}
-                size="xl"
-                icon={<ArrowRight className="order-last" />}
-                className="h-auto min-h-14 w-full whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-14 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-0 sm:text-base"
-              >
-                Anfrage-Potenzial kostenlos prüfen
-              </CtaButton>
-              <a
-                href="#results"
-                className="focus-ring inline-flex min-h-14 w-full items-center justify-center rounded-xl border border-white/15 bg-white/10 px-7 text-sm font-bold text-white transition-colors hover:bg-white/15 sm:w-auto sm:text-base"
-              >
-                Ergebnisse ansehen
-              </a>
-            </div>
-            <p className="mt-3 max-w-xl text-xs leading-relaxed text-white/55 sm:text-sm">
-              Kostenlose persönliche Ersteinschätzung · keine feste Kundenzahl
-              versprochen
-            </p>
-          </Reveal>
+          <p className="mt-5 max-w-xl text-sm font-semibold leading-relaxed text-white/70">
+            Geeignet für Betriebe mit vorhandener Suchnachfrage, freien
+            Kapazitäten und wirtschaftlich relevanten Aufträgen.
+          </p>
 
-          <Reveal immediate>
-            <ul className="mt-5 flex flex-wrap gap-x-5 gap-y-3 text-sm text-white/65">
-              {[
-                "Für lokale Dienstleister",
-                "Für Mobilgeräte gebaut",
-                "Kontaktwege getrennt messbar",
-              ].map((item) => (
-                <li key={item} className="flex items-center gap-2">
-                  <span className="grid size-5 shrink-0 place-items-center rounded-full bg-success-400/15 text-success-300">
-                    <Check
-                      className="size-3"
-                      strokeWidth={3}
-                      aria-hidden="true"
-                    />
-                  </span>
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </Reveal>
-
-          <Reveal immediate className="mt-6 lg:hidden">
+          <div className="mt-6 lg:hidden">
             <a
               href="#ergebnis-frankenautoankauf24"
               className="focus-ring flex flex-col items-start gap-3 rounded-2xl border border-white/12 bg-white/[0.07] p-4 backdrop-blur min-[360px]:flex-row min-[360px]:items-center min-[360px]:justify-between min-[360px]:gap-4"
@@ -123,10 +98,10 @@ export function Hero() {
                 <ArrowRight className="size-3.5" aria-hidden="true" />
               </span>
             </a>
-          </Reveal>
+          </div>
         </div>
 
-        <Reveal immediate className="hidden lg:block">
+        <div className="hidden lg:block">
           <div className="relative">
             <div className="absolute -inset-4 -z-10 rounded-[2rem] bg-primary/20 blur-3xl" />
             <div className="overflow-hidden rounded-[1.75rem] border border-white/12 bg-white/[0.07] p-5 shadow-2xl backdrop-blur-xl sm:p-7">
@@ -172,7 +147,7 @@ export function Hero() {
               </div>
             </div>
           </div>
-        </Reveal>
+        </div>
       </div>
     </section>
   );

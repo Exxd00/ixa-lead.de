@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/BrandMark";
 import { ImpressumDialog } from "@/components/ImpressumDialog";
 import { PrivacyDialog } from "@/components/PrivacyDialog";
 import { EmailLink, PhoneLink, WhatsappTextLink } from "@/components/cta";
@@ -13,16 +14,14 @@ export function Footer() {
         <div className="grid gap-10 md:grid-cols-[1.6fr_1fr_1.4fr]">
           <div>
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-xl bg-navy text-[13px] font-extrabold tracking-[-0.08em] text-white">
-                IXA
-              </span>
+              <BrandMark className="size-10" />
               <span className="text-lg font-bold text-navy">
                 {siteConfig.name}
               </span>
             </div>
             <p className="mt-4 max-w-xs text-sm leading-relaxed text-stone-500">
-              Nachvollziehbare Anfrage-Systeme für lokale Dienstleister in
-              Nürnberg und Franken – persönlich geplant, gebaut und ausgewertet.
+              IXA baut messbare Anfrage-Systeme für lokale
+              Dienstleistungsbetriebe in Nürnberg und Franken.
             </p>
           </div>
 

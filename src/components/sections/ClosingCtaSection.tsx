@@ -17,7 +17,7 @@ export function ClosingCtaSection() {
               Der sinnvolle nächste Schritt
             </p>
             <h2 className="mt-4 text-3xl font-bold text-white sm:text-5xl">
-              Erst prüfen. Dann investieren.
+              Ist IXA der richtige nächste Schritt für Ihren Betrieb?
             </h2>
             <p className="mx-auto mt-5 max-w-3xl text-base leading-relaxed text-white/65 sm:text-lg">
               Nicht jeder lokale Betrieb braucht automatisch mehr Werbung. Wir
@@ -40,7 +40,8 @@ export function ClosingCtaSection() {
               Anfrage-Potenzial kostenlos prüfen
             </CtaButton>
             <p className="mt-3 text-xs font-semibold text-white/50">
-              Kostenlose persönliche Ersteinschätzung
+              Kostenlose persönliche Ersteinschätzung · keine feste Kundenzahl
+              versprochen
             </p>
           </div>
         </Reveal>

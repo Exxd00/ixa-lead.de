@@ -42,12 +42,12 @@ export const metadata: Metadata = {
   applicationName: siteConfig.name,
   authors: [{ name: siteConfig.name }],
   keywords: [
-    "Website für lokale Dienstleister",
-    "Webdesign Nürnberg",
+    "IXA Anfrage-System",
+    "Google Ads für lokale Dienstleister",
     "Google Ads Nürnberg",
-    "Conversion-Tracking",
+    "Google Ads Handwerker Nürnberg",
     "Kontaktmessung",
-    "Lokale Kundengewinnung",
+    "Landingpage Nürnberg",
   ],
   alternates: {
     canonical: siteConfig.seo.url,
@@ -71,81 +71,6 @@ export const metadata: Metadata = {
   },
 };
 
-/* Schema من نوع ProfessionalService — بيانات مؤقتة قابلة للتعديل، بدون تقييمات أو مراجعات. */
-const schema = {
-  "@context": "https://schema.org",
-  "@type": "ProfessionalService",
-  name: siteConfig.name,
-  description: siteConfig.seo.description,
-  url: siteConfig.seo.url,
-  email: siteConfig.contact.emailDisplay,
-  telephone: siteConfig.contact.phoneHref.replace("tel:", ""),
-  founder: siteConfig.owner,
-  areaServed: ["Nürnberg", "Franken", "Bayern"],
-  serviceType:
-    "Anfrage-Systeme für lokale Dienstleister: Websites, Google Ads und Kontaktmessung",
-  knowsAbout: [
-    "Website & Conversion",
-    "Google Ads",
-    "Google Analytics 4",
-    "Google Tag Manager",
-    "Conversion Tracking",
-    "Local SEO",
-    "Google Business Profile",
-    "Lead Automation",
-  ],
-  hasOfferCatalog: {
-    "@type": "OfferCatalog",
-    name: "Leistungen und Preise",
-    itemListElement: [
-      {
-        "@type": "Offer",
-        price: "1000",
-        priceCurrency: "EUR",
-        itemOffered: {
-          "@type": "Service",
-          name: "IXA Website-System inklusive Kontaktmessung",
-        },
-      },
-      {
-        "@type": "Offer",
-        price: "1500",
-        priceCurrency: "EUR",
-        itemOffered: {
-          "@type": "Service",
-          name: "IXA Anfrage-System mit Website und Google-Ads-Start",
-        },
-      },
-      {
-        "@type": "Offer",
-        price: "500",
-        priceCurrency: "EUR",
-        itemOffered: {
-          "@type": "Service",
-          name: "Google Ads Start",
-        },
-      },
-      {
-        "@type": "Offer",
-        price: "500",
-        priceCurrency: "EUR",
-        priceSpecification: {
-          "@type": "UnitPriceSpecification",
-          price: "500",
-          priceCurrency: "EUR",
-          unitText: "MONAT",
-        },
-        itemOffered: {
-          "@type": "Service",
-          name: "Laufende Betreuung und Optimierung",
-        },
-      },
-    ],
-  },
-};
-
-const schemaJson = JSON.stringify(schema).replace(/</g, "\\u003c");
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -157,10 +82,6 @@ export default function RootLayout({
       dir="ltr"
       className={`${jakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
-      <head>
-        {/* بيانات Schema المنظمة */}
-        <script type="application/ld+json">{schemaJson}</script>
-      </head>
       <body suppressHydrationWarning className="antialiased">
         {/* Feines Papierkorn über der gesamten Seite — Teil der warmen Bildsprache */}
         <div

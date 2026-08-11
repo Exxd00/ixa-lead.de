@@ -1,7 +1,7 @@
 export const siteConfig = {
   name: "IXA-Leads",
   owner: "Emad Alzaim",
-  role: "Digitale Kundengewinnung",
+  role: "Messbare Anfrage-Systeme",
   contact: {
     phoneDisplay: "+49 162 9155408",
     phoneHref: "tel:+491629155408",
@@ -23,9 +23,9 @@ export const siteConfig = {
     endpoint: "/api/contact",
   },
   seo: {
-    title: "IXA Leads | Nachvollziehbare Anfragen für lokale Dienstleister",
+    title: "IXA Anfrage-System für lokale Dienstleister | Nürnberg",
     description:
-      "IXA prüft, baut und optimiert messbare Anfrage-Systeme für lokale Dienstleister in Nürnberg und Franken, deren Kunden bereits aktiv bei Google suchen.",
+      "IXA baut messbare Anfrage-Systeme für lokale Dienstleistungsbetriebe in Nürnberg und Franken – mit Google Ads, passender Landingpage und sauberer Kontaktmessung.",
     url: "https://ixa-leads.de",
   },
 };
@@ -60,35 +60,38 @@ export const callbackService = {
 
 export const faqs = [
   {
-    q: "Warum umfasst das IXA Anfrage-System 90 Tage?",
-    a: "Die Veröffentlichung einer Website oder der Start einer Google-Ads-Kampagne ist nur der Anfang. Erst mit realen Such-, Klick-, Kontakt- und Kundenfeedback-Daten lässt sich besser beurteilen, welche Suchbegriffe, Anzeigen und Kontaktwege funktionieren. Deshalb umfasst das IXA Anfrage-System neben Analyse und Aufbau auch eine erste Optimierungsphase.",
+    q: "Wann lohnt sich Google Ads für einen lokalen Betrieb?",
+    a: "Google Ads können sinnvoll sein, wenn Menschen bereits aktiv nach der angebotenen Leistung suchen, zusätzliche Aufträge einen wirtschaftlich relevanten Wert besitzen und der Betrieb freie Kapazität hat. Vor dem Start prüft IXA deshalb Suchnachfrage, Region, Wettbewerb, Website und Kontaktwege.",
   },
   {
-    q: "Brauche ich zuerst eine Website?",
-    a: "Wenn noch keine geeignete Website oder Landingpage vorhanden ist, kann sie Teil des Anfrage-Systems sein. Ist bereits eine passende Seite vorhanden, wird nicht unnötig neu gebaut. Eine Website schafft Vertrauen und ermöglicht Kontakt, erzeugt aber nicht automatisch neue Besucher.",
+    q: "Was kostet das IXA Anfrage-System?",
+    a: "Das IXA Anfrage-System für die ersten 90 Tage kostet insgesamt 3.000 €. Das Google-Werbebudget ist nicht enthalten und wird separat direkt an Google bezahlt. Eine Zahlung nach klar vereinbarten Projektphasen ist möglich.",
   },
   {
-    q: "Muss ich direkt mit Google Ads starten?",
-    a: "Nein. Wir prüfen zuerst die Ausgangslage. Wenn Website, Angebot, Kapazität oder Messung noch nicht bereit sind, kann es sinnvoll sein, diese Punkte zuerst zu verbessern.",
+    q: "Garantiert IXA neue Kunden?",
+    a: "Nein. Eine feste Zahl neuer Kunden, Aufträge oder Umsätze lässt sich seriös nicht garantieren. IXA misst Kontaktaktionen und verbessert das Anfrage-System anhand echter Such-, Kontakt- und Kundenfeedback-Daten.",
   },
   {
     q: "Was ist der Unterschied zwischen Kontaktaktion, qualifizierter Anfrage und Auftrag?",
     a: "Eine Kontaktaktion ist zunächst ein Anruf, eine WhatsApp-Nachricht oder ein Formular. Eine qualifizierte Anfrage liegt vor, wenn Bedarf, angebotene Leistung und Region grundsätzlich passen. Ein Auftrag entsteht erst, wenn sich der Interessent tatsächlich für den Betrieb entscheidet.",
   },
   {
-    q: "Was passiert, wenn mein Betrieb bereits genug Anfragen erhält?",
-    a: "Dann prüfen wir zuerst, ob zusätzliche Werbung überhaupt der richtige Hebel ist. Wenn bereits ausreichend Nachfrage vorhanden ist, aber zu wenige Aufträge entstehen, kann der Engpass beispielsweise bei Erreichbarkeit, Qualifizierung, Angebot, Preis oder Abschluss liegen.",
-  },
-  {
-    q: "Wie werden Honorar und Google-Werbebudget bezahlt?",
-    a: "Die Gesamtinvestition kann wie auf der Seite gezeigt auf klar definierte Projektphasen verteilt werden. Das Google-Werbebudget ist vom IXA-Honorar getrennt und wird direkt an Google bezahlt. Leistungsumfang, Gesamtpreis und Zahlungstermine werden vor Projektbeginn transparent festgelegt.",
+    q: "Warum umfasst das IXA Anfrage-System 90 Tage?",
+    a: "Der Start einer Website oder Google-Ads-Kampagne ist nur der Anfang. Erst reale Suchbegriffe, Kontaktaktionen und Rückmeldungen zeigen, was verbessert werden sollte. Deshalb gehören Analyse, Aufbau, Start, Optimierung und eine gemeinsame Auswertung zum 90-Tage-System.",
   },
 ];
 
 export const footerLinks = [
-  { label: "Anfrage-System", href: "#services" },
-  { label: "90 Tage", href: "#offer" },
-  { label: "Investition", href: "#packages" },
-  { label: "FAQ", href: "#faq" },
-  { label: "Kontakt", href: "#contact" },
+  { label: "Anfrage-System", href: "/#services" },
+  { label: "90 Tage", href: "/#offer" },
+  { label: "Google Ads Nürnberg", href: "/google-ads-nuernberg" },
+  {
+    label: "Google Ads für Handwerker",
+    href: "/google-ads-handwerker-nuernberg",
+  },
+  {
+    label: "Fallstudie Autoankauf",
+    href: "/fallstudien/franken-autoankauf",
+  },
+  { label: "Kontakt", href: "/#contact" },
 ];

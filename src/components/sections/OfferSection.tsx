@@ -1,14 +1,25 @@
 import { Reveal } from "@/components/Reveal";
 import { CtaButton } from "@/components/cta";
 import { freeCheckServiceId } from "@/data/site";
-import { ArrowRight, Check, Clock3 } from "lucide-react";
+import { ArrowRight, Clock3 } from "lucide-react";
 
-const outcomes = [
-  "Ausgangslage und Suchnachfrage prüfen",
-  "den passenden Weg zur Kontaktanfrage aufbauen",
-  "Kampagne und Kontaktmessung kontrolliert starten",
-  "mit realen Such-, Kontakt- und Kundenfeedback-Daten verbessern",
-  "nach 90 Tagen gemeinsam und transparent auswerten",
+const phases = [
+  {
+    title: "Analyse",
+    text: "Leistung, Zielregion, Suchnachfrage, Wettbewerb und aktuelle Ausgangslage prüfen.",
+  },
+  {
+    title: "Aufbau",
+    text: "Bestehende Website verbessern oder bei Bedarf eine fokussierte Website beziehungsweise Landingpage aufbauen, Google Ads vorbereiten und Kontaktmessung einrichten.",
+  },
+  {
+    title: "Start & Optimierung",
+    text: "Kampagne starten, echte Suchbegriffe auswerten, irrelevante Suchanfragen ausschließen, Anzeigen und Landingpage verbessern und Kundenfeedback berücksichtigen.",
+  },
+  {
+    title: "Auswertung",
+    text: "Nach 90 Tagen gemeinsam prüfen, welche Quellen Kontaktaktionen erzeugten, welche Suchbegriffe sinnvoll waren und welche nächsten Schritte wirtschaftlich sinnvoll sind.",
+  },
 ];
 
 export function OfferSection() {
@@ -33,10 +44,13 @@ export function OfferSection() {
                 <h2 className="mt-5 text-3xl font-bold leading-tight text-white sm:text-4xl">
                   IXA Anfrage-System – 90 Tage
                 </h2>
+                <p className="mt-3 text-lg font-bold text-success-300">
+                  Aufbauen. Starten. Messen. Verbessern.
+                </p>
                 <p className="mt-5 text-base leading-relaxed text-white/65">
-                  In den ersten 90 Tagen wird das Anfrage-System analysiert,
-                  aufgebaut, gestartet, mit realen Daten ausgewertet und gezielt
-                  verbessert.
+                  Ein klarer Weg von vorhandener Google-Suchnachfrage bis zur
+                  messbaren Kontaktanfrage – angepasst an die tatsächliche
+                  Ausgangslage Ihres Betriebs.
                 </p>
                 <p className="mt-4 text-sm leading-relaxed text-white/50">
                   Entscheidend sind ein nachvollziehbarer Prozess und eine
@@ -46,21 +60,25 @@ export function OfferSection() {
             </div>
 
             <div className="border-t border-white/10 bg-white/[0.06] p-6 sm:p-8 lg:border-l lg:border-t-0 lg:p-10">
-              <p className="text-sm font-bold text-white">
-                Was in den 90 Tagen erreicht werden soll
-              </p>
-              <ul className="mt-5 space-y-3">
-                {outcomes.map((outcome) => (
-                  <li key={outcome} className="flex items-start gap-3">
+              <ol className="space-y-4">
+                {phases.map((phase, index) => (
+                  <li key={phase.title} className="flex items-start gap-3">
                     <span className="mt-0.5 grid size-6 shrink-0 place-items-center rounded-full bg-success-300/15 text-success-300">
-                      <Check className="size-3.5" strokeWidth={3} />
+                      <span className="font-mono text-[10px] font-bold">
+                        0{index + 1}
+                      </span>
                     </span>
-                    <span className="text-sm leading-relaxed text-white/70">
-                      {outcome}
+                    <span>
+                      <strong className="block text-sm text-white">
+                        {phase.title}
+                      </strong>
+                      <span className="mt-1 block text-sm leading-relaxed text-white/60">
+                        {phase.text}
+                      </span>
                     </span>
                   </li>
                 ))}
-              </ul>
+              </ol>
               <CtaButton
                 event="check_cta_click"
                 location="offer_90_days"

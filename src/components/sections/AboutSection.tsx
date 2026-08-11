@@ -1,3 +1,4 @@
+import { BrandMark } from "@/components/BrandMark";
 import { Reveal } from "@/components/Reveal";
 import { CtaButton, WhatsappLink } from "@/components/cta";
 import { freeCheckServiceId, siteConfig } from "@/data/site";
@@ -34,9 +35,11 @@ export function AboutSection() {
             />
 
             <div className="relative">
-              <span className="grid size-16 place-items-center rounded-2xl border border-white/10 bg-white/10 font-display text-xl font-bold tracking-tight">
-                EA
-              </span>
+              <BrandMark
+                className="size-16 rounded-2xl border border-white/10"
+                alt="Markenzeichen von IXA-Leads"
+                sizes="64px"
+              />
               <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-success-300">
                 Ihr Ansprechpartner
               </p>
@@ -78,10 +81,10 @@ export function AboutSection() {
             Ihr Projekt wird nicht nach dem Verkauf weitergereicht.
           </h2>
           <p className="mt-5 max-w-2xl text-base leading-relaxed text-stone-600">
-            Ich begleite lokale Dienstleister von der ersten Analyse bis zur
-            Auswertung. Entscheidend ist ein nachvollziehbares Anfrage-System,
-            das mit echten Such-, Kontakt- und Kundenfeedback-Daten verbessert
-            werden kann.
+            IXA baut messbare Anfrage-Systeme für lokale
+            Dienstleistungsbetriebe in Nürnberg und Franken. Ich begleite Sie
+            persönlich von der ersten Analyse bis zur Auswertung und
+            Verbesserung anhand echter Daten.
           </p>
 
           <ul className="mt-7 space-y-4">

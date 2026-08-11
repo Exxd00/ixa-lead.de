@@ -223,10 +223,16 @@ export function FeaturedProofSection() {
             Franken Autoankauf 24: nachvollziehbar statt nur versprochen
           </h2>
           <p className="mt-4 max-w-2xl text-base leading-relaxed text-stone-600 sm:text-lg">
-            Formular, Telefon und WhatsApp wurden getrennt dokumentiert. Belegt
-            sind 211 eingegangene Kontaktaktionen – nicht behauptete Aufträge
-            oder Umsätze. Der anonymisierte Originalauszug steht direkt hier.
+            Formular, Telefon und WhatsApp wurden getrennt dokumentiert.
+            Kontaktaktionen sind keine 211 abgeschlossenen Aufträge oder
+            Umsätze. Der anonymisierte Originalauszug steht direkt hier.
           </p>
+          <a
+            href="/fallstudien/franken-autoankauf"
+            className="focus-ring mt-4 inline-flex rounded-md text-sm font-bold text-primary underline decoration-primary/25 underline-offset-4 hover:decoration-primary"
+          >
+            Vollständige Fallstudie ansehen
+          </a>
         </div>
 
         <div className="mt-8 sm:mt-10">

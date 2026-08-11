@@ -1,6 +1,7 @@
 "use client";
 
 import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
+import { BrandMark } from "@/components/BrandMark";
 import { CtaButton } from "@/components/cta";
 import { freeCheckServiceId, siteConfig } from "@/data/site";
 import { cn } from "@/lib/utils";
@@ -9,11 +10,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const links = [
-  { label: "Ergebnisse", href: "#results" },
-  { label: "System", href: "#services" },
-  { label: "90 Tage", href: "#offer" },
-  { label: "Investition", href: "#packages" },
-  { label: "Kontakt", href: "#contact" },
+  { label: "Ergebnisse", href: "/#results" },
+  { label: "System", href: "/#services" },
+  { label: "90 Tage", href: "/#offer" },
+  { label: "Investition", href: "/#packages" },
+  { label: "Kontakt", href: "/#contact" },
 ];
 
 export function Navbar() {
@@ -49,10 +50,7 @@ export function Navbar() {
           aria-label={`${siteConfig.name} – Startseite`}
           onClick={() => setOpen(false)}
         >
-          <span className="relative grid size-10 place-items-center rounded-xl bg-navy text-[13px] font-extrabold tracking-[-0.08em] text-white shadow-soft">
-            IXA
-            <span className="absolute -right-1 -top-1 size-2.5 rounded-full border-2 border-[#fbfaf7] bg-success-400" />
-          </span>
+          <BrandMark className="size-10 shadow-soft" priority />
           <span className="leading-none">
             <span className="block text-[15px] font-extrabold tracking-tight text-navy">
               IXA Leads
