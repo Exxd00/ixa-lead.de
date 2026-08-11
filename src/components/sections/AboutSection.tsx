@@ -36,33 +36,33 @@ export function AboutSection() {
             />
 
             <div className="relative">
-              <div className="grid grid-cols-[88px_minmax(0,1fr)] items-center gap-4 sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-5">
-                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] shadow-lg">
-                  <Image
-                    src="/people/emad-alzaim.webp"
-                    alt="Emad Alzaim, persönlicher Ansprechpartner bei IXA-Leads"
-                    fill
-                    sizes="(max-width: 639px) 88px, 112px"
-                    className="object-cover"
-                  />
-                </div>
-
-                <div className="min-w-0">
+              <div className="flex flex-col items-center text-center">
+                <div className="relative">
+                  <div className="relative aspect-[4/5] w-24 overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] shadow-lg sm:w-28">
+                    <Image
+                      src="/people/emad-alzaim.webp"
+                      alt="Emad Alzaim, persönlicher Ansprechpartner bei IXA-Leads"
+                      fill
+                      sizes="(max-width: 639px) 96px, 112px"
+                      className="object-cover object-center"
+                    />
+                  </div>
                   <BrandMark
-                    className="size-10 rounded-xl border border-white/10"
+                    className="absolute -bottom-3 -right-3 size-10 rounded-xl border border-white/15 shadow-lg"
                     alt="Markenzeichen von IXA-Leads"
                     sizes="40px"
                   />
-                  <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.12em] text-success-300 sm:text-xs sm:tracking-[0.14em]">
-                    Ihr Ansprechpartner
-                  </p>
-                  <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
-                    {siteConfig.owner}
-                  </h2>
-                  <p className="mt-1 text-sm leading-relaxed text-white/55">
-                    {siteConfig.name} · {siteConfig.role}
-                  </p>
                 </div>
+
+                <p className="mt-6 text-[11px] font-bold uppercase tracking-[0.12em] text-success-300 sm:text-xs sm:tracking-[0.14em]">
+                  Ihr Ansprechpartner
+                </p>
+                <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
+                  {siteConfig.owner}
+                </h2>
+                <p className="mt-1 text-sm leading-relaxed text-white/55">
+                  {siteConfig.name} · {siteConfig.role}
+                </p>
               </div>
 
               <div className="mt-7 grid gap-3 sm:grid-cols-2">
