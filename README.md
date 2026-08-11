@@ -39,14 +39,17 @@ verloren. Das identische Geheimnis wird als Script Property `WEBHOOK_SECRET`
 im Apps-Script-Projekt hinterlegt und gehört niemals in eine
 `NEXT_PUBLIC_...`-Variable.
 
-Der Empfänger in `integrations/google-apps-script/Code.gs` legt neue Anfragen
-im Tabellenblatt `Anfragen` ab. `setupSheets()` erstellt und formatiert die
-farbigen Spaltenköpfe, Statusauswahl und Kontrollfelder. Zusätzlich entsteht
-das getrennte Tabellenblatt `Conversions` für die vier freigegebenen
-Haupt-Conversions. Ein vorhandenes Tabellenblatt `Leads` bleibt als Archiv
-unverändert. Sichtbar gespeichert werden Formularangaben, Eingangszeit, GCLID
-und Felder für die spätere persönliche Bearbeitung. Technische IDs liegen
-ausschließlich zur Vermeidung von Doppeleinträgen in ausgeblendeten Spalten.
+Der Empfänger in `integrations/google-apps-script/Code.gs` legt Anfragen und
+die freigegebene Kontaktmessung gemeinsam im Tabellenblatt `Anfragen` ab.
+`setupSheets()` erstellt und formatiert diese eine menschenlesbare Übersicht
+mit farbigen Spaltenköpfen, Statusauswahl und Kontrollfeldern. Formular- und
+Rückrufangaben werden zur Bearbeitung der jeweiligen Anfrage gespeichert. Bei
+erteilter Statistik-Einwilligung kommen für bestätigte Kontaktaktionen nur
+Ereignis, Zeitpunkt, Seite und vorhandene Kampagnenparameter hinzu; dadurch
+werden keine zusätzlichen Namen, Telefonnummern, E-Mail-Adressen oder
+Nachrichten erhoben. Ein vorhandenes Tabellenblatt `Leads` bleibt als Archiv
+unverändert. Die technische ID zur Vermeidung von Doppeleinträgen ist intern
+und als ausgeblendete Spalte nicht Teil der sichtbaren Arbeitsansicht.
 
 Nach dem Einfügen oder Aktualisieren des Apps Scripts:
 
@@ -68,9 +71,10 @@ GCLID.
 
 Google Analytics 4 wird über `NEXT_PUBLIC_GA4_ID` konfiguriert. Google
 Analytics, Vercel Web Analytics und Speed Insights starten erst nach der
-ausdrücklichen Statistik-Einwilligung des Besuchers. Dasselbe gilt für das
-Conversion-Protokoll ohne Namen, Telefonnummern, E-Mail-Adressen oder
-Nachrichten in Google Sheets. Google Ads ist weiterhin
+ausdrücklichen Statistik-Einwilligung des Besuchers. Dasselbe gilt für die
+optionale Kontaktmessung im gemeinsamen Tabellenblatt `Anfragen`: Sie ergänzt
+nur Ereignis-, Seiten- und Kampagnendaten und keine zusätzlichen Namen,
+Telefonnummern, E-Mail-Adressen oder Nachrichten. Google Ads ist weiterhin
 deaktiviert. GA4 und GTM dürfen nicht parallel für denselben Page View
 konfiguriert werden.
 

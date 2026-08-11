@@ -111,16 +111,19 @@ function ConsentBanner({
           </p>
           <p className="mt-1.5 text-sm leading-relaxed text-stone-600">
             Notwendige Funktionen laufen immer. Google Analytics sowie Vercel
-            Web Analytics, Speed Insights und das Conversion-Protokoll in
+            Web Analytics, Speed Insights und die optionale Kontaktmessung in
             Google Sheets starten erst, wenn Sie Statistik erlauben.
           </p>
           {showDetails && (
             <p className="mt-2 text-xs leading-relaxed text-stone-500">
               Ihre Auswahl wird nur auf diesem Gerät gespeichert. Sie können sie
-              jederzeit unter „Datenschutz“ ändern. Kontaktdaten aus dem
-              Formular werden nicht an diese Messdienste gesendet. Im
-              Conversion-Protokoll stehen nur Ereignis, Zeitpunkt, Seite und
-              vorhandene Kampagnenparameter.
+              jederzeit unter „Datenschutz“ ändern. Anfrage- und Rückrufangaben
+              werden unabhängig davon zur Bearbeitung im gemeinsamen
+              Tabellenblatt „Anfragen“ gespeichert. Wenn Sie Statistik
+              erlauben, kommen für bestätigte Kontaktaktionen nur Ereignis,
+              Zeitpunkt, Seite und vorhandene Kampagnenparameter hinzu – keine
+              zusätzlichen Namen, E-Mail-Adressen, Telefonnummern oder
+              Nachrichten.
             </p>
           )}
           <button
