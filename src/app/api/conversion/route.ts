@@ -55,6 +55,34 @@ type SheetResponse = {
   eventId: string;
 };
 
+type SheetRejectionCode =
+  | "unauthorized"
+  | "invalid_payload"
+  | "invalid_record_type"
+  | "invalid_conversion_event"
+  | "busy"
+  | "receiver_error";
+
+type SheetFailureReason =
+  | SheetRejectionCode
+  | "receiver_http_error"
+  | "receiver_invalid_json"
+  | "receiver_invalid_acknowledgement"
+  | "receiver_request_failed";
+
+type SheetForwardResult =
+  | { ok: true; response: SheetResponse }
+  | { ok: false; reason: SheetFailureReason };
+
+const sheetErrorCodes = new Set<string>([
+  "unauthorized",
+  "invalid_payload",
+  "invalid_record_type",
+  "invalid_conversion_event",
+  "busy",
+  "receiver_error",
+]);
+
 function safeErrorLog(event: string, detail?: string | number) {
   // Never log attribution values, webhook details or secrets.
   if (detail === undefined) {
@@ -105,11 +133,21 @@ function isSheetResponse(
   );
 }
 
+function sheetErrorCode(value: unknown): SheetRejectionCode | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const response = value as Record<string, unknown>;
+  return response.ok === false &&
+    typeof response.error === "string" &&
+    sheetErrorCodes.has(response.error)
+    ? (response.error as SheetRejectionCode)
+    : null;
+}
+
 async function forwardToSheet(
   webhookUrl: string,
   webhookSecret: string,
   payload: Payload,
-): Promise<SheetResponse | null> {
+): Promise<SheetForwardResult> {
   try {
     const response = await fetch(webhookUrl, {
       method: "POST",
@@ -131,7 +169,7 @@ async function forwardToSheet(
 
     if (!response.ok) {
       safeErrorLog("sheet_http_error", response.status);
-      return null;
+      return { ok: false, reason: "receiver_http_error" };
     }
 
     let result: unknown;
@@ -139,18 +177,26 @@ async function forwardToSheet(
       result = await response.json();
     } catch {
       safeErrorLog("sheet_invalid_json");
-      return null;
+      return { ok: false, reason: "receiver_invalid_json" };
+    }
+
+    const rejectionCode = sheetErrorCode(result);
+    if (rejectionCode) {
+      // Only expose a fixed, non-sensitive receiver code. Attribution values,
+      // the webhook URL, the response body and the secret stay server-only.
+      safeErrorLog("sheet_rejected", rejectionCode);
+      return { ok: false, reason: rejectionCode };
     }
 
     if (!isSheetResponse(result, payload.eventId)) {
       safeErrorLog("sheet_invalid_acknowledgement");
-      return null;
+      return { ok: false, reason: "receiver_invalid_acknowledgement" };
     }
 
-    return result;
+    return { ok: true, response: result };
   } catch {
     safeErrorLog("sheet_request_failed");
-    return null;
+    return { ok: false, reason: "receiver_request_failed" };
   }
 }
 
@@ -200,12 +246,12 @@ export async function POST(request: Request) {
   }
 
   const result = await forwardToSheet(webhookUrl, webhookSecret, payload);
-  if (!result) {
+  if (!result.ok) {
     return NextResponse.json(
-      { ok: false, error: "forwarding_failed" },
+      { ok: false, error: "forwarding_failed", reason: result.reason },
       { status: 502 },
     );
   }
 
-  return NextResponse.json(result);
+  return NextResponse.json(result.response);
 }

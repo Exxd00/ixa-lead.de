@@ -159,8 +159,8 @@ function setupSheets() {
   if (!spreadsheetId) throw new Error("missing_spreadsheet_id");
 
   const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
-  const leadsSheet = prepareSheet_(spreadsheet);
-  const conversionsSheet = prepareConversionsSheet_(spreadsheet);
+  const leadsSheet = prepareSheet_(spreadsheet, true);
+  const conversionsSheet = prepareConversionsSheet_(spreadsheet, true);
   SpreadsheetApp.flush();
 
   return {
@@ -181,7 +181,7 @@ function setupSheet() {
 }
 
 function saveLead_(spreadsheet, body) {
-  const sheet = prepareSheet_(spreadsheet);
+  const sheet = prepareSheet_(spreadsheet, false);
   const lastRow = sheet.getLastRow();
   const idColumn = HEADERS.indexOf("Eingang-ID (intern)") + 1;
 
@@ -234,7 +234,7 @@ function saveLead_(spreadsheet, body) {
 }
 
 function saveConversion_(spreadsheet, body) {
-  const sheet = prepareConversionsSheet_(spreadsheet);
+  const sheet = prepareConversionsSheet_(spreadsheet, false);
   const lastRow = sheet.getLastRow();
   const idColumn = CONVERSION_HEADERS.indexOf("Event-ID (intern)") + 1;
 
@@ -284,46 +284,100 @@ function hasId_(sheet, idColumn, id) {
   );
 }
 
-function prepareSheet_(spreadsheet) {
-  let sheet = spreadsheet.getSheetByName(SHEET_NAME);
-  if (!sheet) sheet = spreadsheet.insertSheet(SHEET_NAME);
-
-  if (sheet.getLastRow() === 0) {
-    sheet.getRange(1, 1, 1, HEADERS.length).setValues([HEADERS]);
-  } else {
-    const currentHeaders = sheet
-      .getRange(1, 1, 1, HEADERS.length)
-      .getDisplayValues()[0];
-    if (currentHeaders.join("\u001f") !== HEADERS.join("\u001f")) {
-      throw new Error("header_mismatch");
-    }
-  }
-
-  formatSheet_(sheet);
-  return sheet;
+function prepareSheet_(spreadsheet, applyFullFormatting) {
+  const prepared = prepareStructuredSheet_(
+    spreadsheet,
+    SHEET_NAME,
+    HEADERS,
+  );
+  if (prepared.created) formatHeader_(prepared.sheet, HEADER_COLORS);
+  if (applyFullFormatting) formatSheet_(prepared.sheet);
+  return prepared.sheet;
 }
 
-function prepareConversionsSheet_(spreadsheet) {
-  let sheet = spreadsheet.getSheetByName(CONVERSIONS_SHEET_NAME);
-  if (!sheet) sheet = spreadsheet.insertSheet(CONVERSIONS_SHEET_NAME);
+function prepareConversionsSheet_(spreadsheet, applyFullFormatting) {
+  const prepared = prepareStructuredSheet_(
+    spreadsheet,
+    CONVERSIONS_SHEET_NAME,
+    CONVERSION_HEADERS,
+  );
+  if (prepared.created) {
+    formatHeader_(prepared.sheet, CONVERSION_HEADER_COLORS);
+  }
+  if (applyFullFormatting) formatConversionsSheet_(prepared.sheet);
+  return prepared.sheet;
+}
 
-  if (sheet.getLastRow() === 0) {
-    sheet
-      .getRange(1, 1, 1, CONVERSION_HEADERS.length)
-      .setValues([CONVERSION_HEADERS]);
-  } else {
+/**
+ * Never make a live enquiry fail only because an older/manual sheet has a
+ * different first row. Preserve that tab as a recoverable archive and create
+ * a clean active tab with the expected schema. The receiver deliberately does
+ * only the light header work; setupSheets() owns the expensive full formatting.
+ */
+function prepareStructuredSheet_(spreadsheet, sheetName, headers) {
+  let sheet = spreadsheet.getSheetByName(sheetName);
+  let created = false;
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(sheetName);
+    created = true;
+  } else if (sheet.getLastRow() > 0) {
+    ensureColumnCapacity_(sheet, headers.length);
     const currentHeaders = sheet
-      .getRange(1, 1, 1, CONVERSION_HEADERS.length)
+      .getRange(1, 1, 1, headers.length)
       .getDisplayValues()[0];
-    if (
-      currentHeaders.join("\u001f") !== CONVERSION_HEADERS.join("\u001f")
-    ) {
-      throw new Error("conversion_header_mismatch");
+    if (currentHeaders.join("\u001f") !== headers.join("\u001f")) {
+      const archiveName = nextArchiveName_(spreadsheet, sheetName);
+      sheet.setName(archiveName);
+      console.warn(
+        "Archived incompatible sheet " + sheetName + " as " + archiveName,
+      );
+      sheet = spreadsheet.insertSheet(sheetName);
+      created = true;
     }
   }
 
-  formatConversionsSheet_(sheet);
-  return sheet;
+  ensureColumnCapacity_(sheet, headers.length);
+  if (created || sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
+  }
+
+  return { sheet: sheet, created: created };
+}
+
+function ensureColumnCapacity_(sheet, requiredColumns) {
+  const missingColumns = requiredColumns - sheet.getMaxColumns();
+  if (missingColumns > 0) {
+    sheet.insertColumnsAfter(sheet.getMaxColumns(), missingColumns);
+  }
+}
+
+function nextArchiveName_(spreadsheet, sheetName) {
+  const timeZone = Session.getScriptTimeZone() || "Europe/Berlin";
+  const stamp = Utilities.formatDate(new Date(), timeZone, "yyyy-MM-dd HHmmss");
+  const base = (sheetName + " Archiv " + stamp).slice(0, 96);
+  let candidate = base;
+  let suffix = 2;
+
+  while (spreadsheet.getSheetByName(candidate)) {
+    candidate = (base.slice(0, 93) + " " + suffix).slice(0, 100);
+    suffix += 1;
+  }
+
+  return candidate;
+}
+
+function formatHeader_(sheet, colors) {
+  sheet.setFrozenRows(1);
+  sheet.setRowHeight(1, 42);
+  sheet
+    .getRange(1, 1, 1, colors.length)
+    .setBackgrounds([colors])
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setVerticalAlignment("middle")
+    .setHorizontalAlignment("left")
+    .setWrap(true);
 }
 
 function formatSheet_(sheet) {
@@ -337,15 +391,7 @@ function formatSheet_(sheet) {
 
   sheet.setFrozenRows(1);
   sheet.setFrozenColumns(2);
-  sheet.setRowHeight(1, 42);
-  sheet
-    .getRange(1, 1, 1, HEADERS.length)
-    .setBackgrounds([HEADER_COLORS])
-    .setFontColor("#FFFFFF")
-    .setFontWeight("bold")
-    .setVerticalAlignment("middle")
-    .setHorizontalAlignment("left")
-    .setWrap(true);
+  formatHeader_(sheet, HEADER_COLORS);
 
   const widths = [
     145, 230, 180, 170, 200, 220, 180, 180, 260, 260, 170,
@@ -408,15 +454,7 @@ function formatConversionsSheet_(sheet) {
 
   sheet.setFrozenRows(1);
   sheet.setFrozenColumns(2);
-  sheet.setRowHeight(1, 42);
-  sheet
-    .getRange(1, 1, 1, CONVERSION_HEADERS.length)
-    .setBackgrounds([CONVERSION_HEADER_COLORS])
-    .setFontColor("#FFFFFF")
-    .setFontWeight("bold")
-    .setVerticalAlignment("middle")
-    .setHorizontalAlignment("left")
-    .setWrap(true);
+  formatHeader_(sheet, CONVERSION_HEADER_COLORS);
 
   const widths = [
     145, 250, 245, 190, 230, 220, 210, 200, 150, 150, 190, 180, 180, 110,
