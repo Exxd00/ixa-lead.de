@@ -1,5 +1,8 @@
 const SCHEMA_VERSION = 1;
 const SHEET_NAME = "Anfragen";
+const CONVERSIONS_SHEET_NAME = "Conversions";
+const UUID_V4_PATTERN =
+  /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
 const HEADERS = [
   "Eingegangen",
@@ -34,6 +37,57 @@ const HEADER_COLORS = [
   "#475569", "#94A3B8",
 ];
 
+const CONVERSION_HEADERS = [
+  "Erfasst am",
+  "Conversion",
+  "GA4-Ereignis",
+  "Bereich der Website",
+  "Leistung",
+  "Seite",
+  "Verweisende Website",
+  "GCLID",
+  "UTM-Quelle",
+  "UTM-Medium",
+  "UTM-Kampagne",
+  "UTM-Suchbegriff",
+  "UTM-Inhalt",
+  "Anfrage-ID (intern)",
+  "Event-ID (intern)",
+];
+
+const CONVERSION_HEADER_COLORS = [
+  "#3157D5",
+  "#15803D",
+  "#15803D",
+  "#6D28D9",
+  "#3157D5",
+  "#6D28D9",
+  "#0F766E",
+  "#0F766E",
+  "#0F766E",
+  "#0F766E",
+  "#0F766E",
+  "#0F766E",
+  "#0F766E",
+  "#94A3B8",
+  "#94A3B8",
+];
+
+const CONVERSION_EVENT_LABELS = {
+  ixa_conversion_thank_you: "Formular erfolgreich abgeschlossen",
+  ixa_conversion_phone_call: "Direkten Anruf bestätigt",
+  ixa_conversion_callback: "Rückruf erfolgreich angefordert",
+  ixa_conversion_whatsapp: "WhatsApp-Weiterleitung bestätigt",
+};
+
+const SERVICE_LABELS = {
+  "website-check": "Kostenlose Anfrage-Potenzialanalyse",
+  startklar: "IXA Anfrage-System – 90 Tage",
+  "website-system": "Website-System als digitale Grundlage",
+  betreuung: "IXA Anfrage-Optimierung",
+  callback: "Rückrufwunsch",
+};
+
 function doGet() {
   return json_({ ok: true, service: "ixa-leads.de", schemaVersion: SCHEMA_VERSION });
 }
@@ -48,12 +102,32 @@ function doPost(e) {
       return json_({ ok: false, error: "unauthorized" });
     }
 
-    if (
-      body.schemaVersion !== SCHEMA_VERSION ||
-      !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-        String(body.submissionId || ""),
-      )
-    ) {
+    if (body.schemaVersion !== SCHEMA_VERSION) {
+      return json_({ ok: false, error: "invalid_payload" });
+    }
+
+    const isConversion = body.recordType === "conversion_event";
+    const isLead =
+      body.recordType == null ||
+      body.recordType === "" ||
+      body.recordType === "lead" ||
+      body.recordType === "lead_submission";
+
+    if (!isConversion && !isLead) {
+      return json_({ ok: false, error: "invalid_record_type" });
+    }
+
+    if (isConversion) {
+      if (
+        !isUuidV4_(body.eventId) ||
+        !Object.prototype.hasOwnProperty.call(
+          CONVERSION_EVENT_LABELS,
+          String(body.eventName || ""),
+        )
+      ) {
+        return json_({ ok: false, error: "invalid_conversion_event" });
+      }
+    } else if (!isUuidV4_(body.submissionId)) {
       return json_({ ok: false, error: "invalid_payload" });
     }
 
@@ -66,67 +140,10 @@ function doPost(e) {
       const spreadsheetId = properties.getProperty("SPREADSHEET_ID");
       if (!spreadsheetId) throw new Error("missing_spreadsheet_id");
 
-      const sheet = prepareSheet_(SpreadsheetApp.openById(spreadsheetId));
-      const lastRow = sheet.getLastRow();
-      const idColumn = HEADERS.indexOf("Eingang-ID (intern)") + 1;
-
-      if (lastRow > 1) {
-        const existing = sheet
-          .getRange(2, idColumn, lastRow - 1, 1)
-          .createTextFinder(body.submissionId)
-          .matchEntireCell(true)
-          .matchCase(true)
-          .findNext();
-
-        if (existing) {
-          return json_({
-            ok: true,
-            duplicate: true,
-            submissionId: body.submissionId,
-          });
-        }
-      }
-
-      const receivedAt = new Date(body.receivedAt || "");
-      const row = [
-        Number.isNaN(receivedAt.getTime()) ? body.receivedAt : receivedAt,
-        body.neededService,
-        body.company,
-        body.name,
-        body.contact,
-        body.url,
-        body.serviceFocus,
-        body.serviceArea,
-        body.projectDetail,
-        body.capacity,
-        body.orderValueRange,
-        body.problem,
-        body.gclid,
-        body.contactMethod || body.submissionType,
-        "Neu",
-        false,
-        false,
-        "",
-        false,
-        "",
-        "",
-        body.submissionId,
-      ].map((value) =>
-        value instanceof Date || typeof value === "boolean"
-          ? value
-          : safeCell_(value),
-      );
-
-      sheet
-        .getRange(sheet.getLastRow() + 1, 1, 1, HEADERS.length)
-        .setValues([row]);
-      SpreadsheetApp.flush();
-
-      return json_({
-        ok: true,
-        duplicate: false,
-        submissionId: body.submissionId,
-      });
+      const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+      return isConversion
+        ? saveConversion_(spreadsheet, body)
+        : saveLead_(spreadsheet, body);
     } finally {
       lock.releaseLock();
     }
@@ -136,13 +153,135 @@ function doPost(e) {
   }
 }
 
-function setupSheet() {
+function setupSheets() {
   const properties = PropertiesService.getScriptProperties();
   const spreadsheetId = properties.getProperty("SPREADSHEET_ID");
   if (!spreadsheetId) throw new Error("missing_spreadsheet_id");
 
-  const sheet = prepareSheet_(SpreadsheetApp.openById(spreadsheetId));
-  return { ok: true, sheet: sheet.getName(), columns: HEADERS.length };
+  const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  const leadsSheet = prepareSheet_(spreadsheet);
+  const conversionsSheet = prepareConversionsSheet_(spreadsheet);
+  SpreadsheetApp.flush();
+
+  return {
+    ok: true,
+    // Keep the original properties for callers of the former setupSheet().
+    sheet: leadsSheet.getName(),
+    columns: HEADERS.length,
+    sheets: [
+      { name: leadsSheet.getName(), columns: HEADERS.length },
+      { name: conversionsSheet.getName(), columns: CONVERSION_HEADERS.length },
+    ],
+  };
+}
+
+// Backward-compatible alias used by the previous installation instructions.
+function setupSheet() {
+  return setupSheets();
+}
+
+function saveLead_(spreadsheet, body) {
+  const sheet = prepareSheet_(spreadsheet);
+  const lastRow = sheet.getLastRow();
+  const idColumn = HEADERS.indexOf("Eingang-ID (intern)") + 1;
+
+  if (hasId_(sheet, idColumn, body.submissionId)) {
+    return json_({
+      ok: true,
+      duplicate: true,
+      submissionId: body.submissionId,
+    });
+  }
+
+  const receivedAt = new Date(body.receivedAt || "");
+  const row = [
+    Number.isNaN(receivedAt.getTime()) ? body.receivedAt : receivedAt,
+    body.neededService,
+    body.company,
+    body.name,
+    body.contact,
+    body.url,
+    body.serviceFocus,
+    body.serviceArea,
+    body.projectDetail,
+    body.capacity,
+    body.orderValueRange,
+    body.problem,
+    body.gclid,
+    body.contactMethod || body.submissionType,
+    "Neu",
+    false,
+    false,
+    "",
+    false,
+    "",
+    "",
+    body.submissionId,
+  ].map((value) =>
+    value instanceof Date || typeof value === "boolean"
+      ? value
+      : safeCell_(value),
+  );
+
+  sheet.getRange(lastRow + 1, 1, 1, HEADERS.length).setValues([row]);
+  SpreadsheetApp.flush();
+
+  return json_({
+    ok: true,
+    duplicate: false,
+    submissionId: body.submissionId,
+  });
+}
+
+function saveConversion_(spreadsheet, body) {
+  const sheet = prepareConversionsSheet_(spreadsheet);
+  const lastRow = sheet.getLastRow();
+  const idColumn = CONVERSION_HEADERS.indexOf("Event-ID (intern)") + 1;
+
+  if (hasId_(sheet, idColumn, body.eventId)) {
+    return json_({ ok: true, duplicate: true, eventId: body.eventId });
+  }
+
+  const eventName = String(body.eventName);
+  const occurredAt = new Date(body.occurredAt || "");
+  const row = [
+    Number.isNaN(occurredAt.getTime()) ? new Date() : occurredAt,
+    CONVERSION_EVENT_LABELS[eventName],
+    eventName,
+    body.entryPoint || body.location,
+    SERVICE_LABELS[String(body.serviceId || "")] || body.serviceId,
+    body.landingPath || body.pagePath,
+    body.referrerHost,
+    body.gclid,
+    body.utmSource,
+    body.utmMedium,
+    body.utmCampaign,
+    body.utmTerm,
+    body.utmContent,
+    body.submissionId,
+    body.eventId,
+  ].map((value) => (value instanceof Date ? value : safeCell_(value)));
+
+  sheet
+    .getRange(lastRow + 1, 1, 1, CONVERSION_HEADERS.length)
+    .setValues([row]);
+  SpreadsheetApp.flush();
+
+  return json_({ ok: true, duplicate: false, eventId: body.eventId });
+}
+
+function hasId_(sheet, idColumn, id) {
+  const lastRow = sheet.getLastRow();
+  if (lastRow <= 1) return false;
+
+  return Boolean(
+    sheet
+      .getRange(2, idColumn, lastRow - 1, 1)
+      .createTextFinder(String(id))
+      .matchEntireCell(true)
+      .matchCase(true)
+      .findNext(),
+  );
 }
 
 function prepareSheet_(spreadsheet) {
@@ -161,6 +300,29 @@ function prepareSheet_(spreadsheet) {
   }
 
   formatSheet_(sheet);
+  return sheet;
+}
+
+function prepareConversionsSheet_(spreadsheet) {
+  let sheet = spreadsheet.getSheetByName(CONVERSIONS_SHEET_NAME);
+  if (!sheet) sheet = spreadsheet.insertSheet(CONVERSIONS_SHEET_NAME);
+
+  if (sheet.getLastRow() === 0) {
+    sheet
+      .getRange(1, 1, 1, CONVERSION_HEADERS.length)
+      .setValues([CONVERSION_HEADERS]);
+  } else {
+    const currentHeaders = sheet
+      .getRange(1, 1, 1, CONVERSION_HEADERS.length)
+      .getDisplayValues()[0];
+    if (
+      currentHeaders.join("\u001f") !== CONVERSION_HEADERS.join("\u001f")
+    ) {
+      throw new Error("conversion_header_mismatch");
+    }
+  }
+
+  formatConversionsSheet_(sheet);
   return sheet;
 }
 
@@ -238,6 +400,75 @@ function formatSheet_(sheet) {
     sheet.getRange(1, 1, maxRows, HEADERS.length).createFilter();
   }
   sheet.hideColumns(idColumn);
+}
+
+function formatConversionsSheet_(sheet) {
+  const maxRows = Math.max(sheet.getMaxRows(), 2);
+  const eventColumn = CONVERSION_HEADERS.indexOf("Conversion") + 1;
+
+  sheet.setFrozenRows(1);
+  sheet.setFrozenColumns(2);
+  sheet.setRowHeight(1, 42);
+  sheet
+    .getRange(1, 1, 1, CONVERSION_HEADERS.length)
+    .setBackgrounds([CONVERSION_HEADER_COLORS])
+    .setFontColor("#FFFFFF")
+    .setFontWeight("bold")
+    .setVerticalAlignment("middle")
+    .setHorizontalAlignment("left")
+    .setWrap(true);
+
+  const widths = [
+    145, 250, 245, 190, 230, 220, 210, 200, 150, 150, 190, 180, 180, 110,
+    100,
+  ];
+  widths.forEach((width, index) => sheet.setColumnWidth(index + 1, width));
+
+  const dataRange = sheet.getRange(
+    2,
+    1,
+    maxRows - 1,
+    CONVERSION_HEADERS.length,
+  );
+  dataRange.setVerticalAlignment("top").setWrap(true);
+  sheet.getRange(2, 1, maxRows - 1, 1).setNumberFormat("dd.MM.yyyy HH:mm");
+
+  const rules = [
+    ["Formular erfolgreich abgeschlossen", "#DCFCE7", "#166534"],
+    ["Direkten Anruf bestätigt", "#DBEAFE", "#1E40AF"],
+    ["Rückruf erfolgreich angefordert", "#EDE9FE", "#5B21B6"],
+    ["WhatsApp-Weiterleitung bestätigt", "#D1FAE5", "#065F46"],
+  ].map(([label, background, fontColor]) =>
+    SpreadsheetApp.newConditionalFormatRule()
+      .whenFormulaSatisfied(`=$${columnLetter_(eventColumn)}2="${label}"`)
+      .setBackground(background)
+      .setFontColor(fontColor)
+      .setRanges([dataRange])
+      .build(),
+  );
+  sheet.setConditionalFormatRules(rules);
+
+  if (!sheet.getFilter()) {
+    sheet.getRange(1, 1, maxRows, CONVERSION_HEADERS.length).createFilter();
+  }
+  const submissionIdColumn =
+    CONVERSION_HEADERS.indexOf("Anfrage-ID (intern)") + 1;
+  sheet.hideColumns(submissionIdColumn, 2);
+}
+
+function columnLetter_(column) {
+  let value = Number(column);
+  let result = "";
+  while (value > 0) {
+    value -= 1;
+    result = String.fromCharCode(65 + (value % 26)) + result;
+    value = Math.floor(value / 26);
+  }
+  return result;
+}
+
+function isUuidV4_(value) {
+  return UUID_V4_PATTERN.test(String(value || ""));
 }
 
 function safeCell_(value) {

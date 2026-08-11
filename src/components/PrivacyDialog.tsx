@@ -75,6 +75,14 @@ export function PrivacyDialog({
               Bearbeitung Ihrer Anfrage eingesetzt; Ihre Formularangaben werden
               nicht an die unten genannten Messdienste übermittelt.
             </p>
+            <p className="mt-2">
+              Wenn Sie optionale Statistik erlauben, speichern wir bestätigte
+              Kontaktaktionen zusätzlich in einem getrennten Conversion-Protokoll
+              in Google Sheets. Es enthält Ereignis, Zeitpunkt, Seite,
+              Einstiegspunkt und vorhandene Kampagnenparameter wie GCLID oder
+              UTM-Werte, aber keine Namen, Telefonnummern, E-Mail-Adressen oder
+              Nachrichten.
+            </p>
           </div>
           <div>
             <h3 className="mb-1 font-bold text-navy">Hosting</h3>
@@ -88,13 +96,14 @@ export function PrivacyDialog({
           <div>
             <h3 className="mb-1 font-bold text-navy">Optionale Statistik</h3>
             <p>
-              Google Analytics 4 (Google Ireland Limited) sowie Vercel Web
-              Analytics und Speed Insights helfen uns, Nutzung und technische
-              Leistung der Website zu verstehen. Diese Dienste starten erst,
-              wenn Sie „Statistik erlauben“ wählen. Die Rechtsgrundlage ist Ihre
-              Einwilligung (Art. 6 Abs. 1 lit. a DSGVO und § 25 Abs. 1 TDDDG).
-              Werbe- und Personalisierungsspeicher von Google bleiben
-              deaktiviert.
+              Google Analytics 4 (Google Ireland Limited), Vercel Web
+              Analytics, Speed Insights und das beschriebene
+              Conversion-Protokoll helfen uns, Nutzung, Kontaktwege und
+              technische Leistung der Website zu verstehen. Diese Messung
+              startet erst, wenn Sie „Statistik erlauben“ wählen. Die
+              Rechtsgrundlage ist Ihre Einwilligung (Art. 6 Abs. 1 lit. a DSGVO
+              und § 25 Abs. 1 TDDDG). Werbe- und
+              Personalisierungsspeicher von Google bleiben deaktiviert.
             </p>
             <button
               className="focus-ring mt-2 rounded-lg border border-stone-300 bg-white px-3 py-2 text-xs font-bold text-navy transition-colors hover:bg-stone-50"

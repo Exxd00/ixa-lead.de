@@ -13,8 +13,8 @@ import {
 import {
   buildWhatsappUrl,
   conversionEvents,
-  track,
 } from "@/lib/tracking";
+import { recordMainConversion } from "@/lib/conversion-tracking";
 import { ArrowUpRight, MessageCircle, ShieldCheck } from "lucide-react";
 import type { ReactElement } from "react";
 import { useState } from "react";
@@ -72,7 +72,9 @@ export function WhatsappConfirmDialog({
               target="_blank"
               rel="noopener noreferrer"
               onClick={() => {
-                track(conversionEvents.whatsapp, { location });
+                recordMainConversion(conversionEvents.whatsapp, {
+                  entryPoint: location,
+                });
                 setOpen(false);
               }}
             >

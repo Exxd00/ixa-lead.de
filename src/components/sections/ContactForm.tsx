@@ -11,6 +11,7 @@ import {
   leadServiceOptions,
   siteConfig,
 } from "@/data/site";
+import { captureConversionAttribution } from "@/lib/conversion-tracking";
 import { reportAdsConversion, track } from "@/lib/tracking";
 import {
   AlertTriangle,
@@ -113,25 +114,9 @@ function contactLooksValid(value: string) {
 }
 
 function sourceMetadata() {
-  const searchParams = new URLSearchParams(window.location.search);
-  let referrerHost = "";
-  if (document.referrer) {
-    try {
-      referrerHost = new URL(document.referrer).hostname;
-    } catch {
-      // Browser-filtered or malformed referrer.
-    }
-  }
   return {
     entryPoint: "contact_form",
-    landingPath: window.location.pathname,
-    referrerHost,
-    utmSource: searchParams.get("utm_source")?.trim() ?? "",
-    utmMedium: searchParams.get("utm_medium")?.trim() ?? "",
-    utmCampaign: searchParams.get("utm_campaign")?.trim() ?? "",
-    utmTerm: searchParams.get("utm_term")?.trim() ?? "",
-    utmContent: searchParams.get("utm_content")?.trim() ?? "",
-    gclid: searchParams.get("gclid")?.trim() ?? "",
+    ...captureConversionAttribution(),
   };
 }
 

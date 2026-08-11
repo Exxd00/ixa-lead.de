@@ -40,12 +40,21 @@ im Apps-Script-Projekt hinterlegt und gehört niemals in eine
 `NEXT_PUBLIC_...`-Variable.
 
 Der Empfänger in `integrations/google-apps-script/Code.gs` legt neue Anfragen
-im Tabellenblatt `Anfragen` ab. `setupSheet()` erstellt und formatiert die
-farbigen Spaltenköpfe, Statusauswahl und Kontrollfelder. Ein vorhandenes
-Tabellenblatt `Leads` bleibt als Archiv unverändert. Sichtbar gespeichert werden
-Formularangaben, Eingangszeit, GCLID und Felder für die spätere persönliche
-Bearbeitung. Die technische Eingang-ID liegt ausschließlich zur Vermeidung von
-Doppeleinträgen in einer ausgeblendeten letzten Spalte.
+im Tabellenblatt `Anfragen` ab. `setupSheets()` erstellt und formatiert die
+farbigen Spaltenköpfe, Statusauswahl und Kontrollfelder. Zusätzlich entsteht
+das getrennte Tabellenblatt `Conversions` für die vier freigegebenen
+Haupt-Conversions. Ein vorhandenes Tabellenblatt `Leads` bleibt als Archiv
+unverändert. Sichtbar gespeichert werden Formularangaben, Eingangszeit, GCLID
+und Felder für die spätere persönliche Bearbeitung. Technische IDs liegen
+ausschließlich zur Vermeidung von Doppeleinträgen in ausgeblendeten Spalten.
+
+Nach dem Einfügen oder Aktualisieren des Apps Scripts:
+
+1. In den Script Properties `SPREADSHEET_ID` und `WEBHOOK_SECRET` hinterlegen.
+2. `setupSheets()` einmal manuell ausführen und die Berechtigungen bestätigen.
+3. Unter **Deploy → Manage deployments → Edit → New version** neu bereitstellen.
+4. Die Web-App-URL mit `/exec` als `LEAD_WEBHOOK_URL` in Vercel verwenden. Der
+   Google-Sheets-Link selbst gehört nicht in Vercel.
 
 Nach dem erfolgreichen Speichern sendet Resend eine interne Benachrichtigung.
 Dafür werden `RESEND_API_KEY`, `RESEND_FROM_EMAIL` und
@@ -59,7 +68,9 @@ GCLID.
 
 Google Analytics 4 wird über `NEXT_PUBLIC_GA4_ID` konfiguriert. Google
 Analytics, Vercel Web Analytics und Speed Insights starten erst nach der
-ausdrücklichen Statistik-Einwilligung des Besuchers. Google Ads ist weiterhin
+ausdrücklichen Statistik-Einwilligung des Besuchers. Dasselbe gilt für das
+Conversion-Protokoll ohne Namen, Telefonnummern, E-Mail-Adressen oder
+Nachrichten in Google Sheets. Google Ads ist weiterhin
 deaktiviert. GA4 und GTM dürfen nicht parallel für denselben Page View
 konfiguriert werden.
 

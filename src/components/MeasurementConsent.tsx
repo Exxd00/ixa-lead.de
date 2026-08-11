@@ -111,14 +111,16 @@ function ConsentBanner({
           </p>
           <p className="mt-1.5 text-sm leading-relaxed text-stone-600">
             Notwendige Funktionen laufen immer. Google Analytics sowie Vercel
-            Web Analytics und Speed Insights starten erst, wenn Sie Statistik
-            erlauben.
+            Web Analytics, Speed Insights und das Conversion-Protokoll in
+            Google Sheets starten erst, wenn Sie Statistik erlauben.
           </p>
           {showDetails && (
             <p className="mt-2 text-xs leading-relaxed text-stone-500">
               Ihre Auswahl wird nur auf diesem Gerät gespeichert. Sie können sie
               jederzeit unter „Datenschutz“ ändern. Kontaktdaten aus dem
-              Formular werden nicht an diese Messdienste gesendet.
+              Formular werden nicht an diese Messdienste gesendet. Im
+              Conversion-Protokoll stehen nur Ereignis, Zeitpunkt, Seite und
+              vorhandene Kampagnenparameter.
             </p>
           )}
           <button

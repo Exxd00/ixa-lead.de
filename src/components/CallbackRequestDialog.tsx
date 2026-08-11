@@ -12,6 +12,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { callbackService, siteConfig } from "@/data/site";
 import {
+  captureConversionAttribution,
+  recordMainConversion,
+} from "@/lib/conversion-tracking";
+import {
   conversionEvents,
   reportAdsConversion,
   track,
@@ -29,26 +33,9 @@ import { useRef, useState } from "react";
 type SubmitStatus = "idle" | "loading" | "success" | "error";
 
 function sourceMetadata(entryPoint: string) {
-  const searchParams = new URLSearchParams(window.location.search);
-  let referrerHost = "";
-
-  if (document.referrer) {
-    try {
-      referrerHost = new URL(document.referrer).hostname;
-    } catch {
-      // Ignore malformed or browser-filtered referrers.
-    }
-  }
-
   return {
     entryPoint,
-    landingPath: window.location.pathname,
-    referrerHost,
-    utmSource: searchParams.get("utm_source")?.trim() ?? "",
-    utmMedium: searchParams.get("utm_medium")?.trim() ?? "",
-    utmCampaign: searchParams.get("utm_campaign")?.trim() ?? "",
-    utmTerm: searchParams.get("utm_term")?.trim() ?? "",
-    utmContent: searchParams.get("utm_content")?.trim() ?? "",
+    ...captureConversionAttribution(),
   };
 }
 
@@ -119,9 +106,10 @@ export function CallbackRequestDialog({
       if (!response.ok) throw new Error("request_failed");
 
       setStatus("success");
-      track(conversionEvents.callback, {
-        location,
-        transaction_id: submissionId,
+      recordMainConversion(conversionEvents.callback, {
+        entryPoint: location,
+        submissionId,
+        service: callbackService.id,
       });
       reportAdsConversion({
         service: callbackService.id,
@@ -259,8 +247,8 @@ export function CallbackRequestDialog({
               <a
                 href={siteConfig.contact.phoneHref}
                 onClick={() =>
-                  track(conversionEvents.phoneCall, {
-                    location: `${location}_confirmed`,
+                  recordMainConversion(conversionEvents.phoneCall, {
+                    entryPoint: `${location}_confirmed`,
                   })
                 }
                 className="focus-ring inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-navy/10 bg-white px-4 text-sm font-semibold text-navy transition-colors hover:border-primary/30 hover:text-primary"

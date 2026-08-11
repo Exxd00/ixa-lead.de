@@ -6,7 +6,8 @@ import {
   hasAnalyticsConsent,
   type AnalyticsConsent,
 } from "@/lib/consent";
-import { conversionEvents, track } from "@/lib/tracking";
+import { recordMainConversion } from "@/lib/conversion-tracking";
+import { conversionEvents } from "@/lib/tracking";
 import { ArrowLeft, Check, CheckCircle2 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -66,9 +67,10 @@ export function DankeContent() {
         return;
       }
 
-      track(conversionEvents.thankYou, {
+      recordMainConversion(conversionEvents.thankYou, {
         service: storedReceipt.serviceId,
-        transaction_id: storedReceipt.submissionId ?? "",
+        submissionId: storedReceipt.submissionId,
+        entryPoint: "thank_you_page",
       });
       storedReceipt.thankYouTracked = true;
 
