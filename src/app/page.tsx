@@ -20,6 +20,13 @@ import { faqs, siteConfig } from "@/data/site";
 
 const organizationId = `${siteConfig.seo.url}/#organization`;
 const serviceId = `${siteConfig.seo.url}/#ixa-anfrage-system`;
+const businessAddress = {
+  "@type": "PostalAddress",
+  streetAddress: siteConfig.contact.address.street,
+  postalCode: siteConfig.contact.address.postalCode,
+  addressLocality: siteConfig.contact.address.city,
+  addressCountry: siteConfig.contact.address.countryCode,
+};
 
 const homepageSchema = {
   "@context": "https://schema.org",
@@ -37,6 +44,7 @@ const homepageSchema = {
       },
       email: siteConfig.contact.emailDisplay,
       telephone: siteConfig.contact.phoneHref.replace("tel:", ""),
+      address: businessAddress,
       founder: {
         "@type": "Person",
         name: siteConfig.owner,
@@ -59,6 +67,7 @@ const homepageSchema = {
       logo: `${siteConfig.seo.url}/brand/ixa-logo.png`,
       email: siteConfig.contact.emailDisplay,
       telephone: siteConfig.contact.phoneHref.replace("tel:", ""),
+      address: businessAddress,
       areaServed: [
         { "@type": "City", name: "Nürnberg" },
         { "@type": "AdministrativeArea", name: "Franken" },

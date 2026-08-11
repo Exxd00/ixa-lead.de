@@ -11,12 +11,8 @@ import {
 import { cn } from "@/lib/utils";
 import { siteConfig } from "@/data/site";
 
-/* =====================================================================
-   ⚠️ Impressum unvollständig — USt-IdNr fehlt, ebenso die ladungsfähige
-   Anschrift. Vor Live-Schaltung mit Steuerberater/Anwalt klären und die
-   Platzhalter ("wird nachgereicht") durch rechtsgültige Angaben ersetzen.
-   Ein vollständiges Impressum ist nach § 5 DDG (ehem. TMG) Pflicht.
-   ===================================================================== */
+/* Falls eine USt-IdNr oder Wirtschafts-Identifikationsnummer vorliegt,
+   muss sie gemäß § 5 DDG zusätzlich ergänzt werden. */
 
 export function ImpressumDialog({
   className,
@@ -57,9 +53,18 @@ export function ImpressumDialog({
           </div>
 
           <div>
-            <h3 className="mb-1 font-bold text-navy">Anschrift</h3>
-            <p className="italic text-stone-500">
-              Ladungsfähige Anschrift wird nachgereicht.
+            <h3 className="mb-1 font-bold text-navy">
+              Geschäftsanschrift
+            </h3>
+            <p>
+              {siteConfig.contact.address.street}
+              <br />
+              {siteConfig.contact.address.postalCode}{" "}
+              {siteConfig.contact.address.city}
+            </p>
+            <p className="mt-1 text-xs text-stone-500">
+              {siteConfig.contact.address.type} ·{" "}
+              {siteConfig.contact.address.appointmentNote}
             </p>
           </div>
 
@@ -73,10 +78,10 @@ export function ImpressumDialog({
           </div>
 
           <div>
-            <h3 className="mb-1 font-bold text-navy">Umsatzsteuer-ID</h3>
-            <p className="italic text-stone-500">
-              Umsatzsteuer-Identifikationsnummer gemäß § 27 a UStG: wird
-              nachgereicht.
+            <h3 className="mb-1 font-bold text-navy">Umsatzsteuer</h3>
+            <p>
+              Die Umsätze sind gemäß § 19 Abs. 1 UStG umsatzsteuerfrei
+              (Kleinunternehmerregelung).
             </p>
           </div>
 
@@ -86,12 +91,6 @@ export function ImpressumDialog({
             </h3>
             <p>{siteConfig.owner}</p>
           </div>
-
-          <p className="rounded-lg border border-dashed border-amber-300 bg-amber-50 p-3 text-xs text-amber-800">
-            Hinweis: Dieses Impressum ist noch unvollständig (Anschrift und
-            USt-IdNr fehlen). Vor der Live-Schaltung bitte mit Steuerberater
-            bzw. Anwalt vervollständigen.
-          </p>
         </div>
       </DialogContent>
     </Dialog>

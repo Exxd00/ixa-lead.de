@@ -59,9 +59,19 @@ export function Footer() {
               <li>
                 <EmailLink location="footer" />
               </li>
-              <li className="flex items-center gap-2 text-stone-500">
-                <MapPin className="size-4 text-primary" />
-                {siteConfig.contact.location}
+              <li className="flex items-start gap-2 text-stone-500">
+                <MapPin className="mt-0.5 size-4 shrink-0 text-primary" />
+                <span>
+                  <span className="font-medium text-stone-700">
+                    Geschäftsanschrift ({siteConfig.contact.address.type})
+                  </span>
+                  <br />
+                  {siteConfig.contact.address.display}
+                  <br />
+                  <span className="text-xs">
+                    {siteConfig.contact.address.appointmentNote}
+                  </span>
+                </span>
               </li>
             </ul>
           </div>

@@ -70,7 +70,11 @@ export function AboutSection() {
                   <MapPin className="size-5 text-success-300" />
                   <p className="mt-3 text-sm font-bold">Vor Ort verwurzelt</p>
                   <p className="mt-1 text-xs leading-relaxed text-white/50">
-                    Nürnberg & Franken
+                    {siteConfig.contact.address.street}
+                    <br />
+                    {siteConfig.contact.address.postalCode}{" "}
+                    {siteConfig.contact.address.city} ·{" "}
+                    {siteConfig.contact.address.type}
                   </p>
                 </div>
                 <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">

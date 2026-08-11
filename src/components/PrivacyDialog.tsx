@@ -132,8 +132,10 @@ export function PrivacyDialog({
           </div>
 
           <p className="rounded-lg border border-stone-200 bg-stone-50 p-3 text-xs text-stone-500">
-            Verantwortlich: {siteConfig.owner}, {siteConfig.name}. Weitere
-            Anbieterangaben finden Sie im Impressum.
+            Verantwortlich: {siteConfig.owner}, {siteConfig.name},{" "}
+            {siteConfig.contact.address.display} ({
+              siteConfig.contact.address.type
+            }). Weitere Anbieterangaben finden Sie im Impressum.
           </p>
         </div>
       </DialogContent>

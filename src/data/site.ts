@@ -11,6 +11,15 @@ export const siteConfig = {
     emailDisplay: "info@ixa-leads.de",
     emailHref: "mailto:info@ixa-leads.de",
     location: "Nürnberg & Franken",
+    address: {
+      street: "Einsteinring 12",
+      postalCode: "90453",
+      city: "Nürnberg",
+      countryCode: "DE",
+      display: "Einsteinring 12, 90453 Nürnberg",
+      type: "Homeoffice",
+      appointmentNote: "Termine vor Ort nur nach vorheriger Vereinbarung.",
+    },
   },
   tracking: {
     enabled: Boolean(process.env.NEXT_PUBLIC_GA4_ID),

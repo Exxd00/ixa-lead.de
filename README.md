@@ -65,7 +65,7 @@ konfiguriert werden.
 
 ## Vor Veröffentlichung
 
-- Ladungsfähige Anschrift und gegebenenfalls USt-IdNr im Impressum ergänzen.
+- Falls vorhanden, USt-IdNr oder Wirtschafts-Identifikationsnummer im Impressum ergänzen.
 - Vollständige Datenschutzerklärung prüfen lassen.
 - Formular bis zum Zielsystem Ende-zu-Ende testen.
 - Resend-Domain und Google-Apps-Script-Web-App vollständig verifizieren.
