@@ -1,17 +1,41 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import type { Metadata } from "next";
 
+const title = "Google Ads für lokale Dienstleister in Nürnberg | IXA";
+const description =
+  "Google Ads in Nürnberg als messbares Anfrage-System: Suchnachfrage prüfen, Landingpage und Kontaktwege aufbauen und Kontaktaktionen nachvollziehbar messen.";
+const canonicalPath = "/google-ads-nuernberg";
+
 export const metadata: Metadata = {
-  title: "Google Ads für lokale Dienstleister in Nürnberg | IXA",
-  description:
-    "Google Ads in Nürnberg als messbares Anfrage-System: Suchnachfrage prüfen, Landingpage und Kontaktwege aufbauen und Kontaktaktionen nachvollziehbar messen.",
-  alternates: { canonical: "/google-ads-nuernberg" },
+  title,
+  description,
+  alternates: { canonical: canonicalPath },
+  openGraph: {
+    type: "website",
+    url: canonicalPath,
+    title,
+    description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "IXA Anfrage-System für lokale Dienstleister in Nürnberg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/opengraph-image"],
+  },
 };
 
 export default function GoogleAdsNuernbergPage() {
   return (
     <SeoLandingPage
-      canonicalPath="/google-ads-nuernberg"
+      canonicalPath={canonicalPath}
       eyebrow="Google Ads · Nürnberg"
       h1="Google Ads für lokale Dienstleister in Nürnberg"
       intro="IXA verbindet vorhandene Google-Suchnachfrage mit einer passenden Website oder Landingpage und sauberer Kontaktmessung. Ziel ist kein isolierter Anzeigenstart, sondern ein nachvollziehbarer Weg bis zur Kontaktanfrage."

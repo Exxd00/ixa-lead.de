@@ -10,6 +10,7 @@ import {
 } from "@/lib/consent";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
+import { usePathname } from "next/navigation";
 import Script from "next/script";
 import { useCallback, useEffect, useState } from "react";
 
@@ -167,10 +168,13 @@ function ConsentBanner({
 }
 
 export function MeasurementConsent() {
+  const pathname = usePathname();
+  const isAdminRoute = pathname.startsWith("/admin");
   const [consent, setConsent] = useState<AnalyticsConsent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
 
   useEffect(() => {
+    if (isAdminRoute) return;
     ensureGoogleConsentDefaults();
 
     const storedConsent = readAnalyticsConsent();
@@ -205,7 +209,7 @@ export function MeasurementConsent() {
       window.removeEventListener(analyticsConsentSettingsEvent, onOpenSettings);
       window.removeEventListener("storage", onStorage);
     };
-  }, []);
+  }, [isAdminRoute]);
 
   const selectConsent = useCallback((nextConsent: AnalyticsConsent) => {
     const previousConsent = readAnalyticsConsent();
@@ -232,6 +236,8 @@ export function MeasurementConsent() {
   }, [consent]);
 
   const analyticsAllowed = consent === "granted";
+
+  if (isAdminRoute) return null;
 
   return (
     <>

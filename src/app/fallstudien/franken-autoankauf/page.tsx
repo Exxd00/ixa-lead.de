@@ -11,45 +11,121 @@ import { ArrowRight, CalendarDays, Check, FileSpreadsheet } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
 
+const canonicalPath = "/fallstudien/franken-autoankauf";
+const title = "211 Kontaktaktionen für Franken Autoankauf 24 | IXA";
+const headline =
+  "211 dokumentierte Kontaktaktionen für Franken Autoankauf 24";
+const description =
+  "Fallstudie mit anonymisiertem Originalnachweis: 211 dokumentierte Kontaktaktionen für Franken Autoankauf 24 – 135 Formulare, 40 Telefon und 36 WhatsApp.";
+
 export const metadata: Metadata = {
-  title: "211 Kontaktaktionen für Franken Autoankauf 24 | IXA",
-  description:
-    "Fallstudie mit anonymisiertem Originalnachweis: 211 dokumentierte Kontaktaktionen für Franken Autoankauf 24 – 135 Formulare, 40 Telefon und 36 WhatsApp.",
-  alternates: { canonical: "/fallstudien/franken-autoankauf" },
+  title,
+  description,
+  alternates: { canonical: canonicalPath },
+  openGraph: {
+    type: "article",
+    url: canonicalPath,
+    title,
+    description,
+    publishedTime: "2026-08-11",
+    modifiedTime: "2026-08-11",
+    images: [
+      {
+        url: "/evidence/franken-lead-sheet-safe.jpg",
+        width: 860,
+        height: 720,
+        alt: "Anonymisierter Originalnachweis der dokumentierten Kontaktaktionen",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/evidence/franken-lead-sheet-safe.jpg"],
+  },
 };
 
 const study =
   documentedCases.find((item) => item.id === "frankenautoankauf24") ??
   documentedCases[0];
 
-const pageUrl = `${siteConfig.seo.url}/fallstudien/franken-autoankauf`;
+const pageUrl = `${siteConfig.seo.url}${canonicalPath}`;
+const webpageId = `${pageUrl}/#webpage`;
+const articleId = `${pageUrl}/#article`;
+const breadcrumbId = `${pageUrl}/#breadcrumb`;
 const articleSchema = {
   "@context": "https://schema.org",
-  "@type": "Article",
-  "@id": `${pageUrl}/#article`,
-  headline: "211 dokumentierte Kontaktaktionen für Franken Autoankauf 24",
-  description:
-    "Dokumentierte Kontaktaktionen über Formular, Telefon und WhatsApp mit anonymisiertem Originalnachweis.",
-  mainEntityOfPage: pageUrl,
-  image: `${siteConfig.seo.url}/evidence/franken-lead-sheet-safe.jpg`,
-  dateModified: "2026-08-11",
-  author: {
-    "@type": "Person",
-    name: siteConfig.owner,
-  },
-  publisher: {
-    "@type": "Organization",
-    "@id": `${siteConfig.seo.url}/#organization`,
-    name: siteConfig.name,
-    logo: {
-      "@type": "ImageObject",
-      url: `${siteConfig.seo.url}/brand/ixa-logo.png`,
+  "@graph": [
+    {
+      "@type": "WebPage",
+      "@id": webpageId,
+      url: pageUrl,
+      name: title,
+      description,
+      isPartOf: { "@id": `${siteConfig.seo.url}/#website` },
+      breadcrumb: { "@id": breadcrumbId },
+      mainEntity: { "@id": articleId },
+      inLanguage: "de-DE",
     },
-  },
-  about: {
-    "@type": "Thing",
-    name: "Kontaktmessung für lokalen Fahrzeugankauf",
-  },
+    {
+      "@type": "Article",
+      "@id": articleId,
+      headline,
+      description:
+        "Dokumentierte Kontaktaktionen über Formular, Telefon und WhatsApp mit anonymisiertem Originalnachweis.",
+      mainEntityOfPage: { "@id": webpageId },
+      image: {
+        "@type": "ImageObject",
+        url: `${siteConfig.seo.url}/evidence/franken-lead-sheet-safe.jpg`,
+        width: 860,
+        height: 720,
+      },
+      datePublished: "2026-08-11",
+      dateModified: "2026-08-11",
+      inLanguage: "de-DE",
+      author: {
+        "@type": "Person",
+        "@id": `${siteConfig.seo.url}/#emad-alzaim`,
+        name: siteConfig.owner,
+        url: `${siteConfig.seo.url}/#about`,
+      },
+      publisher: {
+        "@type": ["Organization", "LocalBusiness"],
+        "@id": `${siteConfig.seo.url}/#organization`,
+        name: siteConfig.name,
+        url: siteConfig.seo.url,
+        logo: {
+          "@type": "ImageObject",
+          url: `${siteConfig.seo.url}/brand/ixa-logo.png`,
+          width: 608,
+          height: 608,
+        },
+      },
+      about: {
+        "@type": "Thing",
+        name: "Kontaktmessung für lokalen Fahrzeugankauf",
+      },
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": breadcrumbId,
+      itemListElement: [
+        {
+          "@type": "ListItem",
+          position: 1,
+          name: "Startseite",
+          item: siteConfig.seo.url,
+        },
+        {
+          "@type": "ListItem",
+          position: 2,
+          name: headline,
+          item: pageUrl,
+        },
+      ],
+    },
+  ],
 };
 
 export default function FrankenAutoankaufCaseStudyPage() {

@@ -1,17 +1,33 @@
 import type { MetadataRoute } from "next";
+import { siteConfig } from "@/data/site";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://ixa-leads.de";
+  const lastModified = new Date("2026-08-11T00:00:00Z");
 
   return [
-    ["", 1],
-    ["/google-ads-nuernberg", 0.85],
-    ["/google-ads-handwerker-nuernberg", 0.85],
-    ["/fallstudien/franken-autoankauf", 0.9],
-  ].map(([path, priority]) => ({
-    url: `${baseUrl}${path}`,
-    lastModified: new Date("2026-08-11"),
-    changeFrequency: "weekly" as const,
-    priority: priority as number,
-  }));
+    {
+      url: siteConfig.seo.url,
+      lastModified,
+      changeFrequency: "weekly",
+      priority: 1,
+    },
+    {
+      url: `${siteConfig.seo.url}/fallstudien/franken-autoankauf`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.9,
+    },
+    {
+      url: `${siteConfig.seo.url}/google-ads-nuernberg`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+    {
+      url: `${siteConfig.seo.url}/google-ads-handwerker-nuernberg`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.85,
+    },
+  ];
 }

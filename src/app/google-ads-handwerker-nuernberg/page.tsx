@@ -1,17 +1,41 @@
 import { SeoLandingPage } from "@/components/seo/SeoLandingPage";
 import type { Metadata } from "next";
 
+const title = "Google Ads für Handwerksbetriebe in Nürnberg | IXA";
+const description =
+  "Google Ads für Handwerker in Nürnberg: relevante Suchnachfrage, klare Landingpage und messbare Kontaktwege als gemeinsames Anfrage-System.";
+const canonicalPath = "/google-ads-handwerker-nuernberg";
+
 export const metadata: Metadata = {
-  title: "Google Ads für Handwerksbetriebe in Nürnberg | IXA",
-  description:
-    "Google Ads für Handwerker in Nürnberg: relevante Suchnachfrage, klare Landingpage und messbare Kontaktwege als gemeinsames Anfrage-System.",
-  alternates: { canonical: "/google-ads-handwerker-nuernberg" },
+  title,
+  description,
+  alternates: { canonical: canonicalPath },
+  openGraph: {
+    type: "website",
+    url: canonicalPath,
+    title,
+    description,
+    images: [
+      {
+        url: "/opengraph-image",
+        width: 1200,
+        height: 630,
+        alt: "IXA Anfrage-System für Handwerksbetriebe in Nürnberg",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title,
+    description,
+    images: ["/opengraph-image"],
+  },
 };
 
 export default function GoogleAdsHandwerkerNuernbergPage() {
   return (
     <SeoLandingPage
-      canonicalPath="/google-ads-handwerker-nuernberg"
+      canonicalPath={canonicalPath}
       eyebrow="Google Ads · Handwerk · Nürnberg"
       h1="Google Ads für Handwerksbetriebe in Nürnberg"
       intro="IXA baut für Handwerksbetriebe einen klaren Weg von der konkreten Google-Suche bis zur messbaren Kontaktanfrage. Website oder Landingpage, Anzeigen und Kontaktmessung werden dabei als ein System betrachtet."

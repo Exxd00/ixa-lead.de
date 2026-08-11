@@ -39,15 +39,18 @@ export function SeoLandingPage({
   questions,
 }: SeoLandingPageProps) {
   const pageUrl = `${siteConfig.seo.url}${canonicalPath}`;
+  const webpageId = `${pageUrl}/#webpage`;
+  const breadcrumbId = `${pageUrl}/#breadcrumb`;
   const schema = {
     "@context": "https://schema.org",
     "@graph": [
       {
         "@type": "WebPage",
-        "@id": `${pageUrl}/#webpage`,
+        "@id": webpageId,
         url: pageUrl,
         name: h1,
         description: intro,
+        inLanguage: "de-DE",
         isPartOf: {
           "@type": "WebSite",
           "@id": `${siteConfig.seo.url}/#website`,
@@ -55,6 +58,8 @@ export function SeoLandingPage({
           url: siteConfig.seo.url,
         },
         publisher: { "@id": `${siteConfig.seo.url}/#organization` },
+        breadcrumb: { "@id": breadcrumbId },
+        mainEntity: { "@id": `${pageUrl}/#service` },
       },
       {
         "@type": "Service",
@@ -62,8 +67,12 @@ export function SeoLandingPage({
         name: h1,
         description:
           "Google Ads, passende Website oder Landingpage und Kontaktmessung als gemeinsames Anfrage-System für lokale Dienstleistungsbetriebe.",
+        serviceType:
+          "Google Ads und Kontaktmessung für lokale Dienstleistungsbetriebe",
+        url: pageUrl,
+        mainEntityOfPage: { "@id": webpageId },
         provider: {
-          "@type": "Organization",
+          "@type": ["Organization", "LocalBusiness"],
           "@id": `${siteConfig.seo.url}/#organization`,
           name: siteConfig.name,
           url: siteConfig.seo.url,
@@ -80,8 +89,29 @@ export function SeoLandingPage({
         areaServed: { "@type": "City", name: "Nürnberg" },
       },
       {
+        "@type": "BreadcrumbList",
+        "@id": breadcrumbId,
+        itemListElement: [
+          {
+            "@type": "ListItem",
+            position: 1,
+            name: "Startseite",
+            item: siteConfig.seo.url,
+          },
+          {
+            "@type": "ListItem",
+            position: 2,
+            name: h1,
+            item: pageUrl,
+          },
+        ],
+      },
+      {
         "@type": "FAQPage",
         "@id": `${pageUrl}/#faq`,
+        url: `${pageUrl}/#faq`,
+        isPartOf: { "@id": webpageId },
+        inLanguage: "de-DE",
         mainEntity: questions.map((item) => ({
           "@type": "Question",
           name: item.question,
