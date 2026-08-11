@@ -9,6 +9,7 @@ import {
   MessageCircle,
   UserRound,
 } from "lucide-react";
+import Image from "next/image";
 
 const promises = [
   "Sie sprechen von der Analyse bis zur Optimierung direkt mit mir.",
@@ -35,22 +36,36 @@ export function AboutSection() {
             />
 
             <div className="relative">
-              <BrandMark
-                className="size-16 rounded-2xl border border-white/10"
-                alt="Markenzeichen von IXA-Leads"
-                sizes="64px"
-              />
-              <p className="mt-7 text-xs font-bold uppercase tracking-[0.14em] text-success-300">
-                Ihr Ansprechpartner
-              </p>
-              <h2 className="mt-2 text-3xl font-bold text-white">
-                {siteConfig.owner}
-              </h2>
-              <p className="mt-2 text-white/55">
-                {siteConfig.name} · {siteConfig.role}
-              </p>
+              <div className="grid grid-cols-[88px_minmax(0,1fr)] items-center gap-4 sm:grid-cols-[112px_minmax(0,1fr)] sm:gap-5">
+                <div className="relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] shadow-lg">
+                  <Image
+                    src="/people/emad-alzaim.webp"
+                    alt="Emad Alzaim, persönlicher Ansprechpartner bei IXA-Leads"
+                    fill
+                    sizes="(max-width: 639px) 88px, 112px"
+                    className="object-cover"
+                  />
+                </div>
 
-              <div className="mt-8 grid gap-3 sm:grid-cols-2">
+                <div className="min-w-0">
+                  <BrandMark
+                    className="size-10 rounded-xl border border-white/10"
+                    alt="Markenzeichen von IXA-Leads"
+                    sizes="40px"
+                  />
+                  <p className="mt-3 text-[11px] font-bold uppercase tracking-[0.12em] text-success-300 sm:text-xs sm:tracking-[0.14em]">
+                    Ihr Ansprechpartner
+                  </p>
+                  <h2 className="mt-1 text-2xl font-bold text-white sm:text-3xl">
+                    {siteConfig.owner}
+                  </h2>
+                  <p className="mt-1 text-sm leading-relaxed text-white/55">
+                    {siteConfig.name} · {siteConfig.role}
+                  </p>
+                </div>
+              </div>
+
+              <div className="mt-7 grid gap-3 sm:grid-cols-2">
                 <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
                   <MapPin className="size-5 text-success-300" />
                   <p className="mt-3 text-sm font-bold">Vor Ort verwurzelt</p>
