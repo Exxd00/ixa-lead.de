@@ -59,7 +59,7 @@ const homepageSchema = {
       "@type": "Person",
       "@id": founderId,
       name: siteConfig.owner,
-      image: `${siteConfig.seo.url}/people/emad-alzaim-centered.webp`,
+      image: `${siteConfig.seo.url}/people/emad-alzaim-new.png`,
       url: `${siteConfig.seo.url}/#about`,
       worksFor: { "@id": organizationId },
     },

@@ -4,7 +4,7 @@ import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
 import { WhatsappConfirmDialog } from "@/components/WhatsappConfirmDialog";
 import { Phone } from "lucide-react";
 
-function WhatsAppIcon({ className }: { className?: string }) {
+export function WhatsAppIcon({ className }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -28,7 +28,7 @@ export function WhatsappFloat() {
         <button
           type="button"
           aria-label="Rückruf oder direkten Anruf auswählen"
-          className="focus-ring group relative grid size-12 place-items-center rounded-full border-2 border-white bg-navy text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-navy/90"
+          className="focus-ring liquid-float group grid size-12 place-items-center rounded-full transition-all"
         >
           <Phone className="size-5" aria-hidden="true" />
           <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">
@@ -40,7 +40,7 @@ export function WhatsappFloat() {
         <button
           type="button"
           aria-label="Über WhatsApp kontaktieren"
-          className="focus-ring group relative grid size-12 place-items-center rounded-full border-2 border-white bg-success-700 text-white shadow-card transition-all hover:-translate-y-0.5 hover:bg-success-800"
+          className="focus-ring liquid-float group grid size-12 place-items-center rounded-full transition-all"
         >
           <WhatsAppIcon className="size-6" />
           <span className="pointer-events-none absolute right-full top-1/2 mr-3 -translate-y-1/2 whitespace-nowrap rounded-lg bg-navy px-3 py-1.5 text-xs font-semibold text-white opacity-0 shadow-soft transition-opacity duration-200 group-hover:opacity-100">

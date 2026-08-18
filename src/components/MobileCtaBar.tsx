@@ -2,7 +2,8 @@
 
 import { CallbackRequestDialog } from "@/components/CallbackRequestDialog";
 import { WhatsappConfirmDialog } from "@/components/WhatsappConfirmDialog";
-import { MessageCircle, Phone } from "lucide-react";
+import { Phone } from "lucide-react";
+import { WhatsAppIcon } from "@/components/WhatsappFloat";
 
 /** Zwei dauerhaft sichtbare, schwebende Kontaktwege für Mobil und Tablet. */
 export function MobileCtaBar() {
@@ -13,7 +14,7 @@ export function MobileCtaBar() {
           <button
             type="button"
             aria-label="Rückruf oder direkten Anruf auswählen"
-            className="focus-ring grid size-12 place-items-center rounded-full border-2 border-white bg-navy text-white shadow-card transition-colors hover:bg-navy/90"
+            className="focus-ring liquid-float grid size-12 place-items-center rounded-full transition-all"
           >
             <Phone className="size-5" aria-hidden="true" />
             <span className="sr-only">Rückruf</span>
@@ -23,9 +24,9 @@ export function MobileCtaBar() {
           <button
             type="button"
             aria-label="Über WhatsApp kontaktieren"
-            className="focus-ring grid size-12 place-items-center rounded-full border-2 border-white bg-success-700 text-white shadow-card transition-colors hover:bg-success-800"
+            className="focus-ring liquid-float grid size-12 place-items-center rounded-full transition-all"
           >
-            <MessageCircle className="size-5" aria-hidden="true" />
+            <WhatsAppIcon className="size-6" />
             <span className="sr-only">WhatsApp</span>
           </button>
         </WhatsappConfirmDialog>

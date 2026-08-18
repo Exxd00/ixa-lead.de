@@ -40,7 +40,7 @@ export function AboutSection() {
                 <div className="relative">
                   <div className="relative aspect-[4/5] w-24 overflow-hidden rounded-2xl border border-white/15 bg-white/[0.06] shadow-lg sm:w-28">
                     <Image
-                      src="/people/emad-alzaim-centered.webp"
+                      src="/people/emad-alzaim-new.png"
                       alt="Emad Alzaim, persönlicher Ansprechpartner bei IXA-Leads"
                       fill
                       sizes="(max-width: 639px) 96px, 112px"

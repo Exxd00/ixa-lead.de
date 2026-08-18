@@ -6,6 +6,7 @@ import { CtaButton } from "@/components/cta";
 import { freeCheckServiceId, siteConfig } from "@/data/site";
 import { cn } from "@/lib/utils";
 import { Menu, Phone, X } from "lucide-react";
+import { ThemeToggle } from "@/components/ThemeToggle";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -74,6 +75,7 @@ export function Navbar() {
         </div>
 
         <div className="hidden items-center gap-3 lg:flex">
+          <ThemeToggle />
           <CallbackRequestDialog location="navbar">
             <button
               type="button"
@@ -93,16 +95,19 @@ export function Navbar() {
           </CtaButton>
         </div>
 
-        <button
-          type="button"
-          onClick={() => setOpen((value) => !value)}
-          className="focus-ring grid size-11 place-items-center rounded-xl border border-navy/10 bg-white text-navy lg:hidden"
-          aria-expanded={open}
-          aria-controls="mobile-navigation"
-          aria-label={open ? "Menü schließen" : "Menü öffnen"}
-        >
-          {open ? <X className="size-5" /> : <Menu className="size-5" />}
-        </button>
+        <div className="flex items-center gap-2 lg:hidden">
+          <ThemeToggle />
+          <button
+            type="button"
+            onClick={() => setOpen((value) => !value)}
+            className="focus-ring grid size-11 place-items-center rounded-xl border border-navy/10 bg-white text-navy"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+            aria-label={open ? "Menü schließen" : "Menü öffnen"}
+          >
+            {open ? <X className="size-5" /> : <Menu className="size-5" />}
+          </button>
+        </div>
       </nav>
 
       <div

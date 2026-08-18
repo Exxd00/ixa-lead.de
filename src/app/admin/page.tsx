@@ -40,14 +40,11 @@ const sitemapUrl = `${siteConfig.seo.url}/sitemap.xml`;
 const robotsUrl = `${siteConfig.seo.url}/robots.txt`;
 
 const colors = [
-  { name: "Signal Blue", hex: "#3163ED", use: "الأزرار والروابط الأساسية" },
-  { name: "Graphite Navy", hex: "#1D2430", use: "العناوين والنص الداكن" },
-  { name: "Hero Black", hex: "#0D1117", use: "خلفية الـHero" },
-  { name: "Warm Canvas", hex: "#FBFAF7", use: "الخلفية الدافئة" },
-  { name: "Soft Sand", hex: "#F3F1EB", use: "الأقسام الثانوية" },
-  { name: "Success Green", hex: "#16A87A", use: "النتائج والحالات الإيجابية" },
-  { name: "Ember Coral", hex: "#E85D2C", use: "تنبيه أو إبراز ثانوي" },
-  { name: "Soft Border", hex: "#E0DCD6", use: "الحدود الهادئة" },
+  { name: "IXA Mint", hex: "#64E0D5", use: "الهوية والشعار والأزرار واللمسات" },
+  { name: "Deep Black", hex: "#050606", use: "الخلفية الأساسية والتباين" },
+  { name: "Pure White", hex: "#FFFFFF", use: "الخلفيات والنصوص النظيفة" },
+  { name: "Soft Mint", hex: "#B9F4EE", use: "المساحات والتفاصيل الهادئة" },
+  { name: "Graphite", hex: "#1B1E1E", use: "البطاقات والخلفيات الثانوية" },
 ] as const;
 
 const publicPages = [
@@ -85,7 +82,7 @@ const assets = [
   },
   {
     title: "أيقونة IXA WebP",
-    path: "/brand/ixa-mark.webp",
+    path: "/brand/ixa-mark-new.png",
     dimensions: "352 × 352 px",
     size: "حوالي 8 KB",
     width: 352,
@@ -103,7 +100,7 @@ const assets = [
   },
   {
     title: "صورة Emad للموقع",
-    path: "/people/emad-alzaim-centered.webp",
+    path: "/people/emad-alzaim-new.png",
     dimensions: "480 × 600 px",
     size: "حوالي 20 KB",
     width: 480,

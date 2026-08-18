@@ -8,6 +8,7 @@ import "./globals.css";
 import { MeasurementConsent } from "@/components/MeasurementConsent";
 import { siteConfig } from "@/data/site";
 import ClientBody from "./ClientBody";
+import Script from "next/script";
 
 /* Fließtext: klar, professionell, gut lesbar */
 const jakarta = Plus_Jakarta_Sans({
@@ -80,9 +81,18 @@ export default function RootLayout({
     <html
       lang="de"
       dir="ltr"
+      suppressHydrationWarning
       className={`${jakarta.variable} ${spaceGrotesk.variable} ${jetbrainsMono.variable}`}
     >
       <body suppressHydrationWarning className="antialiased">
+        <Script id="ixa-theme" strategy="beforeInteractive">{`
+          try {
+            const saved = localStorage.getItem('ixa-theme');
+            const dark = saved ? saved === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+            document.documentElement.classList.toggle('dark', dark);
+            document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+          } catch (_) {}
+        `}</Script>
         {/* Feines Papierkorn über der gesamten Seite — Teil der warmen Bildsprache */}
         <div
           aria-hidden="true"

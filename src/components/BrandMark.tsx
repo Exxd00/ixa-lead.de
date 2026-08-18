@@ -21,7 +21,7 @@ export function BrandMark({
       )}
     >
       <Image
-        src="/brand/ixa-mark.webp"
+        src="/brand/ixa-mark-new.png"
         alt={alt}
         fill
         priority={priority}
