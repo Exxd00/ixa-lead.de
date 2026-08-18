@@ -56,7 +56,7 @@ export function Hero() {
               service={freeCheckServiceId}
               size="xl"
               icon={<ArrowRight className="order-last" />}
-              className="h-auto min-h-14 w-full whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-14 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-0 sm:text-base"
+              className="liquid-cta h-auto min-h-14 w-full whitespace-normal px-4 py-3 text-center text-sm leading-tight sm:h-14 sm:w-auto sm:whitespace-nowrap sm:px-8 sm:py-0 sm:text-base"
             >
               Anfrage-Potenzial kostenlos prüfen
             </CtaButton>
