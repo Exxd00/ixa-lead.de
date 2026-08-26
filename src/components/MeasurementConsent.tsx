@@ -8,11 +8,12 @@ import {
   readAnalyticsConsent,
   saveAnalyticsConsent,
 } from "@/lib/consent";
+import { isNoTrackPath } from "@/lib/privacy-routes";
 import { Analytics } from "@vercel/analytics/react";
 import { SpeedInsights } from "@vercel/speed-insights/react";
 import { usePathname } from "next/navigation";
 import Script from "next/script";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useState } from "react";
 
 type ConsentModeValue = "granted" | "denied";
 
@@ -29,6 +30,19 @@ type ConsentModeSettings = {
 
 const googleAnalyticsId = process.env.NEXT_PUBLIC_GA4_ID?.trim() ?? "";
 const validGoogleAnalyticsId = /^G-[A-Z0-9]+$/i.test(googleAnalyticsId);
+
+function filterPrivateMeasurementEvent<T extends { url: string }>(
+  event: T,
+): T | null {
+  if (typeof window === "undefined") return null;
+
+  try {
+    const pathname = new URL(event.url, window.location.origin).pathname;
+    return isNoTrackPath(pathname) ? null : event;
+  } catch {
+    return null;
+  }
+}
 
 function ensureGoogleConsentDefaults(): void {
   window.dataLayer = window.dataLayer || [];
@@ -169,12 +183,32 @@ function ConsentBanner({
 
 export function MeasurementConsent() {
   const pathname = usePathname();
-  const isAdminRoute = pathname.startsWith("/admin");
+  const isMeasurementDisabled = isNoTrackPath(pathname);
   const [consent, setConsent] = useState<AnalyticsConsent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
 
+  useLayoutEffect(() => {
+    if (!isMeasurementDisabled) return;
+
+    const optionalMeasurementWasLoaded = Boolean(
+      window.gtag ||
+        window.va ||
+        window.si ||
+        document.getElementById("ixa-google-analytics"),
+    );
+    ensureGoogleConsentDefaults();
+    updateGoogleConsent("denied");
+    setConsent(null);
+    setShowBanner(false);
+
+    // A full reload removes optional analytics runtimes that may remain after
+    // a client-side transition from a measured public page. On a direct load
+    // of a private route none are present, so this runs at most once.
+    if (optionalMeasurementWasLoaded) window.location.reload();
+  }, [isMeasurementDisabled]);
+
   useEffect(() => {
-    if (isAdminRoute) return;
+    if (isMeasurementDisabled) return;
     ensureGoogleConsentDefaults();
 
     const storedConsent = readAnalyticsConsent();
@@ -209,7 +243,7 @@ export function MeasurementConsent() {
       window.removeEventListener(analyticsConsentSettingsEvent, onOpenSettings);
       window.removeEventListener("storage", onStorage);
     };
-  }, [isAdminRoute]);
+  }, [isMeasurementDisabled]);
 
   const selectConsent = useCallback((nextConsent: AnalyticsConsent) => {
     const previousConsent = readAnalyticsConsent();
@@ -237,7 +271,7 @@ export function MeasurementConsent() {
 
   const analyticsAllowed = consent === "granted";
 
-  if (isAdminRoute) return null;
+  if (isMeasurementDisabled) return null;
 
   return (
     <>
@@ -252,8 +286,8 @@ export function MeasurementConsent() {
 
       {analyticsAllowed && (
         <>
-          <Analytics />
-          <SpeedInsights />
+          <Analytics beforeSend={filterPrivateMeasurementEvent} />
+          <SpeedInsights beforeSend={filterPrivateMeasurementEvent} />
         </>
       )}
 

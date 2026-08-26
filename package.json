@@ -11,6 +11,8 @@
     "start": "next start",
     "typecheck": "tsc --noEmit",
     "lint": "tsc --noEmit && eslint .",
+    "test:outreach": "node scripts/verify-whatsapp-contract.cjs",
+    "test:whatsapp": "node scripts/verify-whatsapp-contract.cjs",
     "format": "biome format --write ."
   },
   "dependencies": {

@@ -41,6 +41,11 @@ export const metadata: Metadata = {
   title: siteConfig.seo.title,
   description: siteConfig.seo.description,
   applicationName: siteConfig.name,
+  icons: {
+    icon: "/brand/ixa-mark-new.png",
+    shortcut: "/brand/ixa-mark-new.png",
+    apple: "/brand/ixa-mark-new.png",
+  },
   authors: [{ name: siteConfig.name }],
   keywords: [
     "IXA Anfrage-System",
