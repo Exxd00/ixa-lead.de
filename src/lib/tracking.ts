@@ -5,6 +5,7 @@
 
 import { siteConfig } from "@/data/site";
 import { hasAnalyticsConsent } from "@/lib/consent";
+import { isNoTrackPath } from "@/lib/privacy-routes";
 
 export type TrackingEvent =
   | "hero_cta_click"
@@ -65,6 +66,7 @@ export function track(
   params: DataLayerObject = {},
 ): void {
   if (typeof window === "undefined") return;
+  if (isNoTrackPath(window.location.pathname)) return;
 
   if (!hasAnalyticsConsent()) {
     if (process.env.NODE_ENV !== "production") {
@@ -87,6 +89,7 @@ export function track(
  */
 export function reportAdsConversion(extra: DataLayerObject = {}): void {
   if (typeof window === "undefined") return;
+  if (isNoTrackPath(window.location.pathname)) return;
 
   const { adsEnabled, adsConversionId, adsConversionLabel } =
     siteConfig.tracking;

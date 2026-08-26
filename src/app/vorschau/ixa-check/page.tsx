@@ -20,8 +20,8 @@ export const metadata: Metadata = {
   },
 };
 
-const company = "WH Werner Hofmann";
-const reference = "IXAP260826001";
+const company = "Musterbetrieb Hofmann";
+const reference = "IXAP-DEMO-001";
 
 export default function PersonalCheckPreviewPage() {
   return (

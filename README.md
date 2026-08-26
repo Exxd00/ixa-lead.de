@@ -78,6 +78,50 @@ Telefonnummern, E-Mail-Adressen oder Nachrichten. Google Ads ist weiterhin
 deaktiviert. GA4 und GTM dürfen nicht parallel für denselben Page View
 konfiguriert werden.
 
+Die internen Routen `/admin/*` und `/vorschau/*` sind vollständig von der
+Messung ausgeschlossen. Die Vorschau verwendet nur synthetische Beispieldaten,
+setzt `noindex`/`no-store` und öffnet keine Kontaktaktion.
+
+## WhatsApp-Eingang sicher protokollieren
+
+Der offizielle WhatsApp-Business-Platform-Webhook endet an
+`/api/whatsapp/webhook`. Die Website prüft zuerst Metas
+`X-Hub-Signature-256`, die richtige Business-Account-ID und die richtige
+Phone-Number-ID. Danach geht nur ein HMAC-Beweis an Google Sheets. Der
+Nachrichtentext wird erst übertragen, wenn entweder die internationale Nummer
+exakt in `01 Prospects` steht oder die Nachricht den zufälligen `Public_Token`
+eines gespeicherten Kontakts enthält. Eine kurze `Printed_Ref` allein öffnet
+die Datenschutzschranke nicht.
+
+Der Empfänger liegt bewusst in einem getrennten Apps-Script-Projekt unter
+`integrations/ixa-outreach-webhook/`. Er schreibt ausschließlich in
+`07 Inbound Queue`, verhindert Doppeleinträge über Metas Message-ID und sendet
+keine Antwort. Nach 30 Tagen löscht ein täglicher Trigger Telefonnummer und
+Nachrichtentext; technische IDs und Workflowstatus bleiben zur Deduplizierung
+erhalten.
+
+Einrichtung nach erfolgreichem Meta-Login:
+
+1. Ein neues eigenständiges Apps-Script-Projekt mit `Code.gs` und
+   `appsscript.json` aus `integrations/ixa-outreach-webhook/` anlegen.
+2. In dessen Script Properties `OUTREACH_SPREADSHEET_ID` und ein langes
+   zufälliges `WHATSAPP_WEBHOOK_SECRET` hinterlegen.
+3. `setupWhatsAppInboundQueue()` einmal manuell ausführen. Dadurch werden das
+   Sheet geprüft/formatiert und der tägliche Lösch-Trigger eingerichtet.
+4. Als Web App ausführen als Besitzer und für „Anyone“ bereitstellen. Nur die
+   `/exec`-URL unter `WHATSAPP_SHEET_WEBHOOK_URL` in Vercel hinterlegen; dasselbe
+   Secret kommt in `WHATSAPP_SHEET_WEBHOOK_SECRET`.
+5. In Vercel zusätzlich `WHATSAPP_VERIFY_TOKEN`, `WHATSAPP_APP_SECRET`,
+   `WHATSAPP_PHONE_NUMBER_ID` und `WHATSAPP_BUSINESS_ACCOUNT_ID` setzen.
+6. In Meta die Callback-URL
+   `https://ixa-leads.de/api/whatsapp/webhook` mit dem Verify Token bestätigen
+   und das Feld `messages` abonnieren.
+
+Es wird absichtlich kein WhatsApp Access Token benötigt, weil der Dienst nur
+empfängt, prüft und Entwürfe vorbereitet. Für eine strikte Trennung, bei der
+private Familiennachrichten nicht einmal Metas Business-Webhook erreichen,
+ist eine eigene geschäftliche Rufnummer erforderlich.
+
 ## Vor Veröffentlichung
 
 - Falls vorhanden, USt-IdNr oder Wirtschafts-Identifikationsnummer im Impressum ergänzen.

@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 
+import { isNoTrackPath } from "@/lib/privacy-routes";
+
 export const dynamic = "force-dynamic";
 
 const SCHEMA_VERSION = 1 as const;
@@ -232,6 +234,29 @@ export async function POST(request: Request) {
     return NextResponse.json(
       { ok: false, error: "invalid_payload" },
       { status: 422 },
+    );
+  }
+
+  let referrerPath = "";
+  const referrer = request.headers.get("referer");
+  if (referrer) {
+    try {
+      referrerPath = new URL(referrer).pathname;
+    } catch {
+      return NextResponse.json(
+        { ok: false, error: "invalid_referrer" },
+        { status: 400 },
+      );
+    }
+  }
+
+  if (
+    isNoTrackPath(payload.landingPath || "/") ||
+    (referrerPath && isNoTrackPath(referrerPath))
+  ) {
+    return NextResponse.json(
+      { ok: false, error: "measurement_disabled" },
+      { status: 403 },
     );
   }
 

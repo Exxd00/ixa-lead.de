@@ -1,6 +1,7 @@
 "use client";
 
 import { captureConversionAttribution } from "@/lib/conversion-tracking";
+import { isNoTrackPath } from "@/lib/privacy-routes";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
@@ -15,7 +16,7 @@ export default function ClientBody({
   useEffect(() => {
     // This runs only on the client after hydration
     document.body.className = "antialiased";
-    if (pathname.startsWith("/admin")) return;
+    if (isNoTrackPath(pathname)) return;
     captureConversionAttribution();
   }, [pathname]);
 

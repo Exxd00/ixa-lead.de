@@ -6,6 +6,7 @@ import {
   track,
   type TrackingEvent,
 } from "@/lib/tracking";
+import { isNoTrackPath } from "@/lib/privacy-routes";
 
 export type MainConversionEvent =
   (typeof conversionEvents)[keyof typeof conversionEvents];
@@ -73,6 +74,7 @@ function readStoredAttribution(): ConversionAttribution | null {
 /** Keeps first-touch campaign data available after internal navigation. */
 export function captureConversionAttribution(): ConversionAttribution {
   if (typeof window === "undefined") return emptyAttribution;
+  if (isNoTrackPath(window.location.pathname)) return emptyAttribution;
 
   const stored = readStoredAttribution();
   const searchParams = new URLSearchParams(window.location.search);
@@ -159,6 +161,7 @@ async function persistConversion(
   event: MainConversionEvent,
   params: ConversionRecordParams,
 ): Promise<void> {
+  if (isNoTrackPath(window.location.pathname)) return;
   const eventId = readOrCreateEventId(event, params.submissionId);
   if (wasRecorded(eventId) || inFlightEvents.has(eventId)) return;
 
@@ -204,6 +207,8 @@ export function recordMainConversion(
   event: MainConversionEvent,
   params: ConversionRecordParams = {},
 ): void {
+  if (typeof window === "undefined") return;
+  if (isNoTrackPath(window.location.pathname)) return;
   const analyticsParams: Record<string, string> = {};
   if (params.entryPoint) analyticsParams.location = params.entryPoint;
   if (params.service) analyticsParams.service = params.service;
