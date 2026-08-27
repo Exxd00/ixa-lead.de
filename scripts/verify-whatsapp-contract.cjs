@@ -741,6 +741,41 @@ async function verifyPersonalPageContract() {
       "the synthetic preview must never emit a personal visit",
     );
 
+    const personalCheckView = fs.readFileSync(
+      "src/components/personal-check/PersonalCheckView.tsx",
+      "utf8",
+    );
+    assert.match(
+      personalCheckView,
+      /border-border bg-background\/95 text-foreground/,
+      "the personal page header must use readable theme-aware colors",
+    );
+    assert.match(
+      personalCheckView,
+      /bg-primary[^\"]*text-primary-foreground/,
+      "the personal page CTA must keep a high-contrast color pair",
+    );
+    assert.doesNotMatch(
+      personalCheckView,
+      /bg-\[#111414\][^\"]*text-white/,
+      "the CTA must not reuse the hero text override that broke contrast",
+    );
+    assert.match(
+      personalCheckView,
+      /href="\/datenschutz"/,
+      "the personal page footer must link to privacy information",
+    );
+    assert.match(
+      personalCheckView,
+      /href="\/datenloeschung"/,
+      "the personal page footer must link to data deletion information",
+    );
+    assert.match(
+      personalCheckView,
+      /<ImpressumDialog/,
+      "the personal page footer must expose the legal notice",
+    );
+
     let recordedTicket = null;
     const visitRoute = loadTypeScriptModule(
       "src/app/api/outreach/visit/route.ts",
