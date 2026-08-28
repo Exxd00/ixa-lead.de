@@ -776,6 +776,67 @@ async function verifyPersonalPageContract() {
       "the personal page footer must expose the legal notice",
     );
 
+    const decisionPreviewPage = fs.readFileSync(
+      "src/app/vorschau/ixa-check/page.tsx",
+      "utf8",
+    );
+    const decisionPreviewView = fs.readFileSync(
+      "src/components/personal-check/PersonalCheckDecisionPreview.tsx",
+      "utf8",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /PersonalCheckDecisionPreview/,
+      "the synthetic route must render the V2 decision preview",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /title: "Mobiler Kontaktweg"/,
+      "the V2 preview must include the first synthetic observation",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /title: "Anfragequalifizierung"/,
+      "the V2 preview must include the second synthetic observation",
+    );
+    assert.equal(
+      (decisionPreviewPage.match(/verifiedAt:/g) || []).length,
+      2,
+      "both synthetic observations must carry a verification date",
+    );
+    assert.match(
+      decisionPreviewView,
+      /findings: readonly \[/,
+      "the V2 preview must require exactly two findings at the type boundary",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Vertieften IXA Anfrageweg-Check anfordern/,
+      "the deeper check must be the primary V2 decision",
+    );
+    assert.match(
+      decisionPreviewView,
+      /15-Minuten-Gespräch anfragen/,
+      "the meeting request must remain a secondary V2 decision",
+    );
+    const decisionPreviewButtons =
+      decisionPreviewView.match(/<button[\s\S]*?<\/button>/g) || [];
+    assert.equal(
+      decisionPreviewButtons.length,
+      2,
+      "the V2 preview must expose exactly two decision actions",
+    );
+    assert.equal(
+      decisionPreviewButtons.every((button) => /\sdisabled\s/.test(button)),
+      true,
+      "every V2 preview action must remain disabled",
+    );
+    assert.doesNotMatch(
+      decisionPreviewView,
+      /wa\.me|whatsappHref|meetingHref/,
+      "the synthetic V2 preview must not contain an outbound response link",
+    );
+
     let recordedTicket = null;
     const visitRoute = loadTypeScriptModule(
       "src/app/api/outreach/visit/route.ts",
