@@ -529,9 +529,9 @@ def _safe_id(value: Any, field: str) -> str:
 
 
 def _page_version(value: Any, field: str) -> str:
-    raw = _text(value, field, maximum=32)
-    if not re.fullmatch(r"v[1-9][0-9]{0,5}(?:\.[0-9]{1,5}){0,2}", raw, re.I):
-        raise BatchValidationError(f"{field} must be a canonical version such as v3.0")
+    raw = _text(value, field, maximum=20)
+    if not re.fullmatch(r"v[1-9][0-9]{0,5}(?:\.(?:0|[1-9][0-9]{0,5}))?", raw):
+        raise BatchValidationError(f"{field} must match lowercase vN or vN.N")
     return raw
 
 

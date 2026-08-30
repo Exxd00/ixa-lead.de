@@ -192,6 +192,7 @@ const ensureProspectPersonalPageColumns = apps(
   "ensureProspectPersonalPageColumns_",
 );
 const ensurePersonalPageContent = apps("ensurePersonalPageContent_");
+const ensurePersonalPageActivations = apps("ensurePersonalPageActivations_");
 const secret = "sheet-secret";
 const headers = [
   "Company_ID",
@@ -572,7 +573,80 @@ const pageContentHeaders = [
   "Activated_At_UTC",
   "Expires_UTC",
   "Source_Run_ID",
+  "Activation_Receipt_ID",
+  "Activation_Receipt_SHA256",
 ];
+const pageActivationHeaders = [
+  "Activation_Receipt_ID",
+  "Schema_Version",
+  "Scope",
+  "Batch_ID",
+  "Recipient_Set_Hash",
+  "Page_Version",
+  "Page_Set_SHA256",
+  "Recipient_Count",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Expires_At_UTC",
+  "Nonce",
+  "Signature_HMAC_SHA256",
+  "Receipt_SHA256",
+  "State",
+  "Consumed_At_UTC",
+  "Source_Run_ID",
+];
+const pageActivationSignatureHeaders = [
+  "Schema_Version",
+  "Scope",
+  "Activation_Receipt_ID",
+  "Batch_ID",
+  "Recipient_Set_Hash",
+  "Page_Version",
+  "Page_Set_SHA256",
+  "Recipient_Count",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Expires_At_UTC",
+  "Consumed_At_UTC",
+  "Nonce",
+];
+const pageActivationSecret = "page-activation-secret-v1-48-bytes-minimum-value";
+const pageUnitSeparator = "\u001f";
+const pageRecordSeparator = "\u001e";
+const pageActivationDomain = "IXA_PAGE_ACTIVATION_V1\n";
+const crossRuntimeGoldenFields = [
+  "1",
+  "PAGE_ACTIVATION",
+  "IXA-PA-001",
+  "IXA001",
+  "5396697978ddb94134ae46e0c6764c2cbf2d839ba952bf8c94409a6f5375676e",
+  "v3.0",
+  "d5af087ae80bcd1ebfafbb4f7008067f145b18fbc1e4e2100dc941c739ec7a0b",
+  "50",
+  "IXA owner",
+  "2026-08-30T20:00:00.000Z",
+  "2026-08-30T21:00:00.000Z",
+  "2026-08-30T20:05:00.000Z",
+  "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopq",
+];
+const crossRuntimeGoldenBody = crossRuntimeGoldenFields.join(pageUnitSeparator);
+const crossRuntimeGoldenSignature = crypto
+  .createHmac("sha256", "0123456789abcdef0123456789abcdef")
+  .update(pageActivationDomain + crossRuntimeGoldenBody, "utf8")
+  .digest("hex");
+assert.equal(
+  crossRuntimeGoldenSignature,
+  "1b919ffc8d0e4ee2dc6f91fb0af7993051cca8683974ca7a78237d3d4289077b",
+  "Apps Script and Python must share one PAGE_ACTIVATION HMAC vector",
+);
+assert.equal(
+  sha256Hex(
+    pageActivationDomain + crossRuntimeGoldenBody +
+      pageUnitSeparator + crossRuntimeGoldenSignature,
+  ),
+  "8b2c97ffed91017aa6c618697c9e9253a32b5518766f12f288aa9ba07e6d6765",
+  "Apps Script and Python must share one PAGE_ACTIVATION receipt digest",
+);
 const personalPageEvidence = (position) =>
   JSON.stringify({
     schema: "ixa.personal-page-observation.v1",
@@ -614,11 +688,13 @@ const personalPageContentRow = (overrides = {}) => {
     Evidence_2: personalPageEvidence(2),
     State: "Active",
     Approval_Status: "Approved",
-    Approved_By: "Owner",
+    Approved_By: "Owner-Emad-Alzaim",
     Approved_At_UTC: "2026-08-28T04:30:00.000Z",
     Activated_At_UTC: "2026-08-28T04:31:00.000Z",
     Expires_UTC: "2099-01-01T00:00:00.000Z",
     Source_Run_ID: "IXA-RUN-PAGE-001",
+    Activation_Receipt_ID: "",
+    Activation_Receipt_SHA256: "",
     ...overrides,
   };
   values.Content_SHA256 = sha256Hex(
@@ -628,6 +704,77 @@ const personalPageContentRow = (overrides = {}) => {
     values.Content_SHA256 = overrides.Content_SHA256;
   }
   return pageContentHeaders.map((name) => values[name] || "");
+};
+const pageActivationRow = (contentRows, overrides = {}) => {
+  const objects = contentRows.map((row) =>
+    Object.fromEntries(pageContentHeaders.map((name, index) => [name, row[index] || ""])),
+  );
+  const recipientSetHash = sha256Hex(
+    objects
+      .map((item) =>
+        [item.Company_ID, item.Contact_ID, item.Token_SHA256, item.Letter_ID]
+          .join(pageUnitSeparator),
+      )
+      .sort()
+      .join(pageRecordSeparator),
+  );
+  const pageSetSha256 = sha256Hex(
+    objects
+      .map((item) =>
+        [
+          item.Page_Content_ID,
+          item.Batch_ID,
+          item.Experiment_ID,
+          item.Page_Version,
+          item.Company_ID,
+          item.Contact_ID,
+          item.Token_SHA256,
+          item.Letter_ID,
+          item.Content_SHA256,
+          item.Expires_UTC,
+          item.Source_Run_ID,
+        ].join(pageUnitSeparator),
+      )
+      .sort()
+      .join(pageRecordSeparator),
+  );
+  const values = {
+    Activation_Receipt_ID: "IXA-PAGE-ACT-001",
+    Schema_Version: "1",
+    Scope: "PAGE_ACTIVATION",
+    Batch_ID: "IXA001",
+    Recipient_Set_Hash: recipientSetHash,
+    Page_Version: "v3.0",
+    Page_Set_SHA256: pageSetSha256,
+    Recipient_Count: "50",
+    Approved_By: "Owner-Emad-Alzaim",
+    Approved_At_UTC: "2026-08-28T04:30:00.000Z",
+    Expires_At_UTC: "2026-08-29T04:30:00.000Z",
+    Nonce: Buffer.from(Array.from({ length: 32 }, (_, index) => index)).toString("base64url"),
+    Signature_HMAC_SHA256: "",
+    Receipt_SHA256: "",
+    State: "Consumed",
+    Consumed_At_UTC: "2026-08-28T04:31:00.000Z",
+    Source_Run_ID: "IXA-RUN-PAGE-001",
+    ...overrides,
+  };
+  const signedBody = pageActivationSignatureHeaders
+    .map((name) => String(values[name]))
+    .join(pageUnitSeparator);
+  values.Signature_HMAC_SHA256 = crypto
+    .createHmac("sha256", pageActivationSecret)
+    .update(pageActivationDomain + signedBody, "utf8")
+    .digest("hex");
+  values.Receipt_SHA256 = sha256Hex(
+    pageActivationDomain + signedBody + pageUnitSeparator + values.Signature_HMAC_SHA256,
+  );
+  if (Object.hasOwn(overrides, "Signature_HMAC_SHA256")) {
+    values.Signature_HMAC_SHA256 = overrides.Signature_HMAC_SHA256;
+  }
+  if (Object.hasOwn(overrides, "Receipt_SHA256")) {
+    values.Receipt_SHA256 = overrides.Receipt_SHA256;
+  }
+  return pageActivationHeaders.map((name) => values[name] || "");
 };
 const pageToken = "D-C-vbdQt83-B3lACz10Dg";
 const setupProspects = mutableSheet([
@@ -650,6 +797,21 @@ assert.deepEqual(
   ["IXA-CO-SETUP", "IXA-CT-SETUP", pageToken, "FALSE"],
   "setup must not auto-publish or overwrite CRM values",
 );
+let setupPageActivations = null;
+ensurePersonalPageActivations({
+  getSheetByName: (name) =>
+    name === "12 Page Activations" ? setupPageActivations : null,
+  insertSheet(name) {
+    assert.equal(name, "12 Page Activations");
+    setupPageActivations = mutableSheet([], pageActivationHeaders.length);
+    return setupPageActivations;
+  },
+});
+assert.deepEqual(
+  setupPageActivations.rows[0],
+  pageActivationHeaders,
+  "setup must create the durable activation-receipt ledger without a receipt",
+);
 const pageProspects = mutableSheet([
   pageHeaders,
   [
@@ -661,15 +823,47 @@ const pageProspects = mutableSheet([
     "2099-01-01T00:00:00.000Z",
   ],
 ], pageHeaders.length);
+const pageContentRows = Array.from({ length: 50 }, (_, index) =>
+  personalPageContentRow(
+    index === 0
+      ? {}
+      : {
+          Page_Content_ID: `IXA-PC-${String(index + 1).padStart(3, "0")}`,
+          Company_ID: `IXA-CO-PAGE-${String(index + 1).padStart(3, "0")}`,
+          Contact_ID: `IXA-CT-PAGE-${String(index + 1).padStart(3, "0")}`,
+          Token_SHA256: sha256Hex(`synthetic-public-token-${index + 1}`),
+          Letter_ID: `IXA-LETTER-${String(index + 1).padStart(3, "0")}`,
+          Public_Page_Label: `Synthetischer Testbetrieb ${index + 1}`,
+        },
+  ),
+);
+const validActivationRow = pageActivationRow(pageContentRows);
+const activationColumnsForTest = Object.fromEntries(
+  pageActivationHeaders.map((name, index) => [name, index]),
+);
+const receiptIdForTest =
+  validActivationRow[activationColumnsForTest.Activation_Receipt_ID];
+const receiptShaForTest = validActivationRow[activationColumnsForTest.Receipt_SHA256];
+const receiptIdColumn = pageContentHeaders.indexOf("Activation_Receipt_ID");
+const receiptShaColumn = pageContentHeaders.indexOf("Activation_Receipt_SHA256");
+pageContentRows.forEach((row) => {
+  row[receiptIdColumn] = receiptIdForTest;
+  row[receiptShaColumn] = receiptShaForTest;
+});
 const pageContent = mutableSheet(
-  [pageContentHeaders, personalPageContentRow()],
+  [pageContentHeaders, ...pageContentRows],
   pageContentHeaders.length,
+);
+const pageActivations = mutableSheet(
+  [pageActivationHeaders, validActivationRow],
+  pageActivationHeaders.length,
 );
 let pageEvents = null;
 const pageSpreadsheet = {
   getSheetByName(name) {
     if (name === "01 Prospects") return pageProspects;
     if (name === "11 Page Content") return pageContent;
+    if (name === "12 Page Activations") return pageActivations;
     if (name === "08 Outreach Events") return pageEvents;
     return null;
   },
@@ -684,8 +878,13 @@ const pageResolution = resolvePersonalPage(
   pageSpreadsheet,
   pageTokenProof,
   secret,
+  pageActivationSecret,
 );
 assert.equal(pageResolution.publicPageLabel, "Manuell freigegebener Betrieb");
+assert.ok(
+  Date.now() > Date.parse("2026-08-29T04:30:00.000Z"),
+  "the test must exercise a committed receipt after its short approval window",
+);
 assert.deepEqual(
   Object.keys(pageResolution).sort(),
   ["findings", "firstTest", "publicPageLabel", "visitTicket"],
@@ -727,16 +926,76 @@ assert.equal(
   "IXA-CO-PAGE",
 );
 assert.equal(
-  resolvePersonalPage(pageSpreadsheet, "0".repeat(64), secret),
+  resolvePersonalPage(
+    pageSpreadsheet,
+    "0".repeat(64),
+    secret,
+    pageActivationSecret,
+  ),
   null,
   "unknown tokens must have the same empty resolution as suppressed tokens",
 );
 const pageContentColumns = Object.fromEntries(
   pageContentHeaders.map((name, index) => [name, index]),
 );
+const futureApprovalAt = new Date(Date.now() - 60 * 1000).toISOString();
+const futureConsumptionAt = new Date(Date.now() + 60 * 1000).toISOString();
+const futureApprovalExpiry = new Date(Date.now() + 60 * 60 * 1000).toISOString();
+const originalApprovalValues = pageContent.rows.slice(1).map((row) => ({
+  approvedAt: row[pageContentColumns.Approved_At_UTC],
+  activatedAt: row[pageContentColumns.Activated_At_UTC],
+  receiptSha: row[pageContentColumns.Activation_Receipt_SHA256],
+}));
+pageContent.rows.slice(1).forEach((row) => {
+  row[pageContentColumns.Approved_At_UTC] = futureApprovalAt;
+  row[pageContentColumns.Activated_At_UTC] = futureConsumptionAt;
+});
+const futureConsumptionReceipt = pageActivationRow(pageContent.rows.slice(1), {
+  Approved_At_UTC: futureApprovalAt,
+  Expires_At_UTC: futureApprovalExpiry,
+  Consumed_At_UTC: futureConsumptionAt,
+});
+const futureReceiptSha =
+  futureConsumptionReceipt[activationColumnsForTest.Receipt_SHA256];
+pageContent.rows.slice(1).forEach((row) => {
+  row[pageContentColumns.Activation_Receipt_SHA256] = futureReceiptSha;
+});
+pageActivations.rows[1] = futureConsumptionReceipt;
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "a valid receipt must not serve before its signed consumption instant",
+);
+pageActivations.rows[1] = [...validActivationRow];
+pageContent.rows.slice(1).forEach((row, index) => {
+  row[pageContentColumns.Approved_At_UTC] = originalApprovalValues[index].approvedAt;
+  row[pageContentColumns.Activated_At_UTC] = originalApprovalValues[index].activatedAt;
+  row[pageContentColumns.Activation_Receipt_SHA256] =
+    originalApprovalValues[index].receiptSha;
+});
+const originalConsumedAt =
+  pageActivations.rows[1][activationColumnsForTest.Consumed_At_UTC];
+const originalActivatedAtValues = pageContent.rows.slice(1).map(
+  (row) => row[pageContentColumns.Activated_At_UTC],
+);
+pageActivations.rows[1][activationColumnsForTest.Consumed_At_UTC] =
+  "2026-08-28T04:30:30.000Z";
+pageContent.rows.slice(1).forEach((row) => {
+  row[pageContentColumns.Activated_At_UTC] = "2026-08-28T04:30:30.000Z";
+});
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "backdating both the ledger and all rows must fail without a new signature",
+);
+pageActivations.rows[1][activationColumnsForTest.Consumed_At_UTC] =
+  originalConsumedAt;
+pageContent.rows.slice(1).forEach((row, index) => {
+  row[pageContentColumns.Activated_At_UTC] = originalActivatedAtValues[index];
+});
 pageContent.rows[1][pageContentColumns.Approval_Status] = "Drafted";
 assert.equal(
-  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
   null,
   "unapproved page content must remain unavailable",
 );
@@ -746,7 +1005,7 @@ pageContent.rows[1][pageContentColumns.Evidence_2] = JSON.stringify({
   position: 2,
 });
 assert.equal(
-  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
   null,
   "incomplete evidence must remain unavailable",
 );
@@ -754,23 +1013,82 @@ pageContent.rows[1][pageContentColumns.Evidence_2] =
   personalPageEvidence(2);
 pageContent.rows[1][pageContentColumns.Content_SHA256] = "0".repeat(64);
 assert.equal(
-  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
   null,
   "content whose immutable digest does not match must remain unavailable",
 );
-pageContent.rows[1] = personalPageContentRow();
+pageContent.rows[1] = [...pageContentRows[0]];
 pageContent.rows.push(personalPageContentRow({ Page_Content_ID: "IXA-PC-002" }));
 assert.equal(
-  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
   null,
   "multiple active records for one token must fail closed",
 );
 pageContent.rows.pop();
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, "wrong-page-secret"),
+  null,
+  "the WhatsApp secret or another key must not authorize page activation",
+);
+pageActivations.rows[1][activationColumnsForTest.State] = "Pending";
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "an unconsumed approval receipt must fail closed",
+);
+pageActivations.rows[1] = [...validActivationRow];
+pageActivations.rows[1] = pageActivationRow(pageContentRows, {
+  Scope: "PRINT_READY",
+});
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "a valid PRINT_READY HMAC must not authorize PAGE_ACTIVATION",
+);
+pageActivations.rows[1] = [...validActivationRow];
+pageActivations.rows.push([...validActivationRow]);
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "duplicate consumed receipts must fail closed",
+);
+pageActivations.rows.pop();
+const originalExpiry = pageContent.rows[1][pageContentColumns.Expires_UTC];
+pageContent.rows[1][pageContentColumns.Expires_UTC] = "2098-01-01T00:00:00.000Z";
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "changing a page expiry after approval must invalidate the signed page set",
+);
+pageContent.rows[1][pageContentColumns.Expires_UTC] = originalExpiry;
+const originalReceiptReference =
+  pageContent.rows[1][pageContentColumns.Activation_Receipt_SHA256];
+pageContent.rows[1][pageContentColumns.Activation_Receipt_SHA256] = "0".repeat(64);
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "every active row must reference the exact consumed receipt",
+);
+pageContent.rows[1][pageContentColumns.Activation_Receipt_SHA256] =
+  originalReceiptReference;
+const removedCohortMember = pageContent.rows.pop();
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+  "production activation requires the exact 50-row cohort",
+);
+pageContent.rows.push(removedCohortMember);
 pageProspects.rows[1][3] = "TRUE";
-assert.equal(resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret), null);
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+);
 pageProspects.rows[1][3] = "FALSE";
 pageProspects.rows[1][5] = "2020-01-01T00:00:00.000Z";
-assert.equal(resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret), null);
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret, pageActivationSecret),
+  null,
+);
 pageProspects.rows[1][5] = "2099-01-01T00:00:00.000Z";
 
 assert.equal(

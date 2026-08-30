@@ -111,6 +111,55 @@ mehreren aktiven Treffern bleibt die Seite gesperrt. Nur Zeilen mit
 `State=Active`, `Approval_Status=Approved`, dokumentiertem `Approved_By` und
 gültigen UTC-Zeitpunkten für Freigabe und Aktivierung werden ausgeliefert.
 
+Die Produktionsfreigabe ist zusätzlich kohortenweit signiert. Das generische,
+orts- und batchunabhängige Werkzeug `scripts/personal_page_batch.py` validiert
+1 bis 50 Empfänger und erzeugt deterministisch ausschließlich
+`Prepared / Pending`-Zeilen. Es vergibt keine Tokens, schreibt nicht in Google
+Sheets, aktiviert keine Seite und führt keine Netzwerkaktion aus. Für eine
+Produktionsfreigabe signiert es nur eine exakt 50 Empfänger umfassende
+`PAGE_ACTIVATION`-Anfrage. Die separate `PRINT_READY`-Quittung des
+Briefgenerators kann diese Freigabe niemals ersetzen.
+
+```bash
+python3 scripts/personal_page_batch.py prepare cohort.json \
+  --output prepared-page-batch.json
+
+# Das Secret ausschließlich über eine geschützte Prozessumgebung injizieren.
+python3 scripts/personal_page_batch.py sign prepared-page-batch.json \
+  --receipt-id IXA-PAGE-ACT-001 \
+  --approved-by IXA-OWNER \
+  --approved-at-utc 2026-08-30T20:00:00.000Z \
+  --expires-at-utc 2026-08-30T21:00:00.000Z \
+  --consumed-at-utc 2026-08-30T20:05:00.000Z \
+  --nonce '<43 Zeichen Base64url aus 32 Zufallsbytes>' \
+  --output page-activation-receipt.json
+
+python3 scripts/personal_page_batch.py verify page-activation-receipt.json
+```
+
+`IXA_PAGE_ACTIVATION_SECRET_V1` muss dabei mindestens 32 UTF-8-Bytes lang
+sein. Derselbe Wert wird ausschließlich als gleichnamige Apps-Script-Property
+verwaltet; er gehört weder in das Sheet, das Repository noch in eine
+`NEXT_PUBLIC_...`-Variable. Das Signaturprotokoll ist durch
+`IXA_PAGE_ACTIVATION_V1` vom WhatsApp- und Briefdruck-Protokoll getrennt.
+`Consumed_At_UTC` ist Bestandteil der Signatur und muss innerhalb des
+signierten Freigabefensters liegen; ein Zeitpunkt in der Zukunft wird weder
+vom Signierer noch vom Resolver akzeptiert. Nach der dokumentierten Aktivierung wird
+die Seitenauslieferung nicht von einem nachträglich änderbaren Zeitstempel,
+sondern ausschließlich vom ebenfalls signierten `Expires_UTC` der Seitenzeile
+begrenzt.
+
+`setupWhatsAppInboundQueue()` ergänzt bestehende A:S-Inhaltsblätter
+verlustfrei um `Activation_Receipt_ID` und `Activation_Receipt_SHA256` zu A:U
+und legt das dauerhafte Blatt `12 Page Activations` an. Der Resolver liefert
+eine Seite nur aus, wenn genau 50 eindeutige aktive Zeilen, ihr Empfängerset,
+alle Inhalts-Hashes, `Batch_ID`, `Experiment_ID`, `Page_Version`, Ablaufzeit
+und `Source_Run_ID` mit genau einer gültigen, als `Consumed` dokumentierten
+HMAC-Quittung übereinstimmen. Jede Seite muss ID und SHA-256 genau dieser
+Quittung tragen. Fehlendes Secret, Teilaktivierung, Duplikat, Manipulation,
+falscher Scope oder falsche Quittung ergeben dieselbe neutrale Sperre wie ein
+unbekannter Token. Es gibt absichtlich keinen öffentlichen Aktivierungs-Endpunkt.
+
 `Evidence_1` und `Evidence_2` enthalten jeweils strikt parsebares JSON. Beide
 verwenden dieses Schema; nur `Evidence_1` enthält zusätzlich `firstTest`, und
 `position` ist dort `1` beziehungsweise `2`:

@@ -1,6 +1,7 @@
 const SCHEMA_VERSION = 2;
 const PROSPECTS_SHEET = "01 Prospects";
 const PERSONAL_PAGE_CONTENT_SHEET = "11 Page Content";
+const PERSONAL_PAGE_ACTIVATION_SHEET = "12 Page Activations";
 const INBOUND_QUEUE_SHEET = "07 Inbound Queue";
 const MAX_REQUEST_BYTES = 256 * 1024;
 const MAX_BATCH_ITEMS = 50;
@@ -13,6 +14,12 @@ const PERSONAL_PAGE_TICKET_TTL_MS = 2 * 60 * 1000;
 const PERSONAL_PAGE_LABEL_HEADER = "Public_Page_Label";
 const PERSONAL_PAGE_EXPIRY_HEADER = "Public_Page_Expires_UTC";
 const PERSONAL_PAGE_EVIDENCE_SCHEMA = "ixa.personal-page-observation.v1";
+const PAGE_ACTIVATION_SCHEMA_VERSION = 1;
+const PAGE_ACTIVATION_SCOPE = "PAGE_ACTIVATION";
+const PAGE_ACTIVATION_SECRET_PROPERTY = "IXA_PAGE_ACTIVATION_SECRET_V1";
+const PAGE_ACTIVATION_MAX_TTL_MS = 24 * 60 * 60 * 1000;
+const PAGE_ACTIVATION_UNIT_SEPARATOR = "\u001f";
+const PAGE_ACTIVATION_RECORD_SEPARATOR = "\u001e";
 
 const PERSONAL_PAGE_CONTENT_HEADERS = [
   "Page_Content_ID",
@@ -34,9 +41,47 @@ const PERSONAL_PAGE_CONTENT_HEADERS = [
   "Activated_At_UTC",
   "Expires_UTC",
   "Source_Run_ID",
+  "Activation_Receipt_ID",
+  "Activation_Receipt_SHA256",
 ];
 
 const PERSONAL_PAGE_HASH_FIELDS = PERSONAL_PAGE_CONTENT_HEADERS.slice(0, 11);
+
+const PERSONAL_PAGE_ACTIVATION_HEADERS = [
+  "Activation_Receipt_ID",
+  "Schema_Version",
+  "Scope",
+  "Batch_ID",
+  "Recipient_Set_Hash",
+  "Page_Version",
+  "Page_Set_SHA256",
+  "Recipient_Count",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Expires_At_UTC",
+  "Nonce",
+  "Signature_HMAC_SHA256",
+  "Receipt_SHA256",
+  "State",
+  "Consumed_At_UTC",
+  "Source_Run_ID",
+];
+
+const PAGE_ACTIVATION_SIGNATURE_HEADERS = [
+  "Schema_Version",
+  "Scope",
+  "Activation_Receipt_ID",
+  "Batch_ID",
+  "Recipient_Set_Hash",
+  "Page_Version",
+  "Page_Set_SHA256",
+  "Recipient_Count",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Expires_At_UTC",
+  "Consumed_At_UTC",
+  "Nonce",
+];
 
 const PERSONAL_PAGE_EVENT_HEADERS = [
   "Event_Name",
@@ -111,6 +156,7 @@ function doPost(e) {
         spreadsheet,
         String(body.tokenProof).toLowerCase(),
         expectedSecret,
+        properties.getProperty(PAGE_ACTIVATION_SECRET_PROPERTY),
       );
       if (!resolution) return json_({ ok: true, allowed: false });
       return json_({
@@ -211,6 +257,7 @@ function setupWhatsAppInboundQueue() {
   const queue = ensureInboundQueue_(spreadsheet);
   ensureProspectPersonalPageColumns_(spreadsheet);
   const pageContent = ensurePersonalPageContent_(spreadsheet);
+  const pageActivations = ensurePersonalPageActivations_(spreadsheet);
   const events = ensurePersonalPageEvents_(spreadsheet);
   formatInboundQueue_(queue);
   formatPersonalPageEvents_(events);
@@ -223,6 +270,7 @@ function setupWhatsAppInboundQueue() {
     columns: INBOUND_HEADERS.length,
     personalPageEventsSheet: events.getName(),
     personalPageContentSheet: pageContent.getName(),
+    personalPageActivationSheet: pageActivations.getName(),
   };
 }
 
@@ -235,13 +283,51 @@ function ensurePersonalPageContent_(spreadsheet) {
     sheet.getRange(1, 1, 1, PERSONAL_PAGE_CONTENT_HEADERS.length)
       .setValues([PERSONAL_PAGE_CONTENT_HEADERS]);
   } else {
-    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
+    let headers = sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getDisplayValues()[0];
+    const legacyHeaders = PERSONAL_PAGE_CONTENT_HEADERS.slice(0, 19);
+    if (headers.join("\u001f") === legacyHeaders.join("\u001f")) {
+      sheet.getRange(1, 20, 1, 2).setValues([[
+        "Activation_Receipt_ID",
+        "Activation_Receipt_SHA256",
+      ]]);
+      headers = sheet
+        .getRange(1, 1, 1, PERSONAL_PAGE_CONTENT_HEADERS.length)
+        .getDisplayValues()[0];
+    }
     if (headers.join("\u001f") !== PERSONAL_PAGE_CONTENT_HEADERS.join("\u001f")) {
       throw new Error("personal_page_content_schema_mismatch");
     }
   }
   sheet.setFrozenRows(1);
   sheet.getRange(1, 1, 1, PERSONAL_PAGE_CONTENT_HEADERS.length)
+    .setBackground("#356853").setFontColor("#FFFFFF")
+    .setFontWeight("bold").setWrap(true);
+  return sheet;
+}
+
+function ensurePersonalPageActivations_(spreadsheet) {
+  let sheet = spreadsheet.getSheetByName(PERSONAL_PAGE_ACTIVATION_SHEET);
+  if (!sheet) sheet = spreadsheet.insertSheet(PERSONAL_PAGE_ACTIVATION_SHEET);
+  const missing = PERSONAL_PAGE_ACTIVATION_HEADERS.length - sheet.getMaxColumns();
+  if (missing > 0) sheet.insertColumnsAfter(sheet.getMaxColumns(), missing);
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, PERSONAL_PAGE_ACTIVATION_HEADERS.length)
+      .setValues([PERSONAL_PAGE_ACTIVATION_HEADERS]);
+  } else {
+    const headers = sheet
+      .getRange(1, 1, 1, PERSONAL_PAGE_ACTIVATION_HEADERS.length)
+      .getDisplayValues()[0];
+    if (
+      headers.join(PAGE_ACTIVATION_UNIT_SEPARATOR) !==
+      PERSONAL_PAGE_ACTIVATION_HEADERS.join(PAGE_ACTIVATION_UNIT_SEPARATOR)
+    ) {
+      throw new Error("personal_page_activation_schema_mismatch");
+    }
+  }
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, PERSONAL_PAGE_ACTIVATION_HEADERS.length)
     .setBackground("#356853").setFontColor("#FFFFFF")
     .setFontWeight("bold").setWrap(true);
   return sheet;
@@ -290,7 +376,12 @@ function ensureProspectPersonalPageColumns_(spreadsheet) {
   return sheet;
 }
 
-function resolvePersonalPage_(spreadsheet, tokenProof, secret) {
+function resolvePersonalPage_(
+  spreadsheet,
+  tokenProof,
+  secret,
+  pageActivationSecret,
+) {
   const sheet = spreadsheet.getSheetByName(PROSPECTS_SHEET);
   if (!sheet || sheet.getLastRow() < 2) return null;
 
@@ -344,6 +435,7 @@ function resolvePersonalPage_(spreadsheet, tokenProof, secret) {
     companyId,
     contactId,
     tokenHash,
+    pageActivationSecret,
   );
   if (!content) return null;
 
@@ -368,7 +460,13 @@ function resolvePersonalPage_(spreadsheet, tokenProof, secret) {
   };
 }
 
-function resolvePersonalPageContent_(spreadsheet, companyId, contactId, tokenHash) {
+function resolvePersonalPageContent_(
+  spreadsheet,
+  companyId,
+  contactId,
+  tokenHash,
+  pageActivationSecret,
+) {
   const sheet = spreadsheet.getSheetByName(PERSONAL_PAGE_CONTENT_SHEET);
   if (!sheet || sheet.getLastRow() < 2) return null;
 
@@ -436,6 +534,15 @@ function resolvePersonalPageContent_(spreadsheet, companyId, contactId, tokenHas
     false,
   );
   if (!first || !second || !first.firstTest) return null;
+  const activation = verifyPersonalPageActivation_(
+    spreadsheet,
+    rows,
+    columns,
+    ids.batchId,
+    ids.pageVersion,
+    pageActivationSecret,
+  );
+  if (!activation) return null;
 
   return {
     pageContentId: ids.pageContentId,
@@ -450,6 +557,260 @@ function resolvePersonalPageContent_(spreadsheet, companyId, contactId, tokenHas
   };
 }
 
+function verifyPersonalPageActivation_(
+  spreadsheet,
+  contentRows,
+  contentColumns,
+  batchId,
+  pageVersion,
+  secret,
+) {
+  if (typeof secret !== "string" || Utilities.newBlob(secret).getBytes().length < 32) {
+    return null;
+  }
+  const sheet = spreadsheet.getSheetByName(PERSONAL_PAGE_ACTIVATION_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return null;
+  const headers = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getDisplayValues()[0];
+  if (
+    headers.length !== PERSONAL_PAGE_ACTIVATION_HEADERS.length ||
+    PERSONAL_PAGE_ACTIVATION_HEADERS.some(function (name, index) {
+      return headers[index] !== name;
+    })
+  ) {
+    throw new Error("personal_page_activation_schema_mismatch");
+  }
+
+  const activeMembers = contentRows.filter(function (row) {
+    return (
+      String(row[contentColumns.Batch_ID] || "").trim() === batchId &&
+      String(row[contentColumns.Page_Version] || "").trim() === pageVersion &&
+      String(row[contentColumns.State] || "").trim() === "Active" &&
+      String(row[contentColumns.Approval_Status] || "").trim() === "Approved"
+    );
+  });
+  if (activeMembers.length !== MAX_BATCH_ITEMS) return null;
+
+  const memberRecords = activeMembers.map(function (row) {
+    return personalPageActivationMember_(row, contentColumns, batchId, pageVersion);
+  });
+  if (memberRecords.some(function (record) { return !record; })) return null;
+
+  const uniquenessFields = [
+    "pageContentId",
+    "companyId",
+    "contactId",
+    "tokenHash",
+    "letterId",
+  ];
+  if (uniquenessFields.some(function (field) {
+    return new Set(memberRecords.map(function (record) { return record[field]; })).size !==
+      memberRecords.length;
+  })) {
+    return null;
+  }
+
+  const recipientSetHash = sha256Hex_(memberRecords.map(function (record) {
+    return [record.companyId, record.contactId, record.tokenHash, record.letterId]
+      .join(PAGE_ACTIVATION_UNIT_SEPARATOR);
+  }).sort().join(PAGE_ACTIVATION_RECORD_SEPARATOR));
+  const pageSetSha256 = sha256Hex_(memberRecords.map(function (record) {
+    return [
+      record.pageContentId,
+      record.batchId,
+      record.experimentId,
+      record.pageVersion,
+      record.companyId,
+      record.contactId,
+      record.tokenHash,
+      record.letterId,
+      record.contentSha256,
+      record.expiresUtc,
+      record.sourceRunId,
+    ].join(PAGE_ACTIVATION_UNIT_SEPARATOR);
+  }).sort().join(PAGE_ACTIVATION_RECORD_SEPARATOR));
+
+  const activationColumns = headerMap_(headers);
+  const activationRows = sheet
+    .getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn())
+    .getDisplayValues();
+  const receipts = activationRows.filter(function (row) {
+    return (
+      String(row[activationColumns.Batch_ID] || "").trim() === batchId &&
+      String(row[activationColumns.Page_Version] || "").trim() === pageVersion &&
+      String(row[activationColumns.Scope] || "").trim() === PAGE_ACTIVATION_SCOPE &&
+      String(row[activationColumns.State] || "").trim() === "Consumed"
+    );
+  });
+  if (receipts.length !== 1) return null;
+
+  const receipt = pageActivationReceipt_(receipts[0], activationColumns);
+  if (!receipt || receipt.recipientCount !== memberRecords.length) return null;
+  if (
+    activationRows.filter(function (row) {
+      return String(row[activationColumns.Activation_Receipt_ID] || "").trim() ===
+        receipt.receiptId;
+    }).length !== 1 ||
+    activationRows.filter(function (row) {
+      return String(row[activationColumns.Nonce] || "").trim() === receipt.nonce;
+    }).length !== 1
+  ) {
+    return null;
+  }
+  if (
+    !constantTimeHexEqual_(receipt.recipientSetHash, recipientSetHash) ||
+    !constantTimeHexEqual_(receipt.pageSetSha256, pageSetSha256)
+  ) {
+    return null;
+  }
+  if (memberRecords.some(function (record) {
+    return (
+      record.approvedBy !== receipt.approvedBy ||
+      record.approvedAtUtc !== receipt.approvedAtUtc ||
+      record.activatedAtUtc !== receipt.consumedAtUtc ||
+      record.activationReceiptId !== receipt.receiptId ||
+      !constantTimeHexEqual_(record.activationReceiptSha256, receipt.receiptSha256)
+    );
+  })) {
+    return null;
+  }
+
+  const signedBody = PAGE_ACTIVATION_SIGNATURE_HEADERS.map(function (name) {
+    return String(receipts[0][activationColumns[name]] == null
+      ? ""
+      : receipts[0][activationColumns[name]]).trim();
+  }).join(PAGE_ACTIVATION_UNIT_SEPARATOR);
+  const expectedSignature = hmacSha256Hex_(
+    "IXA_PAGE_ACTIVATION_V1\n" + signedBody,
+    secret,
+  );
+  if (!constantTimeHexEqual_(expectedSignature, receipt.signature)) return null;
+  const expectedReceiptSha256 = sha256Hex_(
+    "IXA_PAGE_ACTIVATION_V1\n" + signedBody +
+      PAGE_ACTIVATION_UNIT_SEPARATOR + receipt.signature,
+  );
+  if (!constantTimeHexEqual_(expectedReceiptSha256, receipt.receiptSha256)) {
+    return null;
+  }
+
+  return {
+    receiptId: receipt.receiptId,
+    recipientSetHash: recipientSetHash,
+    pageSetSha256: pageSetSha256,
+  };
+}
+
+function personalPageActivationMember_(row, columns, batchId, pageVersion) {
+  const pageContentId = safePageId_(row[columns.Page_Content_ID]);
+  const companyId = safePageId_(row[columns.Company_ID]);
+  const contactId = safePageId_(row[columns.Contact_ID]);
+  const letterId = safePageId_(row[columns.Letter_ID]);
+  const experimentId = safePageId_(row[columns.Experiment_ID]);
+  const tokenHash = String(row[columns.Token_SHA256] || "").trim().toLowerCase();
+  const contentSha256 = String(row[columns.Content_SHA256] || "").trim().toLowerCase();
+  const approvedBy = curatedPublicText_(row[columns.Approved_By] || "", 200);
+  const approvedAtUtc = String(row[columns.Approved_At_UTC] || "").trim();
+  const activatedAtUtc = String(row[columns.Activated_At_UTC] || "").trim();
+  const expiresUtc = String(row[columns.Expires_UTC] || "").trim();
+  const sourceRunId = safePageId_(row[columns.Source_Run_ID]);
+  const activationReceiptId = safePageId_(row[columns.Activation_Receipt_ID]);
+  const activationReceiptSha256 = String(
+    row[columns.Activation_Receipt_SHA256] || "",
+  ).trim().toLowerCase();
+  if (
+    !pageContentId || !companyId || !contactId || !letterId || !experimentId ||
+    !isHash_(tokenHash) || !isHash_(contentSha256) || !approvedBy ||
+    !isIsoUtcTimestamp_(approvedAtUtc) || !isIsoUtcTimestamp_(activatedAtUtc) ||
+    !isIsoUtcTimestamp_(expiresUtc) || new Date(expiresUtc).getTime() <= Date.now() ||
+    !sourceRunId || !activationReceiptId || !isHash_(activationReceiptSha256) ||
+    String(row[columns.Batch_ID] || "").trim() !== batchId ||
+    String(row[columns.Page_Version] || "").trim() !== pageVersion
+  ) {
+    return null;
+  }
+  const expectedContentHash = sha256Hex_(PERSONAL_PAGE_HASH_FIELDS.map(function (name) {
+    return String(row[columns[name]] || "").trim();
+  }).join(PAGE_ACTIVATION_UNIT_SEPARATOR));
+  if (!constantTimeHexEqual_(expectedContentHash, contentSha256)) return null;
+  return {
+    pageContentId: pageContentId,
+    batchId: batchId,
+    experimentId: experimentId,
+    pageVersion: pageVersion,
+    companyId: companyId,
+    contactId: contactId,
+    tokenHash: tokenHash,
+    letterId: letterId,
+    contentSha256: contentSha256,
+    approvedBy: approvedBy,
+    approvedAtUtc: approvedAtUtc,
+    activatedAtUtc: activatedAtUtc,
+    expiresUtc: expiresUtc,
+    sourceRunId: sourceRunId,
+    activationReceiptId: activationReceiptId,
+    activationReceiptSha256: activationReceiptSha256,
+  };
+}
+
+function pageActivationReceipt_(row, columns) {
+  const receiptId = safePageId_(row[columns.Activation_Receipt_ID]);
+  const schemaVersion = String(row[columns.Schema_Version] || "").trim();
+  const scope = String(row[columns.Scope] || "").trim();
+  const recipientSetHash = String(row[columns.Recipient_Set_Hash] || "")
+    .trim().toLowerCase();
+  const pageSetSha256 = String(row[columns.Page_Set_SHA256] || "")
+    .trim().toLowerCase();
+  const countText = String(row[columns.Recipient_Count] || "").trim();
+  const approvedBy = curatedPublicText_(row[columns.Approved_By] || "", 200);
+  const approvedAtUtc = String(row[columns.Approved_At_UTC] || "").trim();
+  const expiresAtUtc = String(row[columns.Expires_At_UTC] || "").trim();
+  const nonce = String(row[columns.Nonce] || "").trim();
+  const signature = String(row[columns.Signature_HMAC_SHA256] || "")
+    .trim().toLowerCase();
+  const receiptSha256 = String(row[columns.Receipt_SHA256] || "")
+    .trim().toLowerCase();
+  const consumedAtUtc = String(row[columns.Consumed_At_UTC] || "").trim();
+  if (
+    !receiptId || schemaVersion !== String(PAGE_ACTIVATION_SCHEMA_VERSION) ||
+    scope !== PAGE_ACTIVATION_SCOPE || !isHash_(recipientSetHash) ||
+    !isHash_(pageSetSha256) || countText !== "50" ||
+    !approvedBy || !isIsoUtcTimestamp_(approvedAtUtc) ||
+    !isIsoUtcTimestamp_(expiresAtUtc) ||
+    !/^[A-Za-z0-9_-]{43}$/.test(nonce) || new Set(nonce).size < 12 ||
+    !isHash_(signature) || !isHash_(receiptSha256) ||
+    !isIsoUtcTimestamp_(consumedAtUtc)
+  ) {
+    return null;
+  }
+  const approvedAtMs = new Date(approvedAtUtc).getTime();
+  const expiresAtMs = new Date(expiresAtUtc).getTime();
+  const consumedAtMs = new Date(consumedAtUtc).getTime();
+  if (
+    approvedAtMs > Date.now() + 5 * 60 * 1000 ||
+    expiresAtMs <= approvedAtMs ||
+    expiresAtMs > approvedAtMs + PAGE_ACTIVATION_MAX_TTL_MS ||
+    consumedAtMs < approvedAtMs || consumedAtMs > expiresAtMs ||
+    consumedAtMs > Date.now()
+  ) {
+    return null;
+  }
+  return {
+    receiptId: receiptId,
+    recipientSetHash: recipientSetHash,
+    pageSetSha256: pageSetSha256,
+    recipientCount: Number(countText),
+    approvedBy: approvedBy,
+    approvedAtUtc: approvedAtUtc,
+    approvedAtMs: approvedAtMs,
+    expiresAtMs: expiresAtMs,
+    consumedAtUtc: consumedAtUtc,
+    signature: signature,
+    receiptSha256: receiptSha256,
+    nonce: nonce,
+  };
+}
+
 function safePageId_(value) {
   const text = String(value || "").trim();
   return /^[A-Za-z0-9][A-Za-z0-9._:-]{2,119}$/.test(text) ? text : "";
@@ -457,7 +818,9 @@ function safePageId_(value) {
 
 function safePageVersion_(value) {
   const text = String(value || "").trim();
-  return /^v[1-9][0-9]{0,5}(?:\.[0-9]{1,5}){0,2}$/i.test(text) ? text : "";
+  return /^v[1-9][0-9]{0,5}(?:\.(?:0|[1-9][0-9]{0,5}))?$/.test(text)
+    ? text
+    : "";
 }
 
 function parsePersonalPageEvidence_(value, expectedPosition, requireFirstTest) {
@@ -545,15 +908,11 @@ function curatedIsoDate_(value) {
 
 function isIsoUtcTimestamp_(value) {
   const text = String(value || "").trim();
-  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(text)) {
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/.test(text)) {
     return false;
   }
   const date = new Date(text);
-  if (Number.isNaN(date.getTime())) return false;
-  const normalized = /\.\d{3}Z$/.test(text)
-    ? text
-    : text.replace(/Z$/, ".000Z");
-  return date.toISOString() === normalized;
+  return !Number.isNaN(date.getTime()) && date.toISOString() === text;
 }
 
 function createPersonalPageTicket_(record, secret) {
