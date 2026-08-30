@@ -191,6 +191,7 @@ const recordPersonalPageVisit = apps("recordPersonalPageVisit_");
 const ensureProspectPersonalPageColumns = apps(
   "ensureProspectPersonalPageColumns_",
 );
+const ensurePersonalPageContent = apps("ensurePersonalPageContent_");
 const secret = "sheet-secret";
 const headers = [
   "Company_ID",
@@ -551,6 +552,83 @@ const pageHeaders = [
   "Public_Page_Label",
   "Public_Page_Expires_UTC",
 ];
+const pageContentHeaders = [
+  "Page_Content_ID",
+  "Batch_ID",
+  "Experiment_ID",
+  "Page_Version",
+  "Company_ID",
+  "Contact_ID",
+  "Token_SHA256",
+  "Letter_ID",
+  "Public_Page_Label",
+  "Evidence_1",
+  "Evidence_2",
+  "Content_SHA256",
+  "State",
+  "Approval_Status",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Activated_At_UTC",
+  "Expires_UTC",
+  "Source_Run_ID",
+];
+const personalPageEvidence = (position) =>
+  JSON.stringify({
+    schema: "ixa.personal-page-observation.v1",
+    position,
+    title: position === 1 ? "Mobiler Kontaktweg" : "Anfragequalifizierung",
+    observation:
+      position === 1
+        ? "Der wichtigste Kontaktweg ist mobil erst nach längerem Scrollen sichtbar."
+        : "Der Anfrageweg fragt weder nach Projektart noch nach gewünschtem Zeitraum.",
+    implication:
+      position === 1
+        ? "Das könnte schnelle Kontaktaufnahmen unnötig bremsen."
+        : "Erstanfragen könnten dadurch zusätzliche Rückfragen erfordern.",
+    sourceLabel: "Öffentlich sichtbare Website",
+    sourceUrl: `https://example.test/beobachtung-${position}`,
+    verifiedAt: "2026-08-28",
+    ...(position === 1
+      ? {
+          firstTest: {
+            title: "Kontaktweg im ersten Mobilbereich testen",
+            description:
+              "Die bestehende Kontaktoption 14 Tage lang zusätzlich im ersten sichtbaren Mobilbereich platzieren und danach vergleichen.",
+          },
+        }
+      : {}),
+  });
+const personalPageContentRow = (overrides = {}) => {
+  const values = {
+    Page_Content_ID: "IXA-PC-001",
+    Batch_ID: "IXA001",
+    Experiment_ID: "IXA-EXP-001",
+    Page_Version: "v3.0",
+    Company_ID: "IXA-CO-PAGE",
+    Contact_ID: "IXA-CT-PAGE",
+    Token_SHA256: sha256Hex(pageToken),
+    Letter_ID: "IXA-LETTER-001",
+    Public_Page_Label: "Manuell freigegebener Betrieb",
+    Evidence_1: personalPageEvidence(1),
+    Evidence_2: personalPageEvidence(2),
+    State: "Active",
+    Approval_Status: "Approved",
+    Approved_By: "Owner",
+    Approved_At_UTC: "2026-08-28T04:30:00.000Z",
+    Activated_At_UTC: "2026-08-28T04:31:00.000Z",
+    Expires_UTC: "2099-01-01T00:00:00.000Z",
+    Source_Run_ID: "IXA-RUN-PAGE-001",
+    ...overrides,
+  };
+  values.Content_SHA256 = sha256Hex(
+    pageContentHeaders.slice(0, 11).map((name) => values[name] || "").join("\u001f"),
+  );
+  if (Object.hasOwn(overrides, "Content_SHA256")) {
+    values.Content_SHA256 = overrides.Content_SHA256;
+  }
+  return pageContentHeaders.map((name) => values[name] || "");
+};
 const pageToken = "D-C-vbdQt83-B3lACz10Dg";
 const setupProspects = mutableSheet([
   ["Company_ID", "Contact_ID", "Public_Token", "Blocked"],
@@ -583,16 +661,21 @@ const pageProspects = mutableSheet([
     "2099-01-01T00:00:00.000Z",
   ],
 ], pageHeaders.length);
+const pageContent = mutableSheet(
+  [pageContentHeaders, personalPageContentRow()],
+  pageContentHeaders.length,
+);
 let pageEvents = null;
 const pageSpreadsheet = {
   getSheetByName(name) {
     if (name === "01 Prospects") return pageProspects;
+    if (name === "11 Page Content") return pageContent;
     if (name === "08 Outreach Events") return pageEvents;
     return null;
   },
   insertSheet(name) {
     assert.equal(name, "08 Outreach Events");
-    pageEvents = mutableSheet([], 5);
+    pageEvents = mutableSheet([], 11);
     return pageEvents;
   },
 };
@@ -603,6 +686,32 @@ const pageResolution = resolvePersonalPage(
   secret,
 );
 assert.equal(pageResolution.publicPageLabel, "Manuell freigegebener Betrieb");
+assert.deepEqual(
+  Object.keys(pageResolution).sort(),
+  ["findings", "firstTest", "publicPageLabel", "visitTicket"],
+  "resolution must expose only the curated public page contract",
+);
+assert.equal(pageResolution.findings.length, 2);
+assert.deepEqual(JSON.parse(JSON.stringify(pageResolution.findings[0])), {
+  title: "Mobiler Kontaktweg",
+  observation:
+    "Der wichtigste Kontaktweg ist mobil erst nach längerem Scrollen sichtbar.",
+  implication: "Das könnte schnelle Kontaktaufnahmen unnötig bremsen.",
+  sourceLabel: "Öffentlich sichtbare Website",
+  verifiedAt: "2026-08-28",
+});
+assert.equal(
+  pageResolution.firstTest.title,
+  "Kontaktweg im ersten Mobilbereich testen",
+);
+assert.equal(
+  JSON.stringify(pageResolution).includes("https://example.test"),
+  false,
+  "internal evidence URLs must not be returned to the browser",
+);
+assert.equal(JSON.stringify(pageResolution).includes("IXA-CO-PAGE"), false);
+assert.equal(JSON.stringify(pageResolution).includes("IXA-CT-PAGE"), false);
+assert.equal(JSON.stringify(pageResolution).includes(pageToken), false);
 assert.match(pageResolution.visitTicket, /^[A-Za-z0-9_-]+\.[0-9a-f]{64}$/);
 const [personalTicketPayload] = pageResolution.visitTicket.split(".");
 const publicTicketPayload = JSON.parse(
@@ -622,6 +731,41 @@ assert.equal(
   null,
   "unknown tokens must have the same empty resolution as suppressed tokens",
 );
+const pageContentColumns = Object.fromEntries(
+  pageContentHeaders.map((name, index) => [name, index]),
+);
+pageContent.rows[1][pageContentColumns.Approval_Status] = "Drafted";
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  null,
+  "unapproved page content must remain unavailable",
+);
+pageContent.rows[1][pageContentColumns.Approval_Status] = "Approved";
+pageContent.rows[1][pageContentColumns.Evidence_2] = JSON.stringify({
+  schema: "ixa.personal-page-observation.v1",
+  position: 2,
+});
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  null,
+  "incomplete evidence must remain unavailable",
+);
+pageContent.rows[1][pageContentColumns.Evidence_2] =
+  personalPageEvidence(2);
+pageContent.rows[1][pageContentColumns.Content_SHA256] = "0".repeat(64);
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  null,
+  "content whose immutable digest does not match must remain unavailable",
+);
+pageContent.rows[1] = personalPageContentRow();
+pageContent.rows.push(personalPageContentRow({ Page_Content_ID: "IXA-PC-002" }));
+assert.equal(
+  resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret),
+  null,
+  "multiple active records for one token must fail closed",
+);
+pageContent.rows.pop();
 pageProspects.rows[1][3] = "TRUE";
 assert.equal(resolvePersonalPage(pageSpreadsheet, pageTokenProof, secret), null);
 pageProspects.rows[1][3] = "FALSE";
@@ -640,13 +784,27 @@ assert.deepEqual(pageEvents.rows[0], [
   "Company_ID",
   "Contact_ID",
   "Token_SHA256",
+  "Page_Content_ID",
+  "Batch_ID",
+  "Experiment_ID",
+  "Page_Version",
+  "Letter_ID",
+  "Content_SHA256",
 ]);
 assert.equal(pageEvents.rows.length, 2);
 assert.equal(pageEvents.rows[1][0], "personal_page_visit");
 assert.equal(pageEvents.rows[1][2], "IXA-CO-PAGE");
 assert.equal(pageEvents.rows[1][3], "IXA-CT-PAGE");
 assert.equal(pageEvents.rows[1][4], sha256Hex(pageToken));
-assert.equal(pageEvents.rows[1].length, 5, "event rows contain exactly five fields");
+assert.deepEqual(pageEvents.rows[1].slice(5), [
+  "IXA-PC-001",
+  "IXA001",
+  "IXA-EXP-001",
+  "v3.0",
+  "IXA-LETTER-001",
+  pageContent.rows[1][pageContentColumns.Content_SHA256],
+]);
+assert.equal(pageEvents.rows[1].length, 11, "event rows preserve cohort attribution");
 assert.equal(
   recordPersonalPageVisit(pageSpreadsheet, pageResolution.visitTicket, secret)
     .recorded,
@@ -690,6 +848,27 @@ async function verifyPersonalPageContract() {
           ok: true,
           allowed: true,
           publicPageLabel: "Freigegebener Anzeigename",
+          findings: [
+            {
+              title: "Mobiler Kontaktweg",
+              observation: "Der Kontaktweg ist mobil erst später sichtbar.",
+              implication: "Das könnte spontane Kontaktstarts bremsen.",
+              sourceLabel: "Öffentlich sichtbare Website",
+              verifiedAt: "2026-08-28",
+            },
+            {
+              title: "Anfragequalifizierung",
+              observation: "Projektart und Zeitraum werden nicht abgefragt.",
+              implication: "Das könnte zusätzliche Rückfragen verursachen.",
+              sourceLabel: "Öffentlich sichtbares Anfrageformular",
+              verifiedAt: "2026-08-28",
+            },
+          ],
+          firstTest: {
+            title: "Kontaktweg im ersten Mobilbereich testen",
+            description:
+              "Die bestehende Kontaktoption 14 Tage lang zusätzlich im ersten sichtbaren Mobilbereich platzieren.",
+          },
           visitTicket: opaqueTicket,
         }),
         { status: 200, headers: { "content-type": "application/json" } },
@@ -697,6 +876,12 @@ async function verifyPersonalPageContract() {
     };
     const resolved = await personal.resolvePersonalPage(pageToken);
     assert.equal(resolved.publicPageLabel, "Freigegebener Anzeigename");
+    assert.equal(resolved.findings.length, 2);
+    assert.equal(resolved.findings[0].verifiedAt, "28.08.2026");
+    assert.equal(
+      resolved.firstTest.title,
+      "Kontaktweg im ersten Mobilbereich testen",
+    );
     assert.equal(receiverBody.recordType, "personal_page_resolve");
     assert.equal(receiverBody.tokenProof.length, 64);
     assert.equal(JSON.stringify(receiverBody).includes(pageToken), false);
@@ -711,6 +896,25 @@ async function verifyPersonalPageContract() {
       ),
       "the CTA must carry the same personal page URL",
     );
+    assert.ok(
+      decodeURIComponent(whatsappHref).includes(
+        "Bitte senden Sie mir den vertieften Check per WhatsApp.",
+      ),
+      "the primary CTA must contain an explicit recipient request",
+    );
+    const meetingRequest = personal.personalWhatsAppRequest(
+      pageToken,
+      "meeting_15_min",
+    );
+    assert.match(
+      meetingRequest.href,
+      /^https:\/\/wa\.me\/491629155408\?text=/,
+    );
+    assert.match(
+      meetingRequest.message,
+      /Ich möchte ein unverbindliches 15-Minuten-Gespräch dazu anfragen\./,
+    );
+    assert.notEqual(meetingRequest.href, whatsappHref);
 
     const privacy = loadTypeScriptModule("src/lib/privacy-routes.ts");
     assert.equal(privacy.isNoTrackPath(`/r/${pageToken}`), true);
@@ -739,6 +943,172 @@ async function verifyPersonalPageContract() {
         .includes("PersonalPageVisitBeacon"),
       false,
       "the synthetic preview must never emit a personal visit",
+    );
+
+    const personalCheckView = fs.readFileSync(
+      "src/components/personal-check/PersonalCheckView.tsx",
+      "utf8",
+    );
+    assert.match(
+      personalCheckView,
+      /border-border bg-background\/95 text-foreground/,
+      "the personal page header must use readable theme-aware colors",
+    );
+    assert.match(
+      personalCheckView,
+      /bg-primary[^\"]*text-primary-foreground/,
+      "the personal page CTA must keep a high-contrast color pair",
+    );
+    assert.doesNotMatch(
+      personalCheckView,
+      /bg-\[#111414\][^\"]*text-white/,
+      "the CTA must not reuse the hero text override that broke contrast",
+    );
+    assert.match(
+      personalCheckView,
+      /href="\/datenschutz"/,
+      "the personal page footer must link to privacy information",
+    );
+    assert.match(
+      personalCheckView,
+      /href="\/datenloeschung"/,
+      "the personal page footer must link to data deletion information",
+    );
+    assert.match(
+      personalCheckView,
+      /<ImpressumDialog/,
+      "the personal page footer must expose the legal notice",
+    );
+    assert.match(
+      personalCheckView,
+      /findings: readonly \[PersonalPageFinding, PersonalPageFinding\]/,
+      "the live page must require exactly two findings at its type boundary",
+    );
+    assert.match(
+      personalCheckView,
+      /Vertieften Check per WhatsApp anfordern/,
+      "the live page must expose the deeper-check decision",
+    );
+    assert.match(
+      personalCheckView,
+      /15-Minuten-Gespräch per WhatsApp anfragen/,
+      "the live page must expose the meeting decision",
+    );
+    const liveDecisionLinks =
+      personalCheckView.match(/<a[\s\S]*?<\/a>/g) || [];
+    assert.equal(
+      liveDecisionLinks.length,
+      2,
+      "the live page must expose exactly two direct WhatsApp decisions",
+    );
+    assert.equal(
+      liveDecisionLinks.every(
+        (link) =>
+          /target="_blank"/.test(link) &&
+          /rel="noopener noreferrer"/.test(link) &&
+          /referrerPolicy="no-referrer"/.test(link),
+      ),
+      true,
+      "both live decisions must use privacy-safe outbound links",
+    );
+    const livePersonalPage = fs.readFileSync(
+      "src/app/r/[token]/page.tsx",
+      "utf8",
+    );
+    assert.match(livePersonalPage, /personalWhatsAppRequest\(token, "deeper_check"\)/);
+    assert.match(livePersonalPage, /personalWhatsAppRequest\(token, "meeting_15_min"\)/);
+    assert.match(livePersonalPage, /findings=\{resolution\.findings\}/);
+    assert.match(livePersonalPage, /firstTest=\{resolution\.firstTest\}/);
+
+    const decisionPreviewPage = fs.readFileSync(
+      "src/app/vorschau/ixa-check/page.tsx",
+      "utf8",
+    );
+    const decisionPreviewView = fs.readFileSync(
+      "src/components/personal-check/PersonalCheckDecisionPreview.tsx",
+      "utf8",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /PersonalCheckDecisionPreview/,
+      "the synthetic route must render the V2 decision preview",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /title: "Mobiler Kontaktweg"/,
+      "the V2 preview must include the first synthetic observation",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /title: "Anfragequalifizierung"/,
+      "the V2 preview must include the second synthetic observation",
+    );
+    assert.equal(
+      (decisionPreviewPage.match(/verifiedAt:/g) || []).length,
+      2,
+      "both synthetic observations must carry a verification date",
+    );
+    assert.match(
+      decisionPreviewView,
+      /findings: readonly \[/,
+      "the V2 preview must require exactly two findings at the type boundary",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Vertieften Check per WhatsApp anfordern/,
+      "the deeper check must be the primary V2 decision",
+    );
+    assert.match(
+      decisionPreviewView,
+      /15-Minuten-Gespräch per WhatsApp anfragen/,
+      "the meeting request must remain a secondary V2 decision",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /Bitte senden Sie mir den vertieften Check per WhatsApp/,
+      "the primary action must show an explicit client-initiated request",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /ich möchte ein unverbindliches 15-Minuten-Gespräch/,
+      "the secondary action must show its own explicit request",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Persönlicher Brief[\s\S]*QR-Seite[\s\S]*Sie starten WhatsApp/,
+      "the preview must explain the postal-to-inbound response path",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Google-Suche → passende Seite → Kontakt → qualifizierte[\s\S]*Anfrage → Angebot\/Auftrag → messbares Ergebnis/,
+      "the preview must preserve the full IXA value chain",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Eine kurze Nachricht „Nein“ genügt/,
+      "the preview must state the simple objection path",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Diese Vorschau erfasst weder einen Seitenbesuch noch eine[\s\S]*Google Analytics, Google Ads und Vercel Analytics deaktiviert/,
+      "the preview must explain that it does not contaminate measurement",
+    );
+    const decisionPreviewButtons =
+      decisionPreviewView.match(/<button[\s\S]*?<\/button>/g) || [];
+    assert.equal(
+      decisionPreviewButtons.length,
+      2,
+      "the V2 preview must expose exactly two decision actions",
+    );
+    assert.equal(
+      decisionPreviewButtons.every((button) => /\sdisabled\s/.test(button)),
+      true,
+      "every V2 preview action must remain disabled",
+    );
+    assert.doesNotMatch(
+      `${decisionPreviewPage}\n${decisionPreviewView}`,
+      /<a\b|<Link\b|\bhref=|\bonClick=|wa\.me|whatsappHref|meetingHref|PersonalPageVisitBeacon|recordMainConversion/,
+      "the synthetic V2 preview must not contain links, click handlers, beacons, or conversion calls",
     );
 
     let recordedTicket = null;

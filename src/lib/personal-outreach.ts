@@ -8,8 +8,23 @@ const MAX_RECEIVER_RESPONSE_BYTES = 16 * 1024;
 
 export const outreachReceiverSchemaVersion = 2 as const;
 
+export type PersonalPageFinding = Readonly<{
+  title: string;
+  observation: string;
+  implication: string;
+  sourceLabel: string;
+  verifiedAt: string;
+}>;
+
+export type PersonalPageFirstTest = Readonly<{
+  title: string;
+  description: string;
+}>;
+
 export type PersonalPageResolution = {
-  publicPageLabel: string | null;
+  publicPageLabel: string;
+  findings: readonly [PersonalPageFinding, PersonalPageFinding];
+  firstTest: PersonalPageFirstTest;
   visitTicket: string;
 };
 
@@ -17,8 +32,17 @@ type ReceiverResolution = {
   ok?: unknown;
   allowed?: unknown;
   publicPageLabel?: unknown;
+  findings?: unknown;
+  firstTest?: unknown;
   visitTicket?: unknown;
 };
+
+export type PersonalWhatsAppChoice = "deeper_check" | "meeting_15_min";
+
+export type PersonalWhatsAppRequest = Readonly<{
+  href: string;
+  message: string;
+}>;
 
 export function isValidPublicToken(value: unknown): value is string {
   return typeof value === "string" && PUBLIC_TOKEN.test(value);
@@ -107,10 +131,55 @@ async function postToReceiver(
   }
 }
 
-function curatedPublicLabel(value: unknown): string | null {
+function curatedPublicText(value: unknown, maxLength: number): string | null {
   if (typeof value !== "string") return null;
-  const label = value.trim();
-  return label && label.length <= 120 ? label : null;
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(value)) {
+    return null;
+  }
+  const text = value.replace(/\s+/g, " ").trim();
+  return text && text.length <= maxLength ? text : null;
+}
+
+function curatedVerifiedAt(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+  if (!match) return null;
+  const date = new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
+  );
+  if (date.toISOString().slice(0, 10) !== value.trim()) return null;
+  return `${match[3]}.${match[2]}.${match[1]}`;
+}
+
+function curatedFinding(value: unknown): PersonalPageFinding | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const title = curatedPublicText(record.title, 120);
+  const observation = curatedPublicText(record.observation, 900);
+  const implication = curatedPublicText(record.implication, 900);
+  const sourceLabel = curatedPublicText(record.sourceLabel, 160);
+  const verifiedAt = curatedVerifiedAt(record.verifiedAt);
+  if (!title || !observation || !implication || !sourceLabel || !verifiedAt) {
+    return null;
+  }
+  return { title, observation, implication, sourceLabel, verifiedAt };
+}
+
+function curatedFindings(
+  value: unknown,
+): readonly [PersonalPageFinding, PersonalPageFinding] | null {
+  if (!Array.isArray(value) || value.length !== 2) return null;
+  const first = curatedFinding(value[0]);
+  const second = curatedFinding(value[1]);
+  return first && second ? [first, second] : null;
+}
+
+function curatedFirstTest(value: unknown): PersonalPageFirstTest | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const title = curatedPublicText(record.title, 160);
+  const description = curatedPublicText(record.description, 1200);
+  return title && description ? { title, description } : null;
 }
 
 export async function resolvePersonalPage(
@@ -133,8 +202,15 @@ export async function resolvePersonalPage(
     return null;
   }
 
+  const publicPageLabel = curatedPublicText(response.publicPageLabel, 120);
+  const findings = curatedFindings(response.findings);
+  const firstTest = curatedFirstTest(response.firstTest);
+  if (!publicPageLabel || !findings || !firstTest) return null;
+
   return {
-    publicPageLabel: curatedPublicLabel(response.publicPageLabel),
+    publicPageLabel,
+    findings,
+    firstTest,
     visitTicket: response.visitTicket,
   };
 }
@@ -163,13 +239,20 @@ export function personalPageUrl(token: string): string {
   return `${origin}/r/${token}`;
 }
 
-export function personalWhatsAppHref(token: string): string {
+export function personalWhatsAppRequest(
+  token: string,
+  choice: PersonalWhatsAppChoice,
+): PersonalWhatsAppRequest {
   const pageUrl = personalPageUrl(token);
+  const request =
+    choice === "meeting_15_min"
+      ? "Ich möchte ein unverbindliches 15-Minuten-Gespräch dazu anfragen."
+      : "Bitte senden Sie mir den vertieften Check per WhatsApp.";
   const message = [
-    "Hallo Emad, ich habe meinen persönlichen IXA Check geöffnet:",
+    "Hallo Emad, ich habe meinen persönlichen IXA Anfrageweg-Check geöffnet:",
     pageUrl,
     "",
-    "Bitte senden Sie mir die kurze Ersteinschätzung.",
+    request,
   ].join("\n");
   const configuredNumber =
     process.env.OUTREACH_WHATSAPP_NUMBER?.replace(/\D/g, "") ||
@@ -178,5 +261,15 @@ export function personalWhatsAppHref(token: string): string {
     ? configuredNumber
     : "";
   if (!recipient) throw new Error("missing_outreach_whatsapp_number");
-  return `https://wa.me/${recipient}?text=${encodeURIComponent(message)}`;
+  return {
+    href: `https://wa.me/${recipient}?text=${encodeURIComponent(message)}`,
+    message,
+  };
+}
+
+export function personalWhatsAppHref(
+  token: string,
+  choice: PersonalWhatsAppChoice = "deeper_check",
+): string {
+  return personalWhatsAppRequest(token, choice).href;
 }

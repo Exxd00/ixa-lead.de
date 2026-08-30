@@ -1,5 +1,6 @@
 const SCHEMA_VERSION = 2;
 const PROSPECTS_SHEET = "01 Prospects";
+const PERSONAL_PAGE_CONTENT_SHEET = "11 Page Content";
 const INBOUND_QUEUE_SHEET = "07 Inbound Queue";
 const MAX_REQUEST_BYTES = 256 * 1024;
 const MAX_BATCH_ITEMS = 50;
@@ -11,6 +12,31 @@ const PERSONAL_PAGE_TICKET_VERSION = 1;
 const PERSONAL_PAGE_TICKET_TTL_MS = 2 * 60 * 1000;
 const PERSONAL_PAGE_LABEL_HEADER = "Public_Page_Label";
 const PERSONAL_PAGE_EXPIRY_HEADER = "Public_Page_Expires_UTC";
+const PERSONAL_PAGE_EVIDENCE_SCHEMA = "ixa.personal-page-observation.v1";
+
+const PERSONAL_PAGE_CONTENT_HEADERS = [
+  "Page_Content_ID",
+  "Batch_ID",
+  "Experiment_ID",
+  "Page_Version",
+  "Company_ID",
+  "Contact_ID",
+  "Token_SHA256",
+  "Letter_ID",
+  "Public_Page_Label",
+  "Evidence_1",
+  "Evidence_2",
+  "Content_SHA256",
+  "State",
+  "Approval_Status",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Activated_At_UTC",
+  "Expires_UTC",
+  "Source_Run_ID",
+];
+
+const PERSONAL_PAGE_HASH_FIELDS = PERSONAL_PAGE_CONTENT_HEADERS.slice(0, 11);
 
 const PERSONAL_PAGE_EVENT_HEADERS = [
   "Event_Name",
@@ -18,6 +44,12 @@ const PERSONAL_PAGE_EVENT_HEADERS = [
   "Company_ID",
   "Contact_ID",
   "Token_SHA256",
+  "Page_Content_ID",
+  "Batch_ID",
+  "Experiment_ID",
+  "Page_Version",
+  "Letter_ID",
+  "Content_SHA256",
 ];
 
 const INBOUND_HEADERS = [
@@ -85,6 +117,8 @@ function doPost(e) {
         ok: true,
         allowed: true,
         publicPageLabel: resolution.publicPageLabel,
+        findings: resolution.findings,
+        firstTest: resolution.firstTest,
         visitTicket: resolution.visitTicket,
       });
     }
@@ -176,6 +210,7 @@ function setupWhatsAppInboundQueue() {
   const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
   const queue = ensureInboundQueue_(spreadsheet);
   ensureProspectPersonalPageColumns_(spreadsheet);
+  const pageContent = ensurePersonalPageContent_(spreadsheet);
   const events = ensurePersonalPageEvents_(spreadsheet);
   formatInboundQueue_(queue);
   formatPersonalPageEvents_(events);
@@ -187,7 +222,29 @@ function setupWhatsAppInboundQueue() {
     sheet: queue.getName(),
     columns: INBOUND_HEADERS.length,
     personalPageEventsSheet: events.getName(),
+    personalPageContentSheet: pageContent.getName(),
   };
+}
+
+function ensurePersonalPageContent_(spreadsheet) {
+  let sheet = spreadsheet.getSheetByName(PERSONAL_PAGE_CONTENT_SHEET);
+  if (!sheet) sheet = spreadsheet.insertSheet(PERSONAL_PAGE_CONTENT_SHEET);
+  const missing = PERSONAL_PAGE_CONTENT_HEADERS.length - sheet.getMaxColumns();
+  if (missing > 0) sheet.insertColumnsAfter(sheet.getMaxColumns(), missing);
+  if (sheet.getLastRow() === 0) {
+    sheet.getRange(1, 1, 1, PERSONAL_PAGE_CONTENT_HEADERS.length)
+      .setValues([PERSONAL_PAGE_CONTENT_HEADERS]);
+  } else {
+    const headers = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getDisplayValues()[0];
+    if (headers.join("\u001f") !== PERSONAL_PAGE_CONTENT_HEADERS.join("\u001f")) {
+      throw new Error("personal_page_content_schema_mismatch");
+    }
+  }
+  sheet.setFrozenRows(1);
+  sheet.getRange(1, 1, 1, PERSONAL_PAGE_CONTENT_HEADERS.length)
+    .setBackground("#356853").setFontColor("#FFFFFF")
+    .setFontWeight("bold").setWrap(true);
+  return sheet;
 }
 
 function ensureProspectPersonalPageColumns_(spreadsheet) {
@@ -282,23 +339,221 @@ function resolvePersonalPage_(spreadsheet, tokenProof, secret) {
 
   const rawToken = String(row[columns.Public_Token]).trim();
   const tokenHash = sha256Hex_(rawToken);
-  let publicPageLabel = "";
-  if (columns[PERSONAL_PAGE_LABEL_HEADER] != null) {
-    publicPageLabel = String(
-      row[columns[PERSONAL_PAGE_LABEL_HEADER]] || "",
-    )
-      .replace(/\s+/g, " ")
-      .trim()
-      .slice(0, 120);
-  }
+  const content = resolvePersonalPageContent_(
+    spreadsheet,
+    companyId,
+    contactId,
+    tokenHash,
+  );
+  if (!content) return null;
 
   return {
-    publicPageLabel: publicPageLabel,
+    publicPageLabel: content.publicPageLabel,
+    findings: content.findings,
+    firstTest: content.firstTest,
     visitTicket: createPersonalPageTicket_(
-      { companyId: companyId, contactId: contactId, tokenHash: tokenHash },
+      {
+        companyId: companyId,
+        contactId: contactId,
+        tokenHash: tokenHash,
+        pageContentId: content.pageContentId,
+        batchId: content.batchId,
+        experimentId: content.experimentId,
+        pageVersion: content.pageVersion,
+        letterId: content.letterId,
+        contentSha256: content.contentSha256,
+      },
       secret,
     ),
   };
+}
+
+function resolvePersonalPageContent_(spreadsheet, companyId, contactId, tokenHash) {
+  const sheet = spreadsheet.getSheetByName(PERSONAL_PAGE_CONTENT_SHEET);
+  if (!sheet || sheet.getLastRow() < 2) return null;
+
+  const headers = sheet
+    .getRange(1, 1, 1, sheet.getLastColumn())
+    .getDisplayValues()[0];
+  if (
+    headers.length !== PERSONAL_PAGE_CONTENT_HEADERS.length ||
+    PERSONAL_PAGE_CONTENT_HEADERS.some(function (name, index) {
+      return headers[index] !== name;
+    })
+  ) {
+    throw new Error("personal_page_content_schema_mismatch");
+  }
+
+  const columns = headerMap_(headers);
+  const rows = sheet
+    .getRange(2, 1, sheet.getLastRow() - 1, sheet.getLastColumn())
+    .getDisplayValues();
+  const candidates = rows.filter(function (row) {
+    return (
+      String(row[columns.Company_ID] || "").trim() === companyId &&
+      String(row[columns.Contact_ID] || "").trim() === contactId &&
+      String(row[columns.Token_SHA256] || "").trim().toLowerCase() === tokenHash &&
+      String(row[columns.State] || "").trim() === "Active" &&
+      String(row[columns.Approval_Status] || "").trim() ===
+        "Approved" &&
+      curatedPublicText_(row[columns.Approved_By] || "", 200) &&
+      isIsoUtcTimestamp_(row[columns.Approved_At_UTC]) &&
+      isIsoUtcTimestamp_(row[columns.Activated_At_UTC])
+    );
+  });
+  if (candidates.length !== 1) return null;
+
+  const row = candidates[0];
+  const ids = {
+    pageContentId: safePageId_(row[columns.Page_Content_ID]),
+    batchId: safePageId_(row[columns.Batch_ID]),
+    experimentId: safePageId_(row[columns.Experiment_ID]),
+    pageVersion: safePageVersion_(row[columns.Page_Version]),
+    letterId: safePageId_(row[columns.Letter_ID]),
+  };
+  if (Object.keys(ids).some(function (key) { return !ids[key]; })) return null;
+  const expiry = String(row[columns.Expires_UTC] || "").trim();
+  if (expiry && (!isIsoUtcTimestamp_(expiry) || new Date(expiry).getTime() <= Date.now())) {
+    return null;
+  }
+  const expectedHash = sha256Hex_(PERSONAL_PAGE_HASH_FIELDS.map(function (name) {
+    return String(row[columns[name]] || "").trim();
+  }).join("\u001f"));
+  const contentSha256 = String(row[columns.Content_SHA256] || "").trim().toLowerCase();
+  if (!isHash_(contentSha256) || !constantTimeHexEqual_(expectedHash, contentSha256)) {
+    return null;
+  }
+  const publicPageLabel = curatedPublicText_(row[columns.Public_Page_Label], 120);
+  if (!publicPageLabel) return null;
+  const first = parsePersonalPageEvidence_(
+    row[columns.Evidence_1],
+    1,
+    true,
+  );
+  const second = parsePersonalPageEvidence_(
+    row[columns.Evidence_2],
+    2,
+    false,
+  );
+  if (!first || !second || !first.firstTest) return null;
+
+  return {
+    pageContentId: ids.pageContentId,
+    batchId: ids.batchId,
+    experimentId: ids.experimentId,
+    pageVersion: ids.pageVersion,
+    letterId: ids.letterId,
+    contentSha256: contentSha256,
+    publicPageLabel: publicPageLabel,
+    findings: [first.finding, second.finding],
+    firstTest: first.firstTest,
+  };
+}
+
+function safePageId_(value) {
+  const text = String(value || "").trim();
+  return /^[A-Za-z0-9][A-Za-z0-9._:-]{2,119}$/.test(text) ? text : "";
+}
+
+function safePageVersion_(value) {
+  const text = String(value || "").trim();
+  return /^v[1-9][0-9]{0,5}(?:\.[0-9]{1,5}){0,2}$/i.test(text) ? text : "";
+}
+
+function parsePersonalPageEvidence_(value, expectedPosition, requireFirstTest) {
+  const raw = String(value || "").trim();
+  if (!raw || raw.length > 8000) return null;
+
+  let record;
+  try {
+    record = JSON.parse(raw);
+  } catch (_error) {
+    return null;
+  }
+  if (!record || typeof record !== "object" || Array.isArray(record)) {
+    return null;
+  }
+  if (
+    record.schema !== PERSONAL_PAGE_EVIDENCE_SCHEMA ||
+    record.position !== expectedPosition
+  ) {
+    return null;
+  }
+
+  const sourceUrl = String(record.sourceUrl || "").trim();
+  if (
+    !sourceUrl ||
+    sourceUrl.length > 2048 ||
+    !/^https:\/\/[^\s<>"']+$/i.test(sourceUrl)
+  ) {
+    return null;
+  }
+
+  const finding = {
+    title: curatedPublicText_(record.title, 120),
+    observation: curatedPublicText_(record.observation, 900),
+    implication: curatedPublicText_(record.implication, 900),
+    sourceLabel: curatedPublicText_(record.sourceLabel, 160),
+    verifiedAt: curatedIsoDate_(record.verifiedAt),
+  };
+  if (
+    !finding.title ||
+    !finding.observation ||
+    !finding.implication ||
+    !finding.sourceLabel ||
+    !finding.verifiedAt
+  ) {
+    return null;
+  }
+
+  let firstTest = null;
+  if (requireFirstTest) {
+    const candidate = record.firstTest;
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate)) {
+      return null;
+    }
+    firstTest = {
+      title: curatedPublicText_(candidate.title, 160),
+      description: curatedPublicText_(candidate.description, 1200),
+    };
+    if (!firstTest.title || !firstTest.description) return null;
+  } else if (record.firstTest != null) {
+    return null;
+  }
+
+  return { finding: finding, firstTest: firstTest };
+}
+
+function curatedPublicText_(value, maxLength) {
+  if (typeof value !== "string") return "";
+  if (/[\u0000-\u0008\u000B\u000C\u000E-\u001F\u007F]/.test(value)) {
+    return "";
+  }
+  const text = value.replace(/\s+/g, " ").trim();
+  return text && text.length <= maxLength ? text : "";
+}
+
+function curatedIsoDate_(value) {
+  const text = String(value || "").trim();
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+  if (!match) return "";
+  const date = new Date(
+    Date.UTC(Number(match[1]), Number(match[2]) - 1, Number(match[3])),
+  );
+  return date.toISOString().slice(0, 10) === text ? text : "";
+}
+
+function isIsoUtcTimestamp_(value) {
+  const text = String(value || "").trim();
+  if (!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{3})?Z$/.test(text)) {
+    return false;
+  }
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return false;
+  const normalized = /\.\d{3}Z$/.test(text)
+    ? text
+    : text.replace(/Z$/, ".000Z");
+  return date.toISOString() === normalized;
 }
 
 function createPersonalPageTicket_(record, secret) {
@@ -318,6 +573,12 @@ function createPersonalPageTicket_(record, secret) {
     companyId: String(record.companyId),
     contactId: String(record.contactId),
     tokenHash: String(record.tokenHash),
+    pageContentId: String(record.pageContentId),
+    batchId: String(record.batchId),
+    experimentId: String(record.experimentId),
+    pageVersion: String(record.pageVersion),
+    letterId: String(record.letterId),
+    contentSha256: String(record.contentSha256),
   };
   CacheService.getScriptCache().put(
     personalPageTicketCacheKey_(nonce),
@@ -372,7 +633,13 @@ function verifyPersonalPageTicket_(ticket, secret) {
       record.expiresAt !== payload.expiresAt ||
       !String(record.companyId || "") ||
       !String(record.contactId || "") ||
-      !isHash_(record.tokenHash)
+      !isHash_(record.tokenHash) ||
+      !safePageId_(record.pageContentId) ||
+      !safePageId_(record.batchId) ||
+      !safePageId_(record.experimentId) ||
+      !safePageVersion_(record.pageVersion) ||
+      !safePageId_(record.letterId) ||
+      !isHash_(record.contentSha256)
     ) {
       return null;
     }
@@ -382,6 +649,12 @@ function verifyPersonalPageTicket_(ticket, secret) {
       companyId: String(record.companyId).slice(0, 200),
       contactId: String(record.contactId).slice(0, 200),
       tokenHash: String(record.tokenHash).toLowerCase(),
+      pageContentId: String(record.pageContentId),
+      batchId: String(record.batchId),
+      experimentId: String(record.experimentId),
+      pageVersion: String(record.pageVersion),
+      letterId: String(record.letterId),
+      contentSha256: String(record.contentSha256).toLowerCase(),
     };
   } catch (error) {
     return null;
@@ -416,6 +689,12 @@ function recordPersonalPageVisit_(spreadsheet, ticket, secret) {
         safeCell_(verified.companyId, 200),
         safeCell_(verified.contactId, 200),
         verified.tokenHash,
+        safeCell_(verified.pageContentId, 120),
+        safeCell_(verified.batchId, 120),
+        safeCell_(verified.experimentId, 120),
+        safeCell_(verified.pageVersion, 40),
+        safeCell_(verified.letterId, 120),
+        verified.contentSha256,
       ]])
       .setVerticalAlignment("top");
     sheet.getRange(rowNumber, 2).setNumberFormat("@");

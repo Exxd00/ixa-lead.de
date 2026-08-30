@@ -1,4 +1,3 @@
-import Link from "next/link";
 import {
   ArrowRight,
   CalendarClock,
@@ -10,66 +9,80 @@ import {
 } from "lucide-react";
 
 import { BrandMark } from "@/components/BrandMark";
-import { ImpressumDialog } from "@/components/ImpressumDialog";
 import { siteConfig } from "@/data/site";
-import type {
-  PersonalPageFinding,
-  PersonalPageFirstTest,
-  PersonalWhatsAppRequest,
-} from "@/lib/personal-outreach";
 
-type PersonalCheckViewProps = {
+export type PersonalCheckDecisionFinding = Readonly<{
+  title: string;
+  observation: string;
+  implication: string;
+  sourceLabel: string;
+  verifiedAt: string;
+}>;
+
+export type PersonalCheckDecisionTest = Readonly<{
+  title: string;
+  description: string;
+}>;
+
+type PersonalCheckDecisionPreviewProps = {
   companyLabel: string;
-  findings: readonly [PersonalPageFinding, PersonalPageFinding];
-  firstTest: PersonalPageFirstTest;
-  primaryRequest: PersonalWhatsAppRequest;
-  meetingRequest: PersonalWhatsAppRequest;
+  findings: readonly [
+    PersonalCheckDecisionFinding,
+    PersonalCheckDecisionFinding,
+  ];
+  firstTest: PersonalCheckDecisionTest;
+  primaryRequestText: string;
+  meetingRequestText: string;
+  previewReference: string;
 };
-
-const responsePath = [
-  {
-    step: "01",
-    title: "Persönlicher Brief",
-    description:
-      "Sie erhalten zwei nachvollziehbare Beobachtungen und Ihren persönlichen QR-Code.",
-  },
-  {
-    step: "02",
-    title: "QR-Seite",
-    description:
-      "Sie prüfen die Hinweise in Ruhe und entscheiden selbst, ob Sie mehr erfahren möchten.",
-  },
-  {
-    step: "03",
-    title: "Sie starten WhatsApp",
-    description:
-      "Erst Ihre selbst gesendete Nachricht bittet IXA um den vertieften Check oder ein Gespräch.",
-  },
-] as const;
 
 const deeperCheckItems = [
   "3–5 priorisierte Hinweise von der Suchnachfrage bis zur Anfragequalität",
   "Eine klare Reihenfolge: was zuerst geprüft wird und was warten kann",
   "Einen realistischen, messbaren ersten Test ohne unnötigen Umbau",
+];
+
+const responsePath = [
+  {
+    step: "01",
+    title: "Persönlicher Brief",
+    description: "Sie erhalten zwei nachvollziehbare Beobachtungen und Ihren persönlichen QR-Code.",
+  },
+  {
+    step: "02",
+    title: "QR-Seite",
+    description: "Sie prüfen die Hinweise in Ruhe und entscheiden selbst, ob Sie mehr erfahren möchten.",
+  },
+  {
+    step: "03",
+    title: "Sie starten WhatsApp",
+    description: "Erst Ihre selbst gesendete Nachricht bittet IXA um den vertieften Check oder ein Gespräch.",
+  },
 ] as const;
 
-export function PersonalCheckView({
+export function PersonalCheckDecisionPreview({
   companyLabel,
   findings,
   firstTest,
-  primaryRequest,
-  meetingRequest,
-}: PersonalCheckViewProps) {
+  primaryRequestText,
+  meetingRequestText,
+  previewReference,
+}: PersonalCheckDecisionPreviewProps) {
   const year = new Date().getFullYear();
 
   return (
     <>
       <main className="min-h-screen bg-background text-foreground">
+        <div className="border-b border-amber-300 bg-amber-100 px-4 py-2.5 text-center text-sm font-semibold text-amber-950 dark:border-amber-700/50 dark:bg-amber-950 dark:text-amber-100">
+          Interne V2-Vorschau · synthetische Beispieldaten · alle Aktionen
+          deaktiviert
+        </div>
+
         <header className="border-b border-border bg-background/95 text-foreground backdrop-blur-xl">
-          <div className="container-lp flex min-h-[72px] items-center justify-between gap-4 py-3">
-            <div className="inline-flex min-w-0 items-center gap-3 rounded-lg">
-              <BrandMark className="size-10 shrink-0 shadow-soft" priority />
-              <span className="min-w-0 leading-none">
+          <div className="container-lp flex h-[72px] items-center justify-between gap-4">
+            <div className="inline-flex items-center gap-3 rounded-lg">
+              <BrandMark className="size-10 shadow-soft" priority />
+              <span className="leading-none">
                 <span className="block text-[15px] font-extrabold tracking-tight text-foreground">
                   IXA Leads
                 </span>
@@ -79,7 +92,7 @@ export function PersonalCheckView({
               </span>
             </div>
 
-            <span className="shrink-0 rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground">
+            <span className="rounded-full border border-border bg-card px-3 py-1.5 text-xs font-semibold text-muted-foreground">
               Nicht öffentlich gelistet
             </span>
           </div>
@@ -90,7 +103,9 @@ export function PersonalCheckView({
             <div className="max-w-4xl">
               <div className="inline-flex max-w-full flex-wrap items-center gap-2 rounded-full border border-primary/30 bg-primary/10 px-3.5 py-1.5 text-xs font-semibold text-foreground">
                 <FileCheck2 className="size-4 shrink-0" aria-hidden="true" />
-                <span className="uppercase tracking-wide">Kurz geprüft für</span>
+                <span className="uppercase tracking-wide">
+                  Kurz geprüft für
+                </span>
                 <span className="break-words font-bold">{companyLabel}</span>
               </div>
 
@@ -119,7 +134,7 @@ export function PersonalCheckView({
                     className="size-4 text-navy-700 dark:text-primary"
                     aria-hidden="true"
                   />
-                  Zwei verifizierte Beobachtungen
+                  Zwei konkrete Beobachtungen
                 </span>
               </div>
             </div>
@@ -193,7 +208,7 @@ export function PersonalCheckView({
           <div className="mt-9 grid gap-6 lg:grid-cols-2">
             {findings.map((finding, index) => (
               <article
-                key={`${index}-${finding.title}`}
+                key={finding.title}
                 className="flex h-full flex-col rounded-3xl border border-border bg-card p-6 text-card-foreground shadow-soft sm:p-8"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -321,18 +336,16 @@ export function PersonalCheckView({
               </div>
 
               <div className="rounded-3xl border border-white/15 bg-white/5 p-5 backdrop-blur sm:p-6">
-                <a
-                  href={primaryRequest.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  referrerPolicy="no-referrer"
-                  aria-describedby="primary-request-explanation"
-                  className="focus-ring inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-3.5 text-center text-base font-bold text-primary-foreground shadow-lg transition-transform hover:-translate-y-0.5"
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="primary-request-explanation decision-preview-note"
+                  className="focus-ring inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-primary px-6 py-3.5 text-center text-base font-bold text-primary-foreground shadow-lg disabled:cursor-not-allowed disabled:opacity-80"
                 >
                   <MessageCircle className="size-5" aria-hidden="true" />
                   Vertieften Check per WhatsApp anfordern
                   <ArrowRight className="size-4" aria-hidden="true" />
-                </a>
+                </button>
 
                 <div
                   id="primary-request-explanation"
@@ -341,13 +354,14 @@ export function PersonalCheckView({
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-primary">
                     Vorbereitete Nachricht
                   </p>
-                  <blockquote className="mt-2 whitespace-pre-line text-sm leading-relaxed text-white/80">
-                    „{primaryRequest.message}“
+                  <blockquote className="mt-2 text-sm leading-relaxed text-white/80">
+                    „{primaryRequestText}“
                   </blockquote>
                   <p className="mt-3 text-xs leading-relaxed text-white/55">
-                    WhatsApp öffnet sich nur mit diesem Text. Gesendet wird er
-                    erst, wenn Sie dort selbst auf „Senden“ tippen. Damit bitten
-                    Sie IXA ausdrücklich um eine Antwort per WhatsApp.
+                    Im echten persönlichen Link öffnet sich WhatsApp nur mit
+                    diesem Text. Gesendet wird er erst, wenn Sie dort selbst auf
+                    „Senden“ tippen. Damit bitten Sie IXA ausdrücklich um eine
+                    Antwort per WhatsApp.
                   </p>
                 </div>
 
@@ -357,17 +371,15 @@ export function PersonalCheckView({
                   <span className="h-px flex-1 bg-white/15" />
                 </div>
 
-                <a
-                  href={meetingRequest.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  referrerPolicy="no-referrer"
-                  aria-describedby="meeting-request-explanation"
-                  className="focus-ring inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-white/20 px-3 py-2 text-center text-sm font-semibold text-white transition-colors hover:bg-white/10"
+                <button
+                  type="button"
+                  disabled
+                  aria-describedby="meeting-request-explanation decision-preview-note"
+                  className="focus-ring inline-flex w-full items-center justify-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-white/75 underline decoration-white/30 underline-offset-4 disabled:cursor-not-allowed"
                 >
                   <CalendarClock className="size-4" aria-hidden="true" />
                   15-Minuten-Gespräch per WhatsApp anfragen
-                </a>
+                </button>
 
                 <div
                   id="meeting-request-explanation"
@@ -376,10 +388,18 @@ export function PersonalCheckView({
                   <p className="text-xs font-bold uppercase tracking-[0.12em] text-white/55">
                     Alternative Nachricht
                   </p>
-                  <blockquote className="mt-2 whitespace-pre-line text-xs leading-relaxed text-white/65">
-                    „{meetingRequest.message}“
+                  <blockquote className="mt-2 text-xs leading-relaxed text-white/65">
+                    „{meetingRequestText}“
                   </blockquote>
                 </div>
+
+                <p
+                  id="decision-preview-note"
+                  className="mt-5 text-center text-xs leading-relaxed text-white/55"
+                >
+                  Vorschau: Es wird keine Nachricht geöffnet, kein Termin
+                  gebucht und nichts gesendet. Referenz {previewReference}.
+                </p>
               </div>
             </div>
           </div>
@@ -419,11 +439,12 @@ export function PersonalCheckView({
                   Keine Werbe- oder Reichweitenmessung
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-                  Google Analytics, Google Ads und Vercel Analytics bleiben auf
-                  dieser Seite deaktiviert. Einmalig wird nur vermerkt, dass die
-                  Seite geöffnet wurde; IP-Adresse, User-Agent, Referrer und der
-                  vollständige Linkschlüssel werden nicht in die
-                  Kontaktübersicht übernommen.
+                  Diese Vorschau erfasst weder einen Seitenbesuch noch eine
+                  Kontaktaktion. Auf einer späteren persönlichen Seite bleiben
+                  Google Analytics, Google Ads und Vercel Analytics deaktiviert.
+                  Dort wird einmalig nur vermerkt, dass die Seite geöffnet wurde;
+                  IP-Adresse, User-Agent, Referrer und der vollständige
+                  Linkschlüssel werden nicht in die Kontaktübersicht übernommen.
                 </p>
               </article>
 
@@ -436,6 +457,10 @@ export function PersonalCheckView({
                   Ansprache zu diesem Check. Ein Widerspruch oder eine
                   Löschanfrage ist auch über {siteConfig.contact.emailDisplay}
                   möglich.
+                </p>
+                <p className="mt-3 text-xs leading-relaxed text-muted-foreground">
+                  Datenschutz: ixa-leads.de/datenschutz · Datenlöschung:
+                  ixa-leads.de/datenloeschung
                 </p>
               </article>
             </div>
@@ -457,24 +482,9 @@ export function PersonalCheckView({
             </div>
           </div>
 
-          <nav
-            aria-label="Rechtliche Informationen"
-            className="flex flex-wrap items-center gap-x-5 gap-y-3 text-sm"
-          >
-            <Link
-              href="/datenschutz"
-              className="focus-ring rounded-md text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Datenschutz
-            </Link>
-            <Link
-              href="/datenloeschung"
-              className="focus-ring rounded-md text-muted-foreground transition-colors hover:text-foreground"
-            >
-              Datenlöschung
-            </Link>
-            <ImpressumDialog className="text-muted-foreground hover:text-foreground" />
-          </nav>
+          <p className="text-sm leading-relaxed text-muted-foreground">
+            Datenschutz · Datenlöschung · Impressum auf ixa-leads.de
+          </p>
 
           <p className="text-xs text-muted-foreground">
             © {year} {siteConfig.name}

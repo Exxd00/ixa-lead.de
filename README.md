@@ -96,25 +96,67 @@ dürfen nicht eingebettet werden und senden keinen Referrer.
 `setupWhatsAppInboundQueue()` ergänzt in `01 Prospects` ausschließlich die
 leeren optionalen Spalten `Public_Page_Label` und
 `Public_Page_Expires_UTC`; vorhandene Daten werden nicht überschrieben.
-`Public_Page_Label` ist der einzige CRM-Inhalt, der nach manueller Pflege auf
-der Kundenseite erscheinen darf. Ist er leer, bleibt die Ansprache neutral.
-Namen aus anderen CRM-Spalten werden niemals automatisch veröffentlicht. Ein
-leeres Ablaufdatum lässt den Link aktiv; ein vorhandener Wert muss ein
-zukünftiger ISO-UTC-Zeitpunkt sein.
+`Public_Page_Label` ist der einzige direkt aus diesem Prospects-Datensatz
+veröffentlichte CRM-Inhalt. Ist er leer, bleibt die Seite gesperrt. Namen aus
+anderen CRM-Spalten werden niemals automatisch veröffentlicht. Ein leeres
+Ablaufdatum lässt den Link aktiv; ein vorhandener Wert muss ein zukünftiger
+ISO-UTC-Zeitpunkt sein.
+
+Die freigegebenen Seiteninhalte kommen aus dem append-only Blatt
+`11 Page Content`. Jede aktive Zeile bindet den Token-Hash unveränderlich an
+`Page_Content_ID`, `Batch_ID`, `Experiment_ID`, `Page_Version`, `Letter_ID`,
+Firma, Kontakt, Anzeigename und exakt zwei Evidenzobjekte. Der Server berechnet
+über diese Felder erneut `Content_SHA256`; bei einer Abweichung, null oder
+mehreren aktiven Treffern bleibt die Seite gesperrt. Nur Zeilen mit
+`State=Active`, `Approval_Status=Approved`, dokumentiertem `Approved_By` und
+gültigen UTC-Zeitpunkten für Freigabe und Aktivierung werden ausgeliefert.
+
+`Evidence_1` und `Evidence_2` enthalten jeweils strikt parsebares JSON. Beide
+verwenden dieses Schema; nur `Evidence_1` enthält zusätzlich `firstTest`, und
+`position` ist dort `1` beziehungsweise `2`:
+
+```json
+{
+  "schema": "ixa.personal-page-observation.v1",
+  "position": 1,
+  "title": "Kurzer öffentlicher Befund",
+  "observation": "Konkrete, vorsichtig formulierte Beobachtung.",
+  "implication": "Mögliche geschäftliche Wirkung, nicht als Tatsache behauptet.",
+  "sourceLabel": "Öffentlich sichtbare Website",
+  "sourceUrl": "https://example.de/konkrete-seite",
+  "verifiedAt": "2026-08-28",
+  "firstTest": {
+    "title": "Klar begrenzter erster Test",
+    "description": "Was für welchen Zeitraum unverändert getestet und danach verglichen wird."
+  }
+}
+```
+
+`Evidence_2` darf kein `firstTest` enthalten. Die Serverauflösung prüft beide
+HTTPS-Quellen, gibt die URLs aber bewusst nicht an den Browser weiter. Sie gibt
+nur Anzeigename, exakt zwei kuratierte Beobachtungen, den ersten Test und das
+opaque Besuchsticket zurück — niemals `Company_ID`, `Contact_ID`, Inhalts-IDs,
+rohen Token oder Quellen-URL.
 
 Nach erfolgreicher Auflösung stellt Apps Script eine kurzlebige, opaque
 Besuchsticket-Nonce aus. Sie enthält keine Firmen-, Kontakt- oder Token-Daten.
 Erst wenn die Seite 1–1,5 Sekunden sichtbar war, sendet der Browser dieses
 Ticket an `/api/outreach/visit`. Apps Script prüft Signatur und Ablauf,
 verhindert Nonce-Wiederholungen und schreibt in `08 Outreach Events` genau:
-`personal_page_visit`, UTC-Zeit, interne Company-ID, interne Contact-ID und den
-SHA-256-Tokenhash. IP-Adresse, User-Agent, Referrer, Nachricht und roher Token
-werden weder übertragen noch in diesem Ereignisblatt gespeichert.
+`personal_page_visit`, UTC-Zeit, interne Company-ID, interne Contact-ID,
+SHA-256-Tokenhash, `Page_Content_ID`, `Batch_ID`, `Experiment_ID`,
+`Page_Version`, `Letter_ID` und `Content_SHA256`. Damit bleibt jede QR-Visite
+der tatsächlich ausgelieferten Kohorte und Inhaltsversion zugeordnet.
+IP-Adresse, User-Agent, Referrer, Nachricht und roher Token werden weder
+übertragen noch in diesem Ereignisblatt gespeichert.
 
-Die WhatsApp-Schaltfläche nimmt immer denselben persönlichen `/r/`-Link in den
-vorbereiteten Text auf. `OUTREACH_WHATSAPP_NUMBER` kann serverseitig gesetzt
-werden; ohne den Wert wird die bereits in `src/data/site.ts` gepflegte
-Website-Nummer verwendet. `OUTREACH_PUBLIC_BASE_URL` ist optional und fällt auf
+Die zwei WhatsApp-Schaltflächen nehmen immer denselben persönlichen `/r/`-Link
+in den vorbereiteten Text auf. Die empfangende Person wählt ausdrücklich
+zwischen einem vertieften Check und der Anfrage eines unverbindlichen
+15-Minuten-Gesprächs; WhatsApp öffnet nur den Entwurf und versendet ihn nicht
+automatisch. `OUTREACH_WHATSAPP_NUMBER` kann serverseitig gesetzt werden; ohne
+den Wert wird die bereits in `src/data/site.ts` gepflegte Website-Nummer
+verwendet. `OUTREACH_PUBLIC_BASE_URL` ist optional und fällt auf
 `https://ixa-leads.de` zurück. Für einen getrennten Apps-Script-Empfänger können
 `OUTREACH_SHEET_WEBHOOK_URL` und `OUTREACH_SHEET_WEBHOOK_SECRET` gesetzt werden;
 sonst werden die vorhandenen `WHATSAPP_SHEET_WEBHOOK_*`-Werte verwendet.
