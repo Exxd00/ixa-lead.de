@@ -34,7 +34,9 @@ function signedBytes(buffer) {
 
 function loadAppsScript(path) {
   const cacheValues = new Map();
+  const rsaSigningCalls = [];
   const context = vm.createContext({
+    __rsaSigningCalls: rsaSigningCalls,
     CacheService: {
       getScriptCache: () => ({
         get: (key) => cacheValues.get(String(key)) || null,
@@ -61,7 +63,10 @@ function loadAppsScript(path) {
         };
       },
       base64EncodeWebSafe(value) {
-        return Buffer.from(String(value), "utf8").toString("base64url");
+        const buffer = Array.isArray(value)
+          ? Buffer.from(value.map((byte) => (byte < 0 ? byte + 256 : byte)))
+          : Buffer.from(String(value), "utf8");
+        return buffer.toString("base64url");
       },
       base64DecodeWebSafe(value) {
         return signedBytes(Buffer.from(String(value), "base64url"));
@@ -81,6 +86,17 @@ function loadAppsScript(path) {
             .update(String(value), "utf8")
             .digest(),
         );
+      },
+      computeRsaSha256Signature(value, privateKey) {
+        rsaSigningCalls.push({
+          value: String(value),
+          privateKey: String(privateKey),
+        });
+        const digest = crypto
+          .createHash("sha256")
+          .update(String(value), "utf8")
+          .digest();
+        return signedBytes(Buffer.concat(Array.from({ length: 8 }, () => digest)));
       },
     },
   });
@@ -193,6 +209,10 @@ const ensureProspectPersonalPageColumns = apps(
 );
 const ensurePersonalPageContent = apps("ensurePersonalPageContent_");
 const ensurePersonalPageActivations = apps("ensurePersonalPageActivations_");
+const processPersonalPageActivations = apps("processPersonalPageActivations_");
+const ensurePostalActivations = apps("ensurePostalActivations_");
+const processPostalActivations = apps("processPostalActivations_");
+const rsaSigningCalls = apps("__rsaSigningCalls");
 const secret = "sheet-secret";
 const headers = [
   "Company_ID",
@@ -594,6 +614,7 @@ const pageActivationHeaders = [
   "State",
   "Consumed_At_UTC",
   "Source_Run_ID",
+  "Activation_Error",
 ];
 const pageActivationSignatureHeaders = [
   "Schema_Version",
@@ -609,6 +630,43 @@ const pageActivationSignatureHeaders = [
   "Expires_At_UTC",
   "Consumed_At_UTC",
   "Nonce",
+];
+const postalActivationHeaders = [
+  "Activation_Receipt_ID",
+  "Schema_Version",
+  "Approved_For",
+  "Batch_ID",
+  "Content_Version",
+  "Letter_Date",
+  "Recipient_Count",
+  "Batch_Digest_SHA256",
+  "Approved_By",
+  "Approved_At_UTC",
+  "Expires_At_UTC",
+  "Nonce",
+  "Key_ID",
+  "Signature_RSA_SHA256_B64URL",
+  "Receipt_SHA256",
+  "State",
+  "Consumed_At_UTC",
+  "Source_Run_ID",
+  "Activation_Error",
+];
+const postalSignedFields = [
+  "approved_at_utc",
+  "approved_by",
+  "approved_for",
+  "batch_digest_sha256",
+  "batch_id",
+  "consumed_at_utc",
+  "content_version",
+  "expires_at_utc",
+  "key_id",
+  "letter_date",
+  "nonce",
+  "receipt_id",
+  "recipient_count",
+  "schema_version",
 ];
 const pageActivationSecret = "page-activation-secret-v1-48-bytes-minimum-value";
 const pageUnitSeparator = "\u001f";
@@ -811,6 +869,457 @@ assert.deepEqual(
   setupPageActivations.rows[0],
   pageActivationHeaders,
   "setup must create the durable activation-receipt ledger without a receipt",
+);
+const legacyActivationHeaders = pageActivationHeaders.slice(0, 17);
+const legacyActivationSheet = mutableSheet(
+  [legacyActivationHeaders, Array(17).fill("")],
+  legacyActivationHeaders.length,
+);
+ensurePersonalPageActivations({
+  getSheetByName: (name) =>
+    name === "12 Page Activations" ? legacyActivationSheet : null,
+});
+assert.deepEqual(
+  legacyActivationSheet.rows[0],
+  pageActivationHeaders,
+  "setup must append Activation_Error to the 17-column ledger without deleting rows",
+);
+assert.equal(
+  legacyActivationSheet.rows.length,
+  2,
+  "activation ledger migration must preserve all existing rows",
+);
+
+const activationTestColumns = Object.fromEntries(
+  pageActivationHeaders.map((name, index) => [name, index]),
+);
+const activationContentTestColumns = Object.fromEntries(
+  pageContentHeaders.map((name, index) => [name, index]),
+);
+const activationTestNow = new Date("2030-01-02T10:05:00.000Z");
+const activationApprovedAt = "2030-01-02T10:00:00.000Z";
+const activationRequestExpiry = "2030-01-02T11:00:00.000Z";
+const preparedActivationRows = (batchId) =>
+  Array.from({ length: 50 }, (_, index) => {
+    const suffix = String(index + 1).padStart(3, "0");
+    return personalPageContentRow({
+      Page_Content_ID: `${batchId}-PC-${suffix}`,
+      Batch_ID: batchId,
+      Company_ID: `${batchId}-CO-${suffix}`,
+      Contact_ID: `${batchId}-CT-${suffix}`,
+      Token_SHA256: sha256Hex(`${batchId}-token-${suffix}`),
+      Letter_ID: `${batchId}-LETTER-${suffix}`,
+      Public_Page_Label: `Freigegebener Betrieb ${suffix}`,
+      State: "Prepared",
+      Approved_By: "Owner-Emad-Alzaim",
+      Approved_At_UTC: activationApprovedAt,
+      Activated_At_UTC: "",
+      Expires_UTC: "2099-01-01T00:00:00.000Z",
+      Source_Run_ID: `${batchId}-RUN`,
+      Activation_Receipt_ID: "",
+      Activation_Receipt_SHA256: "",
+    });
+  });
+const pendingActivationRow = (contentRows, batchId, overrides = {}) =>
+  pageActivationRow(contentRows, {
+    Activation_Receipt_ID: "",
+    Batch_ID: batchId,
+    Approved_By: "Owner-Emad-Alzaim",
+    Approved_At_UTC: activationApprovedAt,
+    Expires_At_UTC: activationRequestExpiry,
+    Nonce: "",
+    Signature_HMAC_SHA256: "",
+    Receipt_SHA256: "",
+    State: "Pending",
+    Consumed_At_UTC: "",
+    Source_Run_ID: `${batchId}-RUN`,
+    ...overrides,
+  });
+const activationFixture = (contentRows, activationRow) => {
+  const contentSheet = mutableSheet(
+    [pageContentHeaders, ...contentRows],
+    pageContentHeaders.length,
+  );
+  const activationSheet = mutableSheet(
+    [pageActivationHeaders, activationRow],
+    pageActivationHeaders.length,
+  );
+  return {
+    contentSheet,
+    activationSheet,
+    spreadsheet: {
+      getSheetByName(name) {
+        if (name === "11 Page Content") return contentSheet;
+        if (name === "12 Page Activations") return activationSheet;
+        return null;
+      },
+    },
+  };
+};
+
+const pendingRows = preparedActivationRows("IXA101");
+const pendingFixture = activationFixture(
+  pendingRows,
+  pendingActivationRow(pendingRows, "IXA101"),
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(processPersonalPageActivations(
+    pendingFixture.spreadsheet,
+    pageActivationSecret,
+    activationTestNow,
+  ))),
+  { ok: true, examined: 1, consumed: 1, rejected: 0 },
+  "an exact approved Pending request must be signed and consumed internally",
+);
+const consumedPendingRow = pendingFixture.activationSheet.rows[1];
+assert.equal(
+  consumedPendingRow[activationTestColumns.State],
+  "Consumed",
+  "Pending must advance through the signed ledger to Consumed",
+);
+assert.match(
+  consumedPendingRow[activationTestColumns.Activation_Receipt_ID],
+  /^IXA-PA-[0-9a-f]{32}$/,
+  "the internal signer must create an opaque receipt id",
+);
+assert.match(
+  consumedPendingRow[activationTestColumns.Nonce],
+  /^[A-Za-z0-9_-]{43}$/,
+  "the internal signer must create a 32-byte base64url nonce",
+);
+assert.equal(
+  consumedPendingRow[activationTestColumns.Activation_Error],
+  "",
+  "a consumed receipt must not retain an error",
+);
+assert.ok(
+  pendingFixture.contentSheet.rows.slice(1).every((row) =>
+    row[activationContentTestColumns.State] === "Active" &&
+    row[activationContentTestColumns.Activation_Receipt_ID] ===
+      consumedPendingRow[activationTestColumns.Activation_Receipt_ID] &&
+    row[activationContentTestColumns.Activation_Receipt_SHA256] ===
+      consumedPendingRow[activationTestColumns.Receipt_SHA256]
+  ),
+  "all 50 contiguous rows must reference the same consumed receipt",
+);
+
+const badHashRows = preparedActivationRows("IXA102");
+const badHashFixture = activationFixture(
+  badHashRows,
+  pendingActivationRow(badHashRows, "IXA102", {
+    Recipient_Set_Hash: "0".repeat(64),
+  }),
+);
+processPersonalPageActivations(
+  badHashFixture.spreadsheet,
+  pageActivationSecret,
+  activationTestNow,
+);
+assert.equal(
+  badHashFixture.activationSheet.rows[1][activationTestColumns.State],
+  "Rejected",
+  "a request whose exact recipient hash is wrong must fail closed",
+);
+assert.equal(
+  badHashFixture.activationSheet.rows[1][activationTestColumns.Activation_Error],
+  "recipient_set_hash_mismatch",
+  "the ledger must retain a readable hash failure",
+);
+assert.ok(
+  badHashFixture.contentSheet.rows.slice(1).every((row) =>
+    row[activationContentTestColumns.State] === "Prepared"
+  ),
+  "invalid hashes must never activate content",
+);
+
+const wrongApproverRows = preparedActivationRows("IXA103");
+const wrongApproverFixture = activationFixture(
+  wrongApproverRows,
+  pendingActivationRow(wrongApproverRows, "IXA103", {
+    Approved_By: "General-Approval",
+  }),
+);
+processPersonalPageActivations(
+  wrongApproverFixture.spreadsheet,
+  pageActivationSecret,
+  activationTestNow,
+);
+assert.equal(
+  wrongApproverFixture.activationSheet.rows[1][activationTestColumns.State],
+  "Rejected",
+  "general or mismatched approval must never authorize a batch",
+);
+
+const wrongSecretRows = preparedActivationRows("IXA104");
+const wrongSecretSigning = pageActivationRow(wrongSecretRows, {
+  Activation_Receipt_ID: "IXA-PAGE-ACT-WRONG-SECRET",
+  Batch_ID: "IXA104",
+  Approved_At_UTC: activationApprovedAt,
+  Expires_At_UTC: activationRequestExpiry,
+  State: "Signing",
+  Consumed_At_UTC: activationTestNow.toISOString(),
+  Source_Run_ID: "IXA104-RUN",
+});
+const wrongSecretFixture = activationFixture(wrongSecretRows, wrongSecretSigning);
+processPersonalPageActivations(
+  wrongSecretFixture.spreadsheet,
+  "wrong-page-activation-secret-that-is-long-enough",
+  activationTestNow,
+);
+assert.equal(
+  wrongSecretFixture.activationSheet.rows[1][activationTestColumns.State],
+  "Rejected",
+  "a Signing receipt made with another secret must fail closed",
+);
+assert.equal(
+  wrongSecretFixture.activationSheet.rows[1][activationTestColumns.Activation_Error],
+  "activation_signature_mismatch",
+  "the ledger must identify a signing-key mismatch without exposing the key",
+);
+
+const retrySigningRows = preparedActivationRows("IXA105");
+const retrySigningRow = pageActivationRow(retrySigningRows, {
+  Activation_Receipt_ID: "IXA-PAGE-ACT-RETRY-SIGNING",
+  Batch_ID: "IXA105",
+  Approved_At_UTC: activationApprovedAt,
+  Expires_At_UTC: activationRequestExpiry,
+  State: "Signing",
+  Consumed_At_UTC: activationTestNow.toISOString(),
+  Source_Run_ID: "IXA105-RUN",
+});
+const retrySigningFixture = activationFixture(retrySigningRows, retrySigningRow);
+processPersonalPageActivations(
+  retrySigningFixture.spreadsheet,
+  pageActivationSecret,
+  activationTestNow,
+);
+assert.equal(
+  retrySigningFixture.activationSheet.rows[1][activationTestColumns.State],
+  "Consumed",
+  "a valid Signing row must resume idempotently after an interrupted run",
+);
+assert.ok(
+  retrySigningFixture.contentSheet.rows.slice(1).every((row) =>
+    row[activationContentTestColumns.State] === "Active" &&
+    row[activationContentTestColumns.Activation_Receipt_ID] ===
+      "IXA-PAGE-ACT-RETRY-SIGNING"
+  ),
+  "Signing recovery must bind all 50 rows to the pre-existing receipt",
+);
+
+let setupPostalActivations = null;
+ensurePostalActivations({
+  getSheetByName: (name) =>
+    name === "13 Postal Activations" ? setupPostalActivations : null,
+  insertSheet(name) {
+    assert.equal(name, "13 Postal Activations");
+    setupPostalActivations = mutableSheet([], postalActivationHeaders.length);
+    return setupPostalActivations;
+  },
+});
+assert.deepEqual(
+  setupPostalActivations.rows[0],
+  postalActivationHeaders,
+  "setup must create the exact schema for 13 Postal Activations",
+);
+
+const postalColumns = Object.fromEntries(
+  postalActivationHeaders.map((name, index) => [name, index]),
+);
+const postalNow = new Date("2030-01-02T10:05:00.000Z");
+const postalPrivateKey =
+  "-----BEGIN PRIVATE KEY-----\n" + "A".repeat(1100) +
+  "\n-----END PRIVATE KEY-----";
+const postalKeyId = "IXA-POSTAL-RSA-2026-01";
+const postalActivationRow = (batchId, overrides = {}) => {
+  const values = {
+    Activation_Receipt_ID: "",
+    Schema_Version: "2",
+    Approved_For: "PRINT_READY",
+    Batch_ID: batchId,
+    Content_Version: "IXA-POSTAL-V3-L1-20260830",
+    Letter_Date: "2030-01-03",
+    Recipient_Count: "50",
+    Batch_Digest_SHA256: sha256Hex(`${batchId}-exact-print-manifest`),
+    Approved_By: "Owner-Emad-Alzaim",
+    Approved_At_UTC: "2030-01-02T10:00:00.000Z",
+    Expires_At_UTC: "2030-01-03T10:00:00.000Z",
+    Nonce: "",
+    Key_ID: "",
+    Signature_RSA_SHA256_B64URL: "",
+    Receipt_SHA256: "",
+    State: "Pending",
+    Consumed_At_UTC: "",
+    Source_Run_ID: `${batchId}-RUN`,
+    Activation_Error: "",
+    ...overrides,
+  };
+  return postalActivationHeaders.map((name) => values[name] || "");
+};
+const postalFixture = (rows) => {
+  const sheet = mutableSheet(
+    [postalActivationHeaders, ...rows],
+    postalActivationHeaders.length,
+  );
+  return {
+    sheet,
+    spreadsheet: {
+      getSheetByName: (name) =>
+        name === "13 Postal Activations" ? sheet : null,
+    },
+  };
+};
+
+rsaSigningCalls.splice(0, rsaSigningCalls.length);
+const exactPostalFixture = postalFixture([postalActivationRow("IXA201")]);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(processPostalActivations(
+    exactPostalFixture.spreadsheet,
+    postalPrivateKey,
+    postalKeyId,
+    postalNow,
+  ))),
+  { ok: true, examined: 1, consumed: 1, rejected: 0, pending: 0 },
+  "an exact trusted-owner postal approval must be consumed",
+);
+const consumedPostalRow = exactPostalFixture.sheet.rows[1];
+assert.equal(consumedPostalRow[postalColumns.State], "Consumed");
+assert.equal(consumedPostalRow[postalColumns.Activation_Error], "");
+assert.match(
+  consumedPostalRow[postalColumns.Signature_RSA_SHA256_B64URL],
+  /^[A-Za-z0-9_-]{342}$/,
+  "a mocked 2048-bit RSA signature must retain the production wire format",
+);
+assert.equal(rsaSigningCalls.length, 1, "the exact request must be signed once");
+assert.equal(
+  rsaSigningCalls[0].privateKey,
+  postalPrivateKey,
+  "the internal signer must receive the configured private key",
+);
+const postalSignatureDomain = "IXA_POSTAL_ACTIVATION_V2\n";
+assert.ok(
+  rsaSigningCalls[0].value.startsWith(postalSignatureDomain),
+  "the RSA signature must be domain-separated",
+);
+const postalCanonical = rsaSigningCalls[0].value.slice(postalSignatureDomain.length);
+const postalSignedPayload = JSON.parse(postalCanonical);
+assert.deepEqual(
+  Object.keys(postalSignedPayload),
+  postalSignedFields,
+  "Apps Script canonical fields must match Python postal_activation schema v2",
+);
+assert.equal(postalSignedPayload.schema_version, 2);
+assert.equal(postalSignedPayload.recipient_count, 50);
+assert.equal(postalSignedPayload.approved_by, "Owner-Emad-Alzaim");
+assert.equal(postalSignedPayload.approved_for, "PRINT_READY");
+assert.equal(postalSignedPayload.batch_id, "IXA201");
+assert.equal(
+  postalSignedPayload.batch_digest_sha256,
+  consumedPostalRow[postalColumns.Batch_Digest_SHA256],
+);
+assert.equal(
+  postalSignedPayload.receipt_id,
+  consumedPostalRow[postalColumns.Activation_Receipt_ID],
+);
+assert.equal(
+  postalSignedPayload.nonce,
+  consumedPostalRow[postalColumns.Nonce],
+);
+assert.equal(
+  postalCanonical,
+  JSON.stringify(Object.fromEntries(
+    postalSignedFields.map((name) => [name, postalSignedPayload[name]]),
+  )),
+  "the signed JSON must use the same sorted compact canonical form as Python",
+);
+assert.equal(
+  consumedPostalRow[postalColumns.Receipt_SHA256],
+  sha256Hex(
+    rsaSigningCalls[0].value + pageUnitSeparator +
+      consumedPostalRow[postalColumns.Signature_RSA_SHA256_B64URL],
+  ),
+  "the receipt digest must match Python's domain+canonical+separator+signature rule",
+);
+
+const missingPostalKeyFixture = postalFixture([postalActivationRow("IXA202")]);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(processPostalActivations(
+    missingPostalKeyFixture.spreadsheet,
+    "",
+    postalKeyId,
+    postalNow,
+  ))),
+  { ok: true, examined: 1, consumed: 0, rejected: 0, pending: 1 },
+  "missing signing infrastructure must keep an exact request Pending",
+);
+assert.equal(
+  missingPostalKeyFixture.sheet.rows[1][postalColumns.State],
+  "Pending",
+);
+assert.equal(
+  missingPostalKeyFixture.sheet.rows[1][postalColumns.Activation_Error],
+  "postal_signing_key_unavailable",
+);
+
+const wrongPostalApproverFixture = postalFixture([
+  postalActivationRow("IXA203", { Approved_By: "General-Approval" }),
+]);
+processPostalActivations(
+  wrongPostalApproverFixture.spreadsheet,
+  postalPrivateKey,
+  postalKeyId,
+  postalNow,
+);
+assert.equal(
+  wrongPostalApproverFixture.sheet.rows[1][postalColumns.State],
+  "Rejected",
+  "only Owner-Emad-Alzaim may approve PRINT_READY",
+);
+assert.equal(
+  wrongPostalApproverFixture.sheet.rows[1][postalColumns.Activation_Error],
+  "invalid_postal_activation_request",
+);
+
+const tamperedPostalDigestFixture = postalFixture([
+  postalActivationRow("IXA204", { Batch_Digest_SHA256: "tampered" }),
+]);
+processPostalActivations(
+  tamperedPostalDigestFixture.spreadsheet,
+  postalPrivateKey,
+  postalKeyId,
+  postalNow,
+);
+assert.equal(
+  tamperedPostalDigestFixture.sheet.rows[1][postalColumns.State],
+  "Rejected",
+  "a malformed or tampered batch digest must not be signed",
+);
+assert.equal(
+  tamperedPostalDigestFixture.sheet.rows[1][postalColumns.Activation_Error],
+  "invalid_postal_activation_request",
+);
+
+const duplicatePostalFixture = postalFixture([
+  postalActivationRow("IXA205", { Source_Run_ID: "IXA205-RUN-A" }),
+  postalActivationRow("IXA205", { Source_Run_ID: "IXA205-RUN-B" }),
+]);
+const duplicatePostalResult = processPostalActivations(
+  duplicatePostalFixture.spreadsheet,
+  postalPrivateKey,
+  postalKeyId,
+  postalNow,
+);
+assert.deepEqual(
+  JSON.parse(JSON.stringify(duplicatePostalResult)),
+  { ok: true, examined: 2, consumed: 0, rejected: 2, pending: 0 },
+  "duplicate Batch_ID requests must both fail closed",
+);
+assert.ok(
+  duplicatePostalFixture.sheet.rows.slice(1).every((row) =>
+    row[postalColumns.State] === "Rejected" &&
+    row[postalColumns.Activation_Error] === "duplicate_postal_activation_request"
+  ),
+  "the duplicate Batch_ID reason must remain readable in the ledger",
 );
 const pageProspects = mutableSheet([
   pageHeaders,
@@ -1346,20 +1855,34 @@ async function verifyPersonalPageContract() {
       "src/components/personal-check/PersonalCheckDecisionPreview.tsx",
       "utf8",
     );
+    const privacyPage = fs.readFileSync(
+      "src/app/datenschutz/page.tsx",
+      "utf8",
+    );
     assert.match(
       decisionPreviewPage,
       /PersonalCheckDecisionPreview/,
-      "the synthetic route must render the V2 decision preview",
+      "the synthetic route must render the V3 decision preview",
+    );
+    assert.match(
+      decisionPreviewPage,
+      /V3-Vorschau:[\s\S]*Page-Version v3\.0/,
+      "the synthetic route metadata must identify V3 and Page-Version v3.0",
+    );
+    assert.match(
+      decisionPreviewView,
+      /Interne V3-Vorschau · Page-Version v3\.0/,
+      "the visible preview notice must identify V3 and Page-Version v3.0",
     );
     assert.match(
       decisionPreviewPage,
       /title: "Mobiler Kontaktweg"/,
-      "the V2 preview must include the first synthetic observation",
+      "the V3 preview must include the first synthetic observation",
     );
     assert.match(
       decisionPreviewPage,
       /title: "Anfragequalifizierung"/,
-      "the V2 preview must include the second synthetic observation",
+      "the V3 preview must include the second synthetic observation",
     );
     assert.equal(
       (decisionPreviewPage.match(/verifiedAt:/g) || []).length,
@@ -1369,17 +1892,17 @@ async function verifyPersonalPageContract() {
     assert.match(
       decisionPreviewView,
       /findings: readonly \[/,
-      "the V2 preview must require exactly two findings at the type boundary",
+      "the V3 preview must require exactly two findings at the type boundary",
     );
     assert.match(
       decisionPreviewView,
       /Vertieften Check per WhatsApp anfordern/,
-      "the deeper check must be the primary V2 decision",
+      "the deeper check must be the primary V3 decision",
     );
     assert.match(
       decisionPreviewView,
       /15-Minuten-Gespräch per WhatsApp anfragen/,
-      "the meeting request must remain a secondary V2 decision",
+      "the meeting request must remain a secondary V3 decision",
     );
     assert.match(
       decisionPreviewPage,
@@ -1416,17 +1939,42 @@ async function verifyPersonalPageContract() {
     assert.equal(
       decisionPreviewButtons.length,
       2,
-      "the V2 preview must expose exactly two decision actions",
+      "the V3 preview must expose exactly two decision actions",
     );
     assert.equal(
       decisionPreviewButtons.every((button) => /\sdisabled\s/.test(button)),
       true,
-      "every V2 preview action must remain disabled",
+      "every V3 preview action must remain disabled",
     );
     assert.doesNotMatch(
       `${decisionPreviewPage}\n${decisionPreviewView}`,
       /<a\b|<Link\b|\bhref=|\bonClick=|wa\.me|whatsappHref|meetingHref|PersonalPageVisitBeacon|recordMainConversion/,
-      "the synthetic V2 preview must not contain links, click handlers, beacons, or conversion calls",
+      "the synthetic V3 preview must not contain links, click handlers, beacons, or conversion calls",
+    );
+    assert.match(
+      privacyPage,
+      /tätig unter \{siteConfig\.name\}/,
+      "the privacy notice must identify the controller's trading name",
+    );
+    assert.match(
+      privacyPage,
+      /Art\. 14 DSGVO[\s\S]*Art\. 6 Abs\. 1 lit\. f DSGVO/,
+      "the privacy notice must explain the Article 14 postal-contact basis",
+    );
+    assert.match(
+      privacyPage,
+      /Widerspruch gegen Direktwerbung \(Art\. 21 Abs\. 2 und 3 DSGVO\)/,
+      "the privacy notice must display the direct-marketing objection separately",
+    );
+    assert.match(
+      privacyPage,
+      /personal_page_visit[\s\S]*weder die IP-Adresse noch User-Agent, Referrer/,
+      "the privacy notice must describe the minimal pseudonymous QR event",
+    );
+    assert.match(
+      privacyPage,
+      /Google Sheets[\s\S]*OpenAI\/ChatGPT[\s\S]*Vercel[\s\S]*Resend[\s\S]*Hostinger[\s\S]*WhatsApp/,
+      "the privacy notice must name the service-provider categories used by the workflow",
     );
 
     let recordedTicket = null;

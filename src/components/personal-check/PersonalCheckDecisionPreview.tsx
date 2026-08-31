@@ -74,8 +74,8 @@ export function PersonalCheckDecisionPreview({
     <>
       <main className="min-h-screen bg-background text-foreground">
         <div className="border-b border-amber-300 bg-amber-100 px-4 py-2.5 text-center text-sm font-semibold text-amber-950 dark:border-amber-700/50 dark:bg-amber-950 dark:text-amber-100">
-          Interne V2-Vorschau · synthetische Beispieldaten · alle Aktionen
-          deaktiviert
+          Interne V3-Vorschau · Page-Version v3.0 · synthetische
+          Beispieldaten · alle Aktionen deaktiviert
         </div>
 
         <header className="border-b border-border bg-background/95 text-foreground backdrop-blur-xl">

@@ -115,32 +115,26 @@ Die Produktionsfreigabe ist zusätzlich kohortenweit signiert. Das generische,
 orts- und batchunabhängige Werkzeug `scripts/personal_page_batch.py` validiert
 1 bis 50 Empfänger und erzeugt deterministisch ausschließlich
 `Prepared / Pending`-Zeilen. Es vergibt keine Tokens, schreibt nicht in Google
-Sheets, aktiviert keine Seite und führt keine Netzwerkaktion aus. Für eine
-Produktionsfreigabe signiert es nur eine exakt 50 Empfänger umfassende
-`PAGE_ACTIVATION`-Anfrage. Die separate `PRINT_READY`-Quittung des
+Sheets, aktiviert keine Seite und führt keine Netzwerkaktion aus. Nach der
+exakten Eigentümerfreigabe wird eine `Pending`-Anfrage für genau 50 Empfänger
+in `12 Page Activations` abgelegt. Ein interner Apps-Script-Trigger prüft alle
+Inhalts- und Set-Hashes, wechselt crash-sicher über `Signing` zu `Consumed` und
+aktiviert erst danach die vollständige Kohorte. Es gibt keinen öffentlichen
+Signier- oder Aktivierungs-Endpunkt. Die separate `PRINT_READY`-Quittung des
 Briefgenerators kann diese Freigabe niemals ersetzen.
 
 ```bash
 python3 scripts/personal_page_batch.py prepare cohort.json \
   --output prepared-page-batch.json
 
-# Das Secret ausschließlich über eine geschützte Prozessumgebung injizieren.
-python3 scripts/personal_page_batch.py sign prepared-page-batch.json \
-  --receipt-id IXA-PAGE-ACT-001 \
-  --approved-by IXA-OWNER \
-  --approved-at-utc 2026-08-30T20:00:00.000Z \
-  --expires-at-utc 2026-08-30T21:00:00.000Z \
-  --consumed-at-utc 2026-08-30T20:05:00.000Z \
-  --nonce '<43 Zeichen Base64url aus 32 Zufallsbytes>' \
-  --output page-activation-receipt.json
-
-python3 scripts/personal_page_batch.py verify page-activation-receipt.json
+# Lokale Vertragsprüfung; aktiviert und schreibt nichts.
+python3 -m unittest scripts.tests.test_personal_page_batch -v
 ```
 
-`IXA_PAGE_ACTIVATION_SECRET_V1` muss dabei mindestens 32 UTF-8-Bytes lang
-sein. Derselbe Wert wird ausschließlich als gleichnamige Apps-Script-Property
-verwaltet; er gehört weder in das Sheet, das Repository noch in eine
-`NEXT_PUBLIC_...`-Variable. Das Signaturprotokoll ist durch
+`IXA_PAGE_ACTIVATION_SECRET_V1` muss mindestens 32 UTF-8-Bytes lang sein und
+wird ausschließlich als gleichnamige Apps-Script-Property verwaltet; er gehört
+weder in das Sheet, das Repository noch in eine `NEXT_PUBLIC_...`-Variable.
+Das Signaturprotokoll ist durch
 `IXA_PAGE_ACTIVATION_V1` vom WhatsApp- und Briefdruck-Protokoll getrennt.
 `Consumed_At_UTC` ist Bestandteil der Signatur und muss innerhalb des
 signierten Freigabefensters liegen; ein Zeitpunkt in der Zukunft wird weder
@@ -151,7 +145,9 @@ begrenzt.
 
 `setupWhatsAppInboundQueue()` ergänzt bestehende A:S-Inhaltsblätter
 verlustfrei um `Activation_Receipt_ID` und `Activation_Receipt_SHA256` zu A:U
-und legt das dauerhafte Blatt `12 Page Activations` an. Der Resolver liefert
+und legt die dauerhaften Blätter `12 Page Activations` und
+`13 Postal Activations` sowie einen idempotenten Fünf-Minuten-Trigger an. Das
+Blatt `12` besitzt zusätzlich `Activation_Error`. Der Resolver liefert
 eine Seite nur aus, wenn genau 50 eindeutige aktive Zeilen, ihr Empfängerset,
 alle Inhalts-Hashes, `Batch_ID`, `Experiment_ID`, `Page_Version`, Ablaufzeit
 und `Source_Run_ID` mit genau einer gültigen, als `Consumed` dokumentierten
@@ -159,6 +155,27 @@ HMAC-Quittung übereinstimmen. Jede Seite muss ID und SHA-256 genau dieser
 Quittung tragen. Fehlendes Secret, Teilaktivierung, Duplikat, Manipulation,
 falscher Scope oder falsche Quittung ergeben dieselbe neutrale Sperre wie ein
 unbekannter Token. Es gibt absichtlich keinen öffentlichen Aktivierungs-Endpunkt.
+
+## Signierte Druckfreigabe
+
+Eine exakte Musterfreigabe erlaubt weder Druck noch Posteinlieferung. Erst der
+anschließende Post-Lauf berechnet über alle materiellen Brief-, Empfänger-,
+Quellen-, Datenschutz- und Seitenfelder den `Batch_Digest_SHA256` und legt in
+`13 Postal Activations` eine `Pending`-Anfrage mit dem festen Freigeber
+`Owner-Emad-Alzaim` ab. Der interne Trigger signiert ausschließlich diesen
+Digest für `PRINT_READY`, genau 50 Empfänger, die konkrete Briefversion und das
+Briefdatum.
+
+Der private RSA-Schlüssel bleibt als Script Property
+`IXA_POSTAL_ACTIVATION_PRIVATE_KEY_PEM_V1` in Apps Script. Die feste
+Schlüssel-ID lautet `IXA-POSTAL-RSA-2026-01` und kann zusätzlich als
+`IXA_POSTAL_ACTIVATION_KEY_ID_V1` hinterlegt werden.
+`scripts/create_postal_batch.py --print-ready` prüft die noch gültige
+Schema-v2-Quittung ohne Secret gegen den fest im Repository hinterlegten
+öffentlichen Schlüssel. Eine nachträgliche Änderung am Sheet, Brief oder
+Empfängerset macht sie ungültig. Die Quittung erzeugt ausschließlich Dateien;
+`APPROVED`, physischer Druck, Posteinlieferung und `SENT` bleiben getrennte
+Zustände.
 
 `Evidence_1` und `Evidence_2` enthalten jeweils strikt parsebares JSON. Beide
 verwenden dieses Schema; nur `Evidence_1` enthält zusätzlich `firstTest`, und
@@ -237,13 +254,18 @@ Einrichtung nach erfolgreichem Meta-Login:
 
 1. Ein neues eigenständiges Apps-Script-Projekt mit `Code.gs` und
    `appsscript.json` aus `integrations/ixa-outreach-webhook/` anlegen.
-2. In dessen Script Properties `OUTREACH_SPREADSHEET_ID` und ein langes
-   zufälliges `WHATSAPP_WEBHOOK_SECRET` hinterlegen.
+2. In dessen Script Properties `OUTREACH_SPREADSHEET_ID`, ein langes
+   zufälliges `WHATSAPP_WEBHOOK_SECRET`, `IXA_PAGE_ACTIVATION_SECRET_V1` und
+   den privaten Druckfreigabeschlüssel
+   `IXA_POSTAL_ACTIVATION_PRIVATE_KEY_PEM_V1` hinterlegen. Optional die feste
+   Schlüssel-ID `IXA-POSTAL-RSA-2026-01` als
+   `IXA_POSTAL_ACTIVATION_KEY_ID_V1` setzen.
 3. `setupWhatsAppInboundQueue()` einmal manuell ausführen. Dadurch werden das
    Inbound-Sheet und `08 Outreach Events` geprüft/formatiert, die optionalen
-   persönlichen Seitenspalten ergänzt und der tägliche Lösch-Trigger
-   eingerichtet. Bei einem Upgrade von Schema 1 ergänzt die Funktion die
-   Spalte `Ingested_UTC` ohne vorhandene Zeilen zu löschen.
+   persönlichen Seitenspalten und `11`/`12`/`13` ergänzt sowie der tägliche
+   Lösch- und der Fünf-Minuten-Aktivierungstrigger eingerichtet. Bei einem
+   Upgrade ergänzt die Funktion fehlende Spalten ohne vorhandene Zeilen zu
+   löschen.
 4. Als Web App ausführen als Besitzer und für „Anyone“ bereitstellen. Nur die
    `/exec`-URL unter `WHATSAPP_SHEET_WEBHOOK_URL` in Vercel hinterlegen; dasselbe
    Secret kommt in `WHATSAPP_SHEET_WEBHOOK_SECRET`.

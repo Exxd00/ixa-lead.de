@@ -76,11 +76,11 @@ Exactly 50 recipients are required. ``--draft`` visibly marks every page as
 ENTWURF / NICHT VERSENDEN. ``--print-ready`` additionally requires the exact
 gates ``legal_status=Approved`` and ``page_status=Ready`` for every recipient,
 documented sources for name/function/address, complete provider/transfer/
-retention facts, and a separate, unexpired HMAC-signed activation receipt whose
-batch digest matches every material input field. Missing legal facts remain
-visible activation blockers in a draft; they are never guessed. The signing
-secret is read only from ``IXA_POSTAL_ACTIVATION_SECRET`` and is never stored in
-an artifact.
+retention facts, and a separate, unexpired Apps-Script-signed activation
+receipt whose batch digest matches every material input field. Missing legal
+facts remain visible activation blockers in a draft; they are never guessed.
+The private RSA key remains in Apps Script; this generator verifies with the
+pinned public key in the repository.
 """
 
 from __future__ import annotations
@@ -88,7 +88,6 @@ from __future__ import annotations
 import argparse
 import csv
 import hashlib
-import hmac
 import json
 import os
 import re
@@ -103,6 +102,17 @@ from pathlib import Path
 from typing import Any, Iterable, Mapping, Sequence
 from urllib.parse import urlsplit, urlunsplit
 from xml.sax.saxutils import escape
+
+try:
+    from .postal_activation import (
+        PostalActivationError,
+        verify_postal_activation,
+    )
+except ImportError:  # Direct ``python scripts/create_postal_batch.py`` execution.
+    from postal_activation import (  # type: ignore[no-redef]
+        PostalActivationError,
+        verify_postal_activation,
+    )
 
 from pypdf import PdfReader, PdfWriter
 from pypdf.errors import PdfReadError
@@ -133,7 +143,7 @@ from reportlab.platypus.doctemplate import LayoutError
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = ROOT / "output" / "postal"
 EXPECTED_RECIPIENT_COUNT = 50
-GENERATOR_VERSION = "1.0.0"
+GENERATOR_VERSION = "1.1.0"
 
 PROVIDER_SERVICES = (
     "contact_register_apps_script",
@@ -1307,118 +1317,25 @@ def _verify_activation_receipt(
     batch: Batch, payload: Any
 ) -> VerifiedActivation:
     receipt = _mapping(payload, "activation_receipt")
-    required = {
-        "schema_version",
-        "receipt_id",
-        "approved_for",
-        "batch_id",
-        "content_version",
-        "letter_date",
-        "recipient_count",
-        "batch_digest_sha256",
-        "approved_by",
-        "approved_at_utc",
-        "expires_at_utc",
-        "nonce",
-        "signature_hmac_sha256",
-    }
-    if set(receipt) != required:
-        missing = sorted(required - set(receipt))
-        extra = sorted(set(receipt) - required)
-        raise BatchValidationError(
-            f"activation_receipt schema mismatch; missing={missing}, extra={extra}"
-        )
-    if receipt.get("schema_version") != 1:
-        raise BatchValidationError("activation_receipt.schema_version must be 1")
-
-    receipt_id = _safe_id(receipt.get("receipt_id"), "activation_receipt.receipt_id")
-    approved_by = _text(
-        receipt.get("approved_by"), "activation_receipt.approved_by", maximum=120
-    )
-    nonce = _text(
-        receipt.get("nonce"),
-        "activation_receipt.nonce",
-        minimum=16,
-        maximum=80,
-    )
-    if not PUBLIC_TOKEN.fullmatch(nonce) or len(set(nonce)) < 8:
-        raise BatchValidationError("activation_receipt.nonce is not sufficiently random")
-
-    if receipt.get("approved_for") != "PRINT_READY":
-        raise BatchValidationError(
-            "activation_receipt.approved_for must be PRINT_READY"
-        )
-    if receipt.get("batch_id") != batch.batch_id:
-        raise BatchValidationError("activation_receipt.batch_id does not match")
-    if receipt.get("content_version") != batch.content_version:
-        raise BatchValidationError("activation_receipt.content_version does not match")
-    if receipt.get("letter_date") != batch.letter_date.isoformat():
-        raise BatchValidationError("activation_receipt.letter_date does not match")
-    if (
-        isinstance(receipt.get("recipient_count"), bool)
-        or receipt.get("recipient_count") != len(batch.recipients)
-    ):
-        raise BatchValidationError("activation_receipt.recipient_count does not match")
-
     batch_digest = _batch_digest_sha256(batch)
-    supplied_digest = _text(
-        receipt.get("batch_digest_sha256"),
-        "activation_receipt.batch_digest_sha256",
-        minimum=64,
-        maximum=64,
-    ).lower()
-    if not re.fullmatch(r"[0-9a-f]{64}", supplied_digest):
-        raise BatchValidationError(
-            "activation_receipt.batch_digest_sha256 must be lowercase hex"
+    try:
+        verified = verify_postal_activation(
+            receipt,
+            batch_id=batch.batch_id,
+            content_version=batch.content_version,
+            letter_date=batch.letter_date.isoformat(),
+            recipient_count=len(batch.recipients),
+            batch_digest_sha256=batch_digest,
         )
-    if not hmac.compare_digest(supplied_digest, batch_digest):
-        raise BatchValidationError("activation_receipt batch digest does not match")
-
-    approved_at = _utc_datetime(
-        receipt.get("approved_at_utc"), "activation_receipt.approved_at_utc"
-    )
-    expires_at = _utc_datetime(
-        receipt.get("expires_at_utc"), "activation_receipt.expires_at_utc"
-    )
-    now = datetime.now(timezone.utc)
-    if approved_at > now + timedelta(minutes=5):
-        raise BatchValidationError("activation_receipt approval time is in the future")
-    if expires_at <= now:
-        raise BatchValidationError("activation_receipt has expired")
-    if expires_at <= approved_at or expires_at > approved_at + timedelta(days=7):
-        raise BatchValidationError(
-            "activation_receipt expiry must be after approval and within 7 days"
-        )
-
-    signature = _text(
-        receipt.get("signature_hmac_sha256"),
-        "activation_receipt.signature_hmac_sha256",
-        minimum=64,
-        maximum=64,
-    ).lower()
-    if not re.fullmatch(r"[0-9a-f]{64}", signature):
-        raise BatchValidationError(
-            "activation_receipt.signature_hmac_sha256 must be lowercase hex"
-        )
-    secret = os.environ.get("IXA_POSTAL_ACTIVATION_SECRET", "").encode("utf-8")
-    if len(secret) < 32:
-        raise BatchValidationError(
-            "IXA_POSTAL_ACTIVATION_SECRET must contain at least 32 bytes"
-        )
-    signed_body = {key: receipt[key] for key in sorted(receipt) if key != "signature_hmac_sha256"}
-    expected_signature = hmac.new(
-        secret, _canonical_json_bytes(signed_body), hashlib.sha256
-    ).hexdigest()
-    if not hmac.compare_digest(signature, expected_signature):
-        raise BatchValidationError("activation_receipt signature is invalid")
-
+    except PostalActivationError as exc:
+        raise BatchValidationError(str(exc)) from exc
     return VerifiedActivation(
-        receipt_id=receipt_id,
-        approved_by=approved_by,
-        approved_at_utc=approved_at,
-        expires_at_utc=expires_at,
+        receipt_id=verified.receipt_id,
+        approved_by=verified.approved_by,
+        approved_at_utc=verified.approved_at_utc,
+        expires_at_utc=verified.expires_at_utc,
         batch_digest_sha256=batch_digest,
-        receipt_sha256=hashlib.sha256(_canonical_json_bytes(dict(receipt))).hexdigest(),
+        receipt_sha256=verified.receipt_sha256,
     )
 
 
@@ -2375,7 +2292,7 @@ Vor einer PRINT_READY-Ausgabe müssen alle Ebenen zusammen bereit sein:
     für genau diese Datensätze konfiguriert.
 [ ] Website: die zugehörige /r/<Public_Token>-Version ist veröffentlicht und
     zeigt die beiden richtigen Beobachtungen für denselben Empfänger.
-[ ] Aktivierung: separate HMAC-signierte Quittung stimmt mit Batch-ID,
+[ ] Aktivierung: separate Apps-Script-RSA-Quittung stimmt mit Batch-ID,
     Content-Version, Datum, 50 Empfängern, allen Quellen, Provider-/Transfer-
     Angaben, Löschfristen und dem vollständigen Batch-Digest überein und ist
     noch gültig.
@@ -2940,7 +2857,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "--activation-receipt",
         help=(
-            "Separate HMAC-signed activation receipt JSON. Required only for "
+            "Separate Apps-Script-RSA-signed activation receipt JSON. Required only for "
             "--print-ready and forbidden for --draft."
         ),
     )

@@ -13,7 +13,8 @@
     "lint": "tsc --noEmit && eslint .",
     "test:outreach": "node scripts/verify-whatsapp-contract.cjs",
     "test:page-activation": "python3 -m unittest scripts.tests.test_personal_page_batch -v",
-    "test:ixa": "npm run test:outreach && npm run test:page-activation",
+    "test:postal-activation": "python3 -m unittest scripts.tests.test_postal_activation -v",
+    "test:ixa": "npm run test:outreach && npm run test:page-activation && npm run test:postal-activation",
     "test:whatsapp": "node scripts/verify-whatsapp-contract.cjs",
     "format": "biome format --write ."
   },

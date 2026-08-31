@@ -6,20 +6,20 @@ import {
 } from "@/components/personal-check/PersonalCheckDecisionPreview";
 
 export const metadata: Metadata = {
-  title: "V2-Vorschau: Persönlicher IXA Anfrageweg-Check",
+  title: "V3-Vorschau: Persönlicher IXA Anfrageweg-Check",
   description:
-    "Interne V2-Vorschau mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
+    "Interne V3-Vorschau (Page-Version v3.0) mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
   openGraph: {
-    title: "V2-Vorschau: Persönlicher IXA Anfrageweg-Check",
+    title: "V3-Vorschau: Persönlicher IXA Anfrageweg-Check",
     description:
-      "Interne V2-Vorschau mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
+      "Interne V3-Vorschau (Page-Version v3.0) mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "V2-Vorschau: Persönlicher IXA Anfrageweg-Check",
+    title: "V3-Vorschau: Persönlicher IXA Anfrageweg-Check",
     description:
-      "Interne V2-Vorschau mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
+      "Interne V3-Vorschau (Page-Version v3.0) mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
   },
   robots: {
     index: false,
