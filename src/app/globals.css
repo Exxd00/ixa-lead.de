@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Personal Page V4 is deliberately a fixed light decision surface. */
+.dark .ixa-page-v4,
+.ixa-page-v4 { color-scheme: light; }
+.dark .ixa-page-v4 { background: #fff !important; color: #163230 !important; }
+.dark .ixa-page-v4 h1,
+.dark .ixa-page-v4 h2,
+.dark .ixa-page-v4 h3 { color: #163230 !important; }
+
 @layer base {
   :root {
     --background: 0 0% 100%;

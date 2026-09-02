@@ -86,6 +86,12 @@ Kontaktaktion und erzeugt kein Besuchsereignis.
 
 ## Persönliche IXA-Check-Seiten
 
+Die freigegebene Produktionsoberfläche ist **Page-Version v4.0**. Sie nutzt
+eine feste helle Weiß/Mint-Palette, führt den Leser in drei Schritten von den
+zwei Beobachtungen zum ersten Test und zeigt genau eine aktive Entscheidung:
+die Lösungsskizze über eine vom Empfänger selbst zu sendende WhatsApp-Nachricht
+anzufordern. Die Vorschau bleibt ohne Produktionslink und Besuchsereignis.
+
 Ein gültiger `Public_Token` aus `01 Prospects` öffnet die dynamische Route
 `/r/<Public_Token>`. Der Token wird nie an Apps Script gesendet: Der Server
 überträgt ausschließlich einen HMAC-Beweis über seinen SHA-256-Hash. Ungültige,
@@ -157,6 +163,11 @@ falscher Scope oder falsche Quittung ergeben dieselbe neutrale Sperre wie ein
 unbekannter Token. Es gibt absichtlich keinen öffentlichen Aktivierungs-Endpunkt.
 
 ## Signierte Druckfreigabe
+
+Das freigegebene Drucksystem ist **IXA-POSTAL-V5-L1-20260901** mit
+`IXA-DESIGN-V5-DUPLEX`, Renderer-Schema `ixa.postal.v5.duplex.1` und dem
+fest gebundenen Logo-Hash. Ein Entwurf enthält absichtlich keinen scannbaren
+QR-Code; ein echter QR-Code entsteht erst in einer signierten Print-Ready-Hülle.
 
 Eine exakte Musterfreigabe erlaubt weder Druck noch Posteinlieferung. Erst der
 anschließende Post-Lauf berechnet über alle materiellen Brief-, Empfänger-,

@@ -129,6 +129,7 @@ from reportlab.platypus import (
     BaseDocTemplate,
     Flowable,
     Frame,
+    Image,
     KeepTogether,
     PageBreak,
     PageTemplate,
@@ -143,7 +144,13 @@ from reportlab.platypus.doctemplate import LayoutError
 ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_OUTPUT_DIR = ROOT / "output" / "postal"
 EXPECTED_RECIPIENT_COUNT = 50
-GENERATOR_VERSION = "1.1.0"
+GENERATOR_VERSION = "2.0.0"
+LETTER_VERSION = "IXA-POSTAL-V5-L1-20260901"
+PAGE_VERSION = "v4.0"
+DESIGN_ID = "IXA-DESIGN-V5-DUPLEX"
+RENDERER_SCHEMA = "ixa.postal.v5.duplex.1"
+LOGO_PATH = ROOT / "public" / "brand" / "ixa-mark-new.png"
+LOGO_SHA256 = "68f706fd493a6835e68b3fe372677abdecf57fba67bee5101b7f3b1caee37bd7"
 
 PROVIDER_SERVICES = (
     "contact_register_apps_script",
@@ -438,6 +445,25 @@ class QRCodeFlowable(Flowable):
         )
         drawing.add(widget)
         drawing.drawOn(self.canv, 0, 0)
+
+
+class DraftQRPlaceholder(Flowable):
+    """Clearly non-scannable replacement used by preview artifacts."""
+
+    def __init__(self, size: float = 27 * mm) -> None:
+        super().__init__()
+        self.width = size
+        self.height = size
+
+    def draw(self) -> None:
+        self.canv.setFillColor(colors.HexColor("#F3F9F8"))
+        self.canv.setStrokeColor(colors.HexColor("#90C9B8"))
+        self.canv.rect(0, 0, self.width, self.height, fill=1, stroke=1)
+        self.canv.setFillColor(MUTED)
+        self.canv.setFont(FONT_BOLD, 6.5)
+        self.canv.drawCentredString(self.width / 2, self.height / 2 + 2, "QR NACH FREIGABE")
+        self.canv.setFont(FONT, 5.5)
+        self.canv.drawCentredString(self.width / 2, self.height / 2 - 7, "NICHT SCANNBAR")
 
 
 class Rule(Flowable):
@@ -1209,6 +1235,9 @@ def _canonical_json_bytes(value: Any) -> bytes:
 
 def _batch_digest_sha256(batch: Batch) -> str:
     material = {
+        "design_id": DESIGN_ID,
+        "renderer_schema": RENDERER_SCHEMA,
+        "logo_sha256": LOGO_SHA256,
         "batch_id": batch.batch_id,
         "content_version": batch.content_version,
         "letter_date": batch.letter_date.isoformat(),
@@ -1396,7 +1425,9 @@ def _observation_card(number: int, observation: Observation) -> Table:
     )
 
 
-def _first_page_story(batch: Batch, recipient: Recipient) -> list[Flowable]:
+def _first_page_story(
+    batch: Batch, recipient: Recipient, *, draft: bool
+) -> list[Flowable]:
     local_badge = Table(
         [[
             _rich_paragraph("PERSÖNLICH FÜR", "cta"),
@@ -1477,7 +1508,7 @@ def _first_page_story(batch: Batch, recipient: Recipient) -> list[Flowable]:
         ),
     ]
     cta = Table(
-        [[QRCodeFlowable(recipient.personal_page_url), cta_copy]],
+        [[DraftQRPlaceholder() if draft else QRCodeFlowable(recipient.personal_page_url), cta_copy]],
         colWidths=[35 * mm, 126 * mm],
         style=TableStyle(
             [
@@ -1866,19 +1897,10 @@ def _page_chrome(
             canvas.drawCentredString(0, 0, "NICHT VERSENDEN")
             canvas.restoreState()
 
-        canvas.setFillColor(NAVY)
-        canvas.roundRect(
-            17 * mm,
-            height - 18 * mm,
-            9 * mm,
-            9 * mm,
-            2.2 * mm,
-            fill=1,
-            stroke=0,
+        canvas.drawImage(
+            str(LOGO_PATH), 17 * mm, height - 18 * mm, 9 * mm, 9 * mm,
+            preserveAspectRatio=True, mask="auto"
         )
-        canvas.setFillColor(colors.white)
-        canvas.setFont(FONT_BOLD, 7.2)
-        canvas.drawCentredString(21.5 * mm, height - 14.6 * mm, "IXA")
         canvas.setFillColor(NAVY)
         canvas.setFont(FONT_BOLD, 9)
         canvas.drawString(29 * mm, height - 13.8 * mm, "IXA-Leads")
@@ -1952,7 +1974,7 @@ def _build_individual_pdf(
         ]
     )
     story = (
-        _first_page_story(batch, recipient)
+        _first_page_story(batch, recipient, draft=draft)
         + [PageBreak()]
         + _second_page_story(batch, recipient)
     )
@@ -2086,6 +2108,9 @@ def _write_manifest(
     fields = [
         "batch_id",
         "content_version",
+        "design_id",
+        "renderer_schema",
+        "logo_sha256",
         "mode",
         "order",
         "company_id",
@@ -2135,6 +2160,9 @@ def _write_manifest(
                 {
                     "batch_id": batch.batch_id,
                     "content_version": batch.content_version,
+                    "design_id": DESIGN_ID,
+                    "renderer_schema": RENDERER_SCHEMA,
+                    "logo_sha256": LOGO_SHA256,
                     "mode": mode,
                     "order": item.order,
                     "company_id": recipient.company_id,
@@ -2488,6 +2516,9 @@ def _write_qa(
     report = {
         "schema_version": 1,
         "generator_version": GENERATOR_VERSION,
+        "design_id": DESIGN_ID,
+        "renderer_schema": RENDERER_SCHEMA,
+        "logo_sha256": LOGO_SHA256,
         "generated_at_utc": datetime.now(timezone.utc).isoformat(),
         "batch_id": batch.batch_id,
         "content_version": batch.content_version,
@@ -2602,6 +2633,12 @@ def _validate_batch_for_build(batch: Batch, *, draft: bool) -> None:
         raise BatchValidationError(
             f"A build requires exactly {EXPECTED_RECIPIENT_COUNT} recipients"
         )
+    if batch.content_version != LETTER_VERSION:
+        raise BatchValidationError(
+            f"content_version must be the approved {LETTER_VERSION}"
+        )
+    if not LOGO_PATH.is_file() or hashlib.sha256(LOGO_PATH.read_bytes()).hexdigest() != LOGO_SHA256:
+        raise BatchValidationError("approved V5 logo is missing or has changed")
     if batch.letter_date > date.today() + timedelta(days=7):
         raise BatchValidationError("letter_date cannot be more than 7 days ahead")
     if not draft and batch.base_url != "https://ixa-leads.de":
@@ -2624,6 +2661,10 @@ def _validate_batch_for_build(batch: Batch, *, draft: bool) -> None:
 
     for index, recipient in enumerate(batch.recipients):
         prefix = f"recipients[{index}]"
+        if recipient.page_version != PAGE_VERSION:
+            raise BatchValidationError(
+                f"{prefix}.page_version must be the approved {PAGE_VERSION}"
+            )
         if recipient.suppression is not False:
             raise BatchValidationError(f"{prefix} is suppressed")
         if (

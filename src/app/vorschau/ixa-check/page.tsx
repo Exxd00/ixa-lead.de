@@ -6,20 +6,20 @@ import {
 } from "@/components/personal-check/PersonalCheckDecisionPreview";
 
 export const metadata: Metadata = {
-  title: "V3-Vorschau: Persönlicher IXA Anfrageweg-Check",
+  title: "V4-Vorschau: Persönlicher IXA Website-Check",
   description:
-    "Interne V3-Vorschau (Page-Version v3.0) mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
+    "Interne V4-Vorschau (Page-Version v4.0) mit synthetischen Beispieldaten und deaktivierter Kontaktaktion.",
   openGraph: {
-    title: "V3-Vorschau: Persönlicher IXA Anfrageweg-Check",
+    title: "V4-Vorschau: Persönlicher IXA Website-Check",
     description:
-      "Interne V3-Vorschau (Page-Version v3.0) mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
+      "Interne V4-Vorschau (Page-Version v4.0) mit synthetischen Beispieldaten und deaktivierter Kontaktaktion.",
     type: "website",
   },
   twitter: {
     card: "summary",
-    title: "V3-Vorschau: Persönlicher IXA Anfrageweg-Check",
+    title: "V4-Vorschau: Persönlicher IXA Website-Check",
     description:
-      "Interne V3-Vorschau (Page-Version v3.0) mit zwei synthetischen Beobachtungen und einer klaren nächsten Entscheidung.",
+      "Interne V4-Vorschau (Page-Version v4.0) mit synthetischen Beispieldaten und deaktivierter Kontaktaktion.",
   },
   robots: {
     index: false,
@@ -30,7 +30,7 @@ export const metadata: Metadata = {
 const company = "Musterbetrieb Hofmann";
 const reference = "IXAP-DEMO-001";
 const primaryRequestText =
-  "Hallo Emad, ich habe den persönlichen IXA Anfrageweg-Check zur Referenz IXAP-DEMO-001 gelesen. Bitte senden Sie mir den vertieften Check per WhatsApp.";
+  "Hallo Herr Alzaim, ich habe den Website-Check gesehen und möchte Ihre Lösungsskizze kurz besprechen.";
 const meetingRequestText =
   "Hallo Emad, ich möchte ein unverbindliches 15-Minuten-Gespräch zum IXA Anfrageweg-Check (Referenz IXAP-DEMO-001) anfragen.";
 const findings: readonly [

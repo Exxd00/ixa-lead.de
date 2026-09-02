@@ -244,15 +244,15 @@ export function personalWhatsAppRequest(
   choice: PersonalWhatsAppChoice,
 ): PersonalWhatsAppRequest {
   const pageUrl = personalPageUrl(token);
+  // Keep the legacy choice in the server contract so old activations remain
+  // readable. V4 intentionally exposes one decision and one message only.
+  void choice;
   const request =
-    choice === "meeting_15_min"
-      ? "Ich möchte ein unverbindliches 15-Minuten-Gespräch dazu anfragen."
-      : "Bitte senden Sie mir den vertieften Check per WhatsApp.";
+    "Hallo Herr Alzaim, ich habe den Website-Check gesehen und möchte Ihre Lösungsskizze kurz besprechen.";
   const message = [
-    "Hallo Emad, ich habe meinen persönlichen IXA Anfrageweg-Check geöffnet:",
-    pageUrl,
-    "",
     request,
+    "",
+    pageUrl,
   ].join("\n");
   const configuredNumber =
     process.env.OUTREACH_WHATSAPP_NUMBER?.replace(/\D/g, "") ||

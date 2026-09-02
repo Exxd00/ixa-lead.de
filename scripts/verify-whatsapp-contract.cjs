@@ -1725,7 +1725,7 @@ async function verifyPersonalPageContract() {
     );
     assert.ok(
       decodeURIComponent(whatsappHref).includes(
-        "Bitte senden Sie mir den vertieften Check per WhatsApp.",
+        "Hallo Herr Alzaim, ich habe den Website-Check gesehen und möchte Ihre Lösungsskizze kurz besprechen.",
       ),
       "the primary CTA must contain an explicit recipient request",
     );
@@ -1737,11 +1737,7 @@ async function verifyPersonalPageContract() {
       meetingRequest.href,
       /^https:\/\/wa\.me\/491629155408\?text=/,
     );
-    assert.match(
-      meetingRequest.message,
-      /Ich möchte ein unverbindliches 15-Minuten-Gespräch dazu anfragen\./,
-    );
-    assert.notEqual(meetingRequest.href, whatsappHref);
+    assert.equal(meetingRequest.href, whatsappHref);
 
     const privacy = loadTypeScriptModule("src/lib/privacy-routes.ts");
     assert.equal(privacy.isNoTrackPath(`/r/${pageToken}`), true);
@@ -1773,17 +1769,17 @@ async function verifyPersonalPageContract() {
     );
 
     const personalCheckView = fs.readFileSync(
-      "src/components/personal-check/PersonalCheckView.tsx",
+      "src/components/personal-check/PersonalCheckExperience.tsx",
       "utf8",
     );
     assert.match(
       personalCheckView,
-      /border-border bg-background\/95 text-foreground/,
-      "the personal page header must use readable theme-aware colors",
+      /ixa-page-v4 min-h-screen bg-white text-\[#163230\]/,
+      "the personal page must use the approved fixed light palette",
     );
     assert.match(
       personalCheckView,
-      /bg-primary[^\"]*text-primary-foreground/,
+      /bg-\[#61d8cc\][^\"]*text-\[#102f2c\]/,
       "the personal page CTA must keep a high-contrast color pair",
     );
     assert.doesNotMatch(
@@ -1813,20 +1809,16 @@ async function verifyPersonalPageContract() {
     );
     assert.match(
       personalCheckView,
-      /Vertieften Check per WhatsApp anfordern/,
-      "the live page must expose the deeper-check decision",
+      /Lösungsskizze per WhatsApp anfordern/,
+      "the live page must expose the one approved decision",
     );
-    assert.match(
-      personalCheckView,
-      /15-Minuten-Gespräch per WhatsApp anfragen/,
-      "the live page must expose the meeting decision",
-    );
+    assert.doesNotMatch(personalCheckView, /15-Minuten-Gespräch/);
     const liveDecisionLinks =
       personalCheckView.match(/<a[\s\S]*?<\/a>/g) || [];
     assert.equal(
       liveDecisionLinks.length,
-      2,
-      "the live page must expose exactly two direct WhatsApp decisions",
+      1,
+      "the live page must expose exactly one direct WhatsApp decision",
     );
     assert.equal(
       liveDecisionLinks.every(
@@ -1836,7 +1828,7 @@ async function verifyPersonalPageContract() {
           /referrerPolicy="no-referrer"/.test(link),
       ),
       true,
-      "both live decisions must use privacy-safe outbound links",
+      "the live decision must use a privacy-safe outbound link",
     );
     const livePersonalPage = fs.readFileSync(
       "src/app/r/[token]/page.tsx",
@@ -1852,7 +1844,7 @@ async function verifyPersonalPageContract() {
       "utf8",
     );
     const decisionPreviewView = fs.readFileSync(
-      "src/components/personal-check/PersonalCheckDecisionPreview.tsx",
+      "src/components/personal-check/PersonalCheckExperience.tsx",
       "utf8",
     );
     const privacyPage = fs.readFileSync(
@@ -1862,17 +1854,17 @@ async function verifyPersonalPageContract() {
     assert.match(
       decisionPreviewPage,
       /PersonalCheckDecisionPreview/,
-      "the synthetic route must render the V3 decision preview",
+      "the synthetic route must render the V4 decision preview",
     );
     assert.match(
       decisionPreviewPage,
-      /V3-Vorschau:[\s\S]*Page-Version v3\.0/,
-      "the synthetic route metadata must identify V3 and Page-Version v3.0",
+      /V4-Vorschau:[\s\S]*Page-Version v4\.0/,
+      "the synthetic route metadata must identify V4 and Page-Version v4.0",
     );
     assert.match(
       decisionPreviewView,
-      /Interne V3-Vorschau · Page-Version v3\.0/,
-      "the visible preview notice must identify V3 and Page-Version v3.0",
+      /Interne V4-Vorschau/,
+      "the visible preview notice must identify V4",
     );
     assert.match(
       decisionPreviewPage,
@@ -1891,65 +1883,40 @@ async function verifyPersonalPageContract() {
     );
     assert.match(
       decisionPreviewView,
-      /findings: readonly \[/,
-      "the V3 preview must require exactly two findings at the type boundary",
+      /findings: readonly \[PersonalPageFinding, PersonalPageFinding\]/,
+      "the V4 preview must require exactly two findings at the type boundary",
     );
     assert.match(
       decisionPreviewView,
-      /Vertieften Check per WhatsApp anfordern/,
-      "the deeper check must be the primary V3 decision",
-    );
-    assert.match(
-      decisionPreviewView,
-      /15-Minuten-Gespräch per WhatsApp anfragen/,
-      "the meeting request must remain a secondary V3 decision",
+      /Lösungsskizze per WhatsApp anfordern/,
+      "the solution sketch must be the single V4 decision",
     );
     assert.match(
       decisionPreviewPage,
-      /Bitte senden Sie mir den vertieften Check per WhatsApp/,
+      /Hallo Herr Alzaim, ich habe den Website-Check gesehen und möchte Ihre Lösungsskizze kurz besprechen/,
       "the primary action must show an explicit client-initiated request",
     );
     assert.match(
-      decisionPreviewPage,
-      /ich möchte ein unverbindliches 15-Minuten-Gespräch/,
-      "the secondary action must show its own explicit request",
-    );
-    assert.match(
       decisionPreviewView,
-      /Persönlicher Brief[\s\S]*QR-Seite[\s\S]*Sie starten WhatsApp/,
-      "the preview must explain the postal-to-inbound response path",
-    );
-    assert.match(
-      decisionPreviewView,
-      /Google-Suche → passende Seite → Kontakt → qualifizierte[\s\S]*Anfrage → Angebot\/Auftrag → messbares Ergebnis/,
-      "the preview must preserve the full IXA value chain",
-    );
-    assert.match(
-      decisionPreviewView,
-      /Eine kurze Nachricht „Nein“ genügt/,
-      "the preview must state the simple objection path",
-    );
-    assert.match(
-      decisionPreviewView,
-      /Diese Vorschau erfasst weder einen Seitenbesuch noch eine[\s\S]*Google Analytics, Google Ads und Vercel Analytics deaktiviert/,
+      /keine Aktion und kein Tracking/,
       "the preview must explain that it does not contaminate measurement",
     );
     const decisionPreviewButtons =
       decisionPreviewView.match(/<button[\s\S]*?<\/button>/g) || [];
     assert.equal(
       decisionPreviewButtons.length,
-      2,
-      "the V3 preview must expose exactly two decision actions",
+      1,
+      "the V4 preview must expose exactly one decision action",
     );
     assert.equal(
       decisionPreviewButtons.every((button) => /\sdisabled\s/.test(button)),
       true,
-      "every V3 preview action must remain disabled",
+      "the V4 preview action must remain disabled",
     );
     assert.doesNotMatch(
       `${decisionPreviewPage}\n${decisionPreviewView}`,
-      /<a\b|<Link\b|\bhref=|\bonClick=|wa\.me|whatsappHref|meetingHref|PersonalPageVisitBeacon|recordMainConversion/,
-      "the synthetic V3 preview must not contain links, click handlers, beacons, or conversion calls",
+      /wa\.me|whatsappHref|meetingHref|PersonalPageVisitBeacon|recordMainConversion/,
+      "the synthetic V4 preview must not contain production URLs, beacons, or conversion calls",
     );
     assert.match(
       privacyPage,
