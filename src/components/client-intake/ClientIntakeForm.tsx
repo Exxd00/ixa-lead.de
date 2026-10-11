@@ -565,11 +565,17 @@ export function ClientIntakeForm() {
             </button>
           )}
           {step < 2 ? (
-            <button type="button" className={styles.submit} onClick={nextStep}>
+            <button
+              key="next-step"
+              type="button"
+              className={styles.submit}
+              onClick={nextStep}
+            >
               Weiter <ArrowRight size={19} aria-hidden="true" />
             </button>
           ) : (
             <button
+              key="send-intake"
               type="submit"
               className={styles.submit}
               disabled={status === "sending"}
