@@ -231,7 +231,21 @@ export default function DatenschutzPage() {
       </section>
 
       <section>
-        <h2>8. Anfragen und Rückrufwünsche</h2>
+        <h2 id="kundenfragebogen">8. Anfragen, Website-Fragebogen und Rückrufwünsche</h2>
+        <p className="mt-3">
+          Über den Website-Fragebogen unter <code>/kundenfragebogen</code>
+          können Sie uns Unternehmens- und Kontaktdaten sowie Angaben zu Ihren
+          Leistungen, Einsatzorten, Erreichbarkeitszeiten, vorhandenen digitalen
+          Angeboten und Gestaltungswünschen übermitteln. Wir verwenden diese
+          Angaben zur Vorbereitung und Bearbeitung Ihres Website-Projekts.
+          Die Übermittlung erfolgt als interne E-Mail über Resend an unser
+          geschäftliches Postfach. Eine technische Vorgangsnummer hilft,
+          wiederholte Übertragungen zu erkennen. Auf dieser Seite laden wir
+          keine optionalen Analysedienste und veröffentlichen keine Antworten.
+          Für die begrenzte Abwehr wiederholter automatisierter Übertragungen
+          kann ein aus der IP-Adresse abgeleiteter Wert kurzzeitig im
+          Arbeitsspeicher verarbeitet werden.
+        </p>
         <p className="mt-3">
           Wenn Sie ein Anfrage- oder Rückrufformular verwenden, verarbeiten wir
           die von Ihnen eingetragenen Angaben. Dazu können Name, Telefon oder

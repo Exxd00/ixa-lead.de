@@ -17,6 +17,7 @@
     "test:postal-v5": "python3 -m unittest scripts.tests.test_create_postal_batch -v",
     "test:ixa": "npm run test:outreach && npm run test:page-activation && npm run test:postal-activation && npm run test:postal-v5",
     "test:whatsapp": "node scripts/verify-whatsapp-contract.cjs",
+    "test:client-intake": "node scripts/verify-client-intake.cjs",
     "format": "biome format --write ."
   },
   "dependencies": {
