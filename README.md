@@ -4,7 +4,7 @@ Lead-Generation-Website für lokale Dienstleister in Nürnberg und Franken. Die 
 
 ## Lokal starten
 
-Voraussetzung: Node.js 20 (siehe `.nvmrc`).
+Voraussetzung: Node.js 24 (siehe `.nvmrc`).
 
 ```bash
 npm install
