@@ -29,9 +29,19 @@ function load(file) {
   })(localRequire, mod, mod.exports);
   return mod.exports;
 }
-const { emptyIntake } = load("src/lib/client-intake.ts");
+const { emptyIntake, parseIntake, INTAKE_EVENT } = load(
+  "src/lib/client-intake.ts",
+);
 const { intakeEmail } = load("src/lib/client-intake-email.ts");
 const { POST } = load("src/app/api/client-intake/route.ts");
+const { intakeSheetHeaders, intakeSheetValues } = load(
+  "src/lib/client-intake-sheet.ts",
+);
+const { createIntakeReceipt, verifyIntakeReceipt } = load(
+  "src/lib/client-intake-receipt.ts",
+);
+const { POST: complete } = load("src/app/api/client-intake/complete/route.ts");
+const { NextRequest } = require("next/server");
 const { isNoTrackPath } = load("src/lib/privacy-routes.ts");
 const valid = {
   ...emptyIntake(),
@@ -68,13 +78,32 @@ const originalFetch = global.fetch;
 process.env.RESEND_API_KEY = "test-key-not-real";
 process.env.RESEND_FROM_EMAIL = "IXA <test@example.invalid>";
 delete process.env.CLIENT_INTAKE_NOTIFICATION_EMAIL;
+process.env.OUTREACH_SHEET_WEBHOOK_URL =
+  "https://script.google.com/macros/s/TEST_NOT_REAL/exec";
+process.env.OUTREACH_SHEET_WEBHOOK_SECRET = "test-secret-only-".repeat(4);
 
 test("client questionnaire delivery contract", async (t) => {
   let calls = [];
+  let sheetCalls = [];
   function capture(status = 200, result = { id: "email-test-id" }) {
     calls = [];
+    sheetCalls = [];
     global.fetch = async (url, options) => {
-      calls.push({ url, ...options, json: JSON.parse(options.body) });
+      const body = JSON.parse(options.body);
+      if (url.includes("script.google.com")) {
+        sheetCalls.push(body);
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            submissionId: body.submissionId,
+            sheetId: 151026001,
+            rowNumber: 2,
+            emailAccepted: false,
+            sendEvent: true,
+          }),
+        );
+      }
+      calls.push({ url, ...options, json: body });
       return new Response(JSON.stringify(result), { status });
     };
   }
@@ -95,8 +124,21 @@ test("client questionnaire delivery contract", async (t) => {
         assert.equal(calls.length, 1);
         assert.deepEqual(calls[0].json.to, ["info@ixa-leads.de"]);
         assert.equal(calls[0].json.reply_to, valid.email);
-        for (const n of ["01", "02", "03", "04", "05", "06", "07", "08", "09"])
-          assert.ok(calls[0].json.text.includes(n + " ·"));
+        for (const heading of [
+          "Kontakt",
+          "Unternehmen & Impressum",
+          "Website & Erreichbarkeit",
+          "Bereits vorhanden",
+          "Wünsche & Termin",
+        ])
+          assert.ok(calls[0].json.text.includes(heading));
+        assert.deepEqual(
+          sheetCalls.map((x) => x.operation),
+          ["save", "email_accepted"],
+        );
+        assert.match(response.headers.get("set-cookie"), /HttpOnly/i);
+        assert.match(response.headers.get("set-cookie"), /Max-Age=1800/i);
+        assert.equal(sheetCalls[0].headers.length, 43);
         assert.ok(calls[0].json.html.includes("&lt;img"));
         assert.ok(!calls[0].json.html.includes("<img src=x"));
         assert.ok(calls[0].json.text.includes("Reinigung\nBüropflege"));
@@ -198,7 +240,110 @@ test("client questionnaire delivery contract", async (t) => {
         assert.equal(calls.length, 10);
         assert.ok(isNoTrackPath("/kundenfragebogen"));
         assert.ok(isNoTrackPath("/kundenfragebogen/"));
+        assert.ok(isNoTrackPath("/info"));
+        assert.ok(!isNoTrackPath("/info/danke"));
         assert.ok(!isNoTrackPath("/"));
+      },
+    );
+    await t.test(
+      "storage failure never sends mail or creates a success receipt",
+      async () => {
+        capture();
+        global.fetch = async () => new Response(JSON.stringify({ ok: false }));
+        const response = await POST(request());
+        assert.equal(response.status, 502);
+        assert.equal(response.headers.get("set-cookie"), null);
+        assert.equal(calls.length, 0);
+      },
+    );
+    await t.test("a previously accepted email is not sent twice", async () => {
+      capture();
+      global.fetch = async (url, options) => {
+        assert.ok(url.includes("script.google.com"));
+        const body = JSON.parse(options.body);
+        return new Response(
+          JSON.stringify({
+            ok: true,
+            submissionId: body.submissionId,
+            sheetId: 151026001,
+            rowNumber: 2,
+            emailAccepted: true,
+          }),
+        );
+      };
+      assert.equal((await POST(request())).status, 200);
+    });
+    await t.test(
+      "signed receipts reject tampering and expire; statistics require receipt and consent",
+      async () => {
+        const token = createIntakeReceipt(valid.submissionId, 10000);
+        assert.equal(verifyIntakeReceipt(token, 10001).id, valid.submissionId);
+        assert.equal(verifyIntakeReceipt(token + "x", 10001), null);
+        assert.equal(verifyIntakeReceipt(token, 1810001), null);
+        assert.equal(verifyIntakeReceipt(undefined), null);
+        const base = { origin: "https://ixa-leads.de" };
+        const req = (headers) =>
+          new NextRequest("https://ixa-leads.de/api/client-intake/complete", {
+            method: "POST",
+            headers,
+          });
+        capture();
+        assert.equal((await complete(req(base))).status, 403);
+        assert.equal(
+          (await complete(req({ ...base, "x-ixa-statistics": "granted" })))
+            .status,
+          403,
+        );
+        const cookie =
+          "ixa_client_intake_receipt=" +
+          createIntakeReceipt(valid.submissionId);
+        assert.equal((await complete(req({ ...base, cookie }))).status, 403);
+        assert.equal(sheetCalls.length, 0);
+        const response = await complete(
+          req({ ...base, cookie, "x-ixa-statistics": "granted" }),
+        );
+        assert.equal(response.status, 200);
+        assert.deepEqual(
+          Object.keys(sheetCalls[0]).sort(),
+          [
+            "_secret",
+            "operation",
+            "recordType",
+            "schemaVersion",
+            "submissionId",
+          ].sort(),
+        );
+        assert.equal(INTAKE_EVENT, "info_danke");
+      },
+    );
+    await t.test(
+      "conditional legal fields and Ads metadata retain truthful defaults",
+      () => {
+        const parsed = parseIntake({
+          ...valid,
+          taxStatus: "no",
+          vatId: "DE123456789",
+          registerStatus: "no",
+          register: "old",
+          existingStatus: "no",
+          existing: "old",
+        });
+        assert.equal(parsed.ok, true);
+        assert.equal(parsed.answers.vatId, "");
+        assert.equal(parsed.answers.register, "");
+        assert.equal(parsed.answers.existing, "");
+        assert.equal(
+          parseIntake({ ...valid, taxStatus: "yes", vatId: "123/456/789" }).ok,
+          false,
+        );
+        const values = intakeSheetValues(
+          parsed.answers,
+          valid.submissionId,
+          "a".repeat(32),
+        );
+        assert.equal(values.length, intakeSheetHeaders.length);
+        assert.equal(values[36], "UNKNOWN");
+        assert.equal(values[37], "Nicht freigegeben");
       },
     );
     const preview = process.env.INTAKE_EMAIL_PREVIEW_PATH;
@@ -207,4 +352,126 @@ test("client questionnaire delivery contract", async (t) => {
   } finally {
     global.fetch = originalFetch;
   }
+});
+
+test("Apps Script saves only to the intended tab and deduplicates records and tracking", () => {
+  const rows = [intakeSheetHeaders.slice()];
+  let released = 0;
+  const get = (r, c) => String(rows[r - 1]?.[c - 1] ?? "");
+  const range = (r, c, h = 1, w = 1) => ({
+    getDisplayValues: () =>
+      Array.from({ length: h }, (_, i) =>
+        Array.from({ length: w }, (_, j) => get(r + i, c + j)),
+      ),
+    getDisplayValue: () => get(r, c),
+    setNumberFormat() {
+      return this;
+    },
+    setWrap() {
+      return this;
+    },
+    setVerticalAlignment() {
+      return this;
+    },
+    setValues(values) {
+      for (let i = 0; i < values.length; i++) {
+        rows[r + i - 1] ??= [];
+        for (let j = 0; j < values[i].length; j++)
+          rows[r + i - 1][c + j - 1] = values[i][j];
+      }
+      return this;
+    },
+    setValue(value) {
+      return this.setValues([[value]]);
+    },
+    createTextFinder(id) {
+      return {
+        matchEntireCell() {
+          return this;
+        },
+        useRegularExpression() {
+          return this;
+        },
+        findNext() {
+          const index = rows.findIndex(
+            (row, i) => i >= r - 1 && i < r - 1 + h && row[c - 1] === id,
+          );
+          return index < 0 ? null : { getRow: () => index + 1 };
+        },
+      };
+    },
+  });
+  const sheet = {
+    getSheetId: () => 151026001,
+    getRange: range,
+    getLastColumn: () => 43,
+    getLastRow: () => rows.length,
+    getMaxRows: () => 500,
+    setRowHeight() {},
+  };
+  const book = {
+    getId: () => "1YFYLQPMSdCzq6ArY0szD93qnfBHIub7yy-WnKDfGhoY",
+    getSheetByName(name) {
+      assert.equal(name, "15 Kunden-Websites");
+      return sheet;
+    },
+  };
+  const context = vm.createContext({
+    json_: (x) => x,
+    LockService: {
+      getScriptLock: () => ({
+        tryLock: () => true,
+        releaseLock: () => released++,
+      }),
+    },
+    SpreadsheetApp: { flush() {} },
+    Date,
+  });
+  vm.runInContext(
+    fs.readFileSync(
+      path.join(root, "integrations/ixa-outreach-webhook/ClientIntake.gs"),
+      "utf8",
+    ),
+    context,
+  );
+  const digest = "a".repeat(32);
+  const body = {
+    operation: "save",
+    submissionId: valid.submissionId,
+    digest,
+    headers: intakeSheetHeaders,
+    values: intakeSheetValues(
+      { ...valid, company: '=HYPERLINK("https://example.invalid")' },
+      valid.submissionId,
+      digest,
+    ),
+  };
+  const save = (patch = {}) =>
+    context.saveClientIntake_(book, { ...body, ...patch });
+  assert.equal(save().ok, true);
+  assert.equal(rows.length, 2);
+  assert.ok(rows[1][1].startsWith("'="));
+  assert.equal(save().duplicate, true);
+  assert.equal(rows.length, 2);
+  assert.equal(
+    save({
+      digest: "b".repeat(32),
+      values: body.values.map((x, i) => (i === 39 ? "b".repeat(32) : x)),
+    }).error,
+    "intake_id_conflict",
+  );
+  assert.equal(save({ headers: ["wrong"] }).ok, false);
+  assert.equal(
+    save({ operation: "email_accepted", emailId: "TEST-email-id" })
+      .emailAccepted,
+    true,
+  );
+  assert.equal(save({ operation: "claim_tracking" }).sendEvent, true);
+  assert.equal(save({ operation: "claim_tracking" }).sendEvent, false);
+  assert.equal(
+    context.saveClientIntake_({ getId: () => "wrong" }, body).ok,
+    false,
+  );
+  assert.equal(rows.length, 2);
+  assert.equal(released, 7);
 });

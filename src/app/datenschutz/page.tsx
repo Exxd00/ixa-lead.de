@@ -231,20 +231,33 @@ export default function DatenschutzPage() {
       </section>
 
       <section>
-        <h2 id="kundenfragebogen">8. Anfragen, Website-Fragebogen und Rückrufwünsche</h2>
+        <h2 id="kundenfragebogen">
+          8. Anfragen, Website-Fragebogen und Rückrufwünsche
+        </h2>
         <p className="mt-3">
-          Über den Website-Fragebogen unter <code>/kundenfragebogen</code>
+          Über den Website-Fragebogen unter <code>/info</code>
           können Sie uns Unternehmens- und Kontaktdaten sowie Angaben zu Ihren
           Leistungen, Einsatzorten, Erreichbarkeitszeiten, vorhandenen digitalen
           Angeboten und Gestaltungswünschen übermitteln. Wir verwenden diese
-          Angaben zur Vorbereitung und Bearbeitung Ihres Website-Projekts.
-          Die Übermittlung erfolgt als interne E-Mail über Resend an unser
-          geschäftliches Postfach. Eine technische Vorgangsnummer hilft,
-          wiederholte Übertragungen zu erkennen. Auf dieser Seite laden wir
-          keine optionalen Analysedienste und veröffentlichen keine Antworten.
-          Für die begrenzte Abwehr wiederholter automatisierter Übertragungen
-          kann ein aus der IP-Adresse abgeleiteter Wert kurzzeitig im
-          Arbeitsspeicher verarbeitet werden.
+          Angaben zur Vorbereitung und Bearbeitung Ihres vereinbarten
+          Website-Projekts, einschließlich vorhandener Unternehmens-, Register-
+          und Steuerkennungen für den Impressumsentwurf. Die Antworten werden in
+          unserer geschützten Google-Tabelle im Tabellenblatt „15
+          Kunden-Websites“ gespeichert und als interne E-Mail über Resend an
+          unser geschäftliches Postfach gesendet. Eine technische Vorgangsnummer
+          und eine Prüfsumme verhindern doppelte Einträge. Ein notwendiges,
+          signiertes Bestätigungs-Cookie ermöglicht nach erfolgreicher
+          Übermittlung für 30 Minuten den Zugang zur Bestätigungsseite. Auf der
+          Formularseite laden wir keine optionalen Analysedienste und
+          veröffentlichen keine Antworten. Nur auf der Bestätigungsseite kann
+          nach Ihrer Statistik-Einwilligung das GA4-Ereignis „info_danke“ einmal
+          je Vorgang gesendet werden. Antworten, Kontaktdaten und
+          Steuerkennungen werden dabei nicht an GA4 übermittelt. Der Zeitpunkt
+          dieses Sendeversuchs wird zur Vermeidung doppelter Ereignisse in der
+          Tabelle gespeichert. Eine automatische Übermittlung dieser Antworten
+          an Google Ads findet nicht statt. Für die begrenzte Abwehr
+          wiederholter automatisierter Übertragungen kann ein aus der IP-Adresse
+          abgeleiteter Wert kurzzeitig im Arbeitsspeicher verarbeitet werden.
         </p>
         <p className="mt-3">
           Wenn Sie ein Anfrage- oder Rückrufformular verwenden, verarbeiten wir
@@ -254,8 +267,9 @@ export default function DatenschutzPage() {
           einen gewünschten Termin oder Rückruf vorzubereiten.
         </p>
         <p className="mt-3">
-          Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die Verarbeitung
-          zur Durchführung vorvertraglicher Maßnahmen auf Ihre Anfrage hin
+          Rechtsgrundlage ist Art. 6 Abs. 1 lit. b DSGVO, soweit die
+          Verarbeitung zur Erfüllung des vereinbarten Auftrags oder zur
+          Durchführung vorvertraglicher Maßnahmen auf Ihre Anfrage hin
           erforderlich ist. Im Übrigen erfolgt die Verarbeitung auf Grundlage
           unseres berechtigten Interesses an einer verlässlichen Bearbeitung von
           Geschäftsanfragen gemäß Art. 6 Abs. 1 lit. f DSGVO.
@@ -313,7 +327,7 @@ export default function DatenschutzPage() {
       </section>
 
       <p className="border-t border-stone-200 pt-6 text-sm text-stone-500">
-        Stand: 31. August 2026
+        Stand: 12. Oktober 2026
       </p>
     </LegalPageShell>
   );

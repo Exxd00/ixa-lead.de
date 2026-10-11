@@ -1,9 +1,9 @@
 import {
+  intakeChoices,
   contactOptions,
-  intakeFields,
   type IntakeAnswers,
-  type IntakeField,
 } from "./client-intake";
+import { missingIntakeDetails } from "./client-intake-sheet";
 
 export function escapeIntakeHtml(value: string): string {
   return value
@@ -14,51 +14,103 @@ export function escapeIntakeHtml(value: string): string {
     .replaceAll("'", "&#039;");
 }
 
-export function intakeEmail(data: IntakeAnswers, submissionId: string) {
-  const groups: Array<{ title: string; keys: IntakeField[] }> = [
-    { title: "01 · Unternehmen", keys: ["company", "owner", "address"] },
+export function intakeEmail(
+  data: IntakeAnswers,
+  submissionId: string,
+  recordUrl = "https://ixa-leads.de/info",
+) {
+  const yesNo = (key: keyof typeof intakeChoices) =>
+    intakeChoices[key].options[data[key]];
+  const groups = [
     {
-      title: "02 · Dienstleistungen & Einsatzgebiet",
-      keys: ["services", "regions"],
+      title: "Kontakt",
+      rows: [
+        ["Ansprechpartner", data.owner],
+        ["Telefon", data.phone],
+        ["WhatsApp", data.whatsapp],
+        ["E-Mail", data.email],
+        ...(data.recipientEmail && data.recipientEmail !== data.email
+          ? [["Neue Website-Anfragen an", data.recipientEmail]]
+          : []),
+      ],
     },
-    { title: "03 · Kontaktdaten", keys: ["phone", "whatsapp", "email"] },
-    { title: "04 · Erreichbarkeit", keys: ["hours"] },
-    { title: "05 · Vorhandene Technik", keys: ["existing"] },
-    { title: "06 · Logo, Farben & Fotos", keys: ["branding"] },
-    { title: "07 · Google", keys: ["google"] },
-    { title: "08 · Bevorzugte Kontaktwege", keys: [] },
-    { title: "09 · Beispiele & Starttermin", keys: ["examples", "launch"] },
-  ];
-  const sections = groups.map((group) => {
-    const rows = group.keys.length
-      ? group.keys.map((key) => ({
-          label: intakeFields[key].label,
-          value: data[key] || "Nicht angegeben",
-        }))
-      : [
-          {
-            label: "Kontaktwege",
-            value:
-              data.contactMethods
-                .map((method) => contactOptions[method])
-                .join(", ") || "Nicht angegeben",
-          },
-        ];
-    return { ...group, rows };
-  });
-  return {
-    subject: `Website-Fragebogen · ${data.company.replace(/[\r\n]/g, " ")}`,
-    text: [
-      "IXA Leads | Neuer Website-Fragebogen",
+    {
+      title: "Unternehmen & Impressum",
+      rows: [
+        ["Rechtsform", data.legalForm],
+        ["Adresse", data.address],
+        [
+          "USt-IdNr. / W-IdNr.",
+          [data.vatId, data.businessId].filter(Boolean).join(" · ") ||
+            yesNo("taxStatus"),
+        ],
+        ["Register", data.register || yesNo("registerStatus")],
+        [
+          "Berufliche Zulassung",
+          data.regulatedDetails || yesNo("regulatedStatus"),
+        ],
+      ],
+    },
+    {
+      title: "Website & Erreichbarkeit",
+      rows: [
+        ["Wichtigste Leistungen", data.services],
+        ["Orte / Regionen", data.regions],
+        ["Zeiten", data.hours],
+        [
+          "Kontaktwege",
+          data.contactMethods.map((key) => contactOptions[key]).join(", "),
+        ],
+      ],
+    },
+    {
+      title: "Bereits vorhanden",
+      rows: [
+        [
+          "Domain / Website / Postfach",
+          [yesNo("existingStatus"), data.existing].filter(Boolean).join("\n"),
+        ],
+        [
+          "Logo / Farben / Bilder",
+          [yesNo("brandingStatus"), data.branding].filter(Boolean).join("\n"),
+        ],
+        [
+          "Google",
+          [yesNo("googleStatus"), data.google].filter(Boolean).join("\n"),
+        ],
+      ],
+    },
+    {
+      title: "Wünsche & Termin",
+      rows: [
+        ["Beispiele", data.examples],
+        ["Wunschtermin", data.launch],
+      ],
+    },
+  ]
+    .map((group) => ({
+      ...group,
+      rows: group.rows.filter(([, value]) => Boolean(value)),
+    }))
+    .filter((group) => group.rows.length);
+  const missing = missingIntakeDetails(data);
+  const text = [
+    `IXA | Website-Daten: ${data.company}`,
+    `Kundendaten nach Projektvereinbarung · Referenz ${submissionId.slice(0, 8).toUpperCase()}`,
+    "",
+    ...groups.flatMap((group) => [
+      group.title,
+      ...group.rows.map(([label, value]) => `${label}: ${value}`),
       "",
-      ...sections.flatMap((group) => [
-        group.title,
-        ...group.rows.map((row) => `${row.label}: ${row.value}`),
-        "",
-      ]),
-      "Datenschutzhinweise bestätigt: Ja",
-      `Vorgang: ${submissionId}`,
-    ].join("\n"),
-    html: `<!doctype html><html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0;background:#edf6f4;font-family:Arial,Helvetica,sans-serif;color:#163230"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td align="center" style="padding:20px 10px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:640px;background:#fff;border:1px solid #d5e7e2;border-radius:18px;overflow:hidden"><tr><td style="padding:28px 24px;background:#050606"><div style="color:#64e0d5;font-size:12px;font-weight:700;letter-spacing:.1em">IXA LEADS · WEBSITE-FRAGEBOGEN</div><h1 style="color:#fff;font-size:26px;line-height:1.3;overflow-wrap:anywhere;margin:12px 0">${escapeIntakeHtml(data.company)}</h1><p style="margin:0;color:#cfebe5;font-size:15px">Alle Angaben für die Vorbereitung der Website.</p></td></tr><tr><td style="padding:8px 24px 24px">${sections.map((group) => `<h2 style="margin:24px 0 12px;padding-bottom:9px;border-bottom:2px solid #b9f4ee;font-size:16px;color:#163230">${group.title}</h2>${group.rows.map((row) => `<div style="margin:0 0 16px"><div style="font-size:12px;font-weight:700;color:#57746c;margin-bottom:5px">${row.label}</div><div style="font-size:16px;line-height:1.6;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word">${escapeIntakeHtml(row.value)}</div></div>`).join("")}`).join("")}<p style="font-size:12px;color:#57746c;margin:24px 0 0">Datenschutzhinweise bestätigt. Vorgang: ${submissionId}</p></td></tr><tr><td style="padding:18px 24px;background:#e9f8f5;font-size:12px;color:#526966">IXA Leads · ixa-leads.de/kundenfragebogen</td></tr></table></td></tr></table></body></html>`,
+    ]),
+    ...(missing.length ? [`Noch zu ergänzen: ${missing.join("; ")}`, ""] : []),
+    `Vollständiger Datensatz: ${recordUrl}`,
+    "Datenschutzhinweise bestätigt.",
+  ].join("\n");
+  const html = `<!doctype html><html lang="de"><head><meta name="viewport" content="width=device-width, initial-scale=1"></head><body style="margin:0;background:#f5f7f6;color:#182b26;font-family:Arial,Helvetica,sans-serif"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:18px 12px" align="center"><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:600px;background:#fff;border:1px solid #dce6e0;border-radius:12px"><tr><td style="padding:22px 20px"><p style="font-size:12px;color:#466259;margin:0 0 8px">IXA · WEBSITE-DATEN</p><h1 style="margin:0 0 8px;font-size:23px;line-height:1.3;overflow-wrap:anywhere">${escapeIntakeHtml(data.company)}</h1><p style="margin:0 0 20px;font-size:13px;color:#52675f">Projektvorbereitung · ${submissionId.slice(0, 8).toUpperCase()}</p><a href="${escapeIntakeHtml(recordUrl)}" style="display:inline-block;padding:12px 16px;background:#b9f3df;color:#16372c;border-radius:7px;font-size:14px;font-weight:bold;text-decoration:none">Datensatz im Sheet öffnen</a>${missing.length ? `<p style="padding:12px;background:#fff5dc;font-size:14px;line-height:1.5;border-radius:7px"><strong>Noch zu ergänzen:</strong><br>${escapeIntakeHtml(missing.join(" · "))}</p>` : ""}${groups.map((group) => `<h2 style="margin:22px 0 10px;padding-bottom:7px;border-bottom:1px solid #dce6e0;font-size:15px">${group.title}</h2>${group.rows.map(([label, value]) => `<p style="margin:0 0 11px;font-size:14px;line-height:1.55;overflow-wrap:anywhere;word-break:break-word"><strong style="color:#476157">${label}:</strong><br>${escapeIntakeHtml(value).replaceAll("\n", "<br>")}</p>`).join("")}`).join("")}<p style="margin:22px 0 0;font-size:11px;color:#62796f">Datenschutzhinweise bestätigt · IXA Leads</p></td></tr></table></td></tr></table></body></html>`;
+  return {
+    subject: `Website-Daten · ${data.company.replace(/[\r\n]/g, " ")}`,
+    text,
+    html,
   };
 }

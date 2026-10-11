@@ -1,0 +1,79 @@
+import type { Metadata } from "next";
+import Link from "next/link";
+import { Check } from "lucide-react";
+import { BrandMark } from "@/components/BrandMark";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { ImpressumDialog } from "@/components/ImpressumDialog";
+import { ClientIntakeForm } from "@/components/client-intake/ClientIntakeForm";
+import styles from "@/components/client-intake/client-intake.module.css";
+
+export const metadata: Metadata = {
+  title: "Website-Fragebogen | IXA Leads",
+  description:
+    "Ihr vereinbartes Website-Projekt: Unternehmensdaten und Wünsche in drei einfachen Schritten an IXA senden.",
+  robots: {
+    index: false,
+    follow: false,
+    noarchive: true,
+    googleBot: { index: false, follow: false, noimageindex: true },
+  },
+  alternates: { canonical: "https://ixa-leads.de/info" },
+  openGraph: {
+    title: "Ihr Website-Fragebogen | IXA Leads",
+    description: "Drei einfache Schritte für Ihr vereinbartes Website-Projekt.",
+    url: "https://ixa-leads.de/info",
+  },
+};
+
+export default function WebsiteInfoPage() {
+  return (
+    <div className={styles.page}>
+      <a href="#fragebogen" className="sr-only focus:not-sr-only">
+        Zum Fragebogen
+      </a>
+      <header className={styles.header}>
+        <Link
+          href="/"
+          className={styles.brand}
+          aria-label="IXA Leads - Startseite"
+        >
+          <BrandMark className="size-12 shrink-0" priority />
+          <span>
+            <span className={styles.brandName}>IXA Leads</span>
+            <span className={styles.brandSub}>Ihr Website-Projekt</span>
+          </span>
+        </Link>
+        <div className={styles.headerActions}>
+          <Link className={styles.back} href="/">
+            Zur Website
+          </Link>
+          <ThemeToggle />
+        </div>
+      </header>
+      <main id="fragebogen" className={styles.main}>
+        <div className={styles.intro}>
+          <p className={styles.eyebrow}>Kundenfragebogen</p>
+          <h1>Ihre Website beginnt hier.</h1>
+          <p className={styles.introText}>
+            Wir freuen uns auf Ihr vereinbartes Website-Projekt. Erzählen Sie
+            uns von Ihrem Unternehmen und Ihren Wünschen. So können wir Ihre
+            Website passend vorbereiten.
+          </p>
+          <span className={styles.badge}>
+            <Check size={14} aria-hidden="true" /> 3 einfache Schritte ·
+            Fehlendes können wir gemeinsam ergänzen
+          </span>
+        </div>
+        <ClientIntakeForm />
+      </main>
+      <footer className={styles.footer}>
+        <a href="https://ixa-leads.de">IXA Leads · ixa-leads.de</a>
+        <div className={styles.footerLinks}>
+          <a href="mailto:info@ixa-leads.de">info@ixa-leads.de</a>
+          <Link href="/datenschutz">Datenschutz</Link>
+          <ImpressumDialog className="min-h-11" />
+        </div>
+      </footer>
+    </div>
+  );
+}

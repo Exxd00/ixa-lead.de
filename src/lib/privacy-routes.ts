@@ -4,5 +4,8 @@
  * already contains a previously granted analytics consent.
  */
 export function isNoTrackPath(pathname: string): boolean {
-  return /^(?:\/admin|\/vorschau|\/r|\/kundenfragebogen)(?:\/|$)/.test(pathname);
+  if (/^\/info\/danke\/?$/.test(pathname)) return false;
+  return /^(?:\/admin|\/vorschau|\/r|\/kundenfragebogen|\/info)(?:\/|$)/.test(
+    pathname,
+  );
 }

@@ -3,10 +3,21 @@ import { NextResponse } from "next/server";
 import { parseIntake, isIntakeEmail } from "@/lib/client-intake";
 import { intakeEmail } from "@/lib/client-intake-email";
 import { siteConfig } from "@/data/site";
+import {
+  createIntakeReceipt,
+  INTAKE_RECEIPT_COOKIE,
+} from "@/lib/client-intake-receipt";
+import {
+  intakeReceiverConfig,
+  intakeSheetHeaders,
+  intakeSheetValues,
+  intakeRecordUrl,
+  writeIntakeSheet,
+} from "@/lib/client-intake-sheet";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 30;
+export const maxDuration = 60;
 
 const MAX_BYTES = 32_768;
 // An additional, bounded warm-instance guard. This is not a distributed quota.
@@ -101,16 +112,48 @@ export async function POST(request: Request) {
   const to =
     process.env.CLIENT_INTAKE_NOTIFICATION_EMAIL?.trim() ||
     siteConfig.contact.emailDisplay;
-  if (!apiKey || !from || !isIntakeEmail(to))
+  if (!apiKey || !from || !isIntakeEmail(to) || !intakeReceiverConfig())
     return reply({ ok: false, error: "temporarily_unavailable" }, 503);
 
-  const content = intakeEmail(parsed.answers, parsed.submissionId);
   // Same answers + submission ID produce exactly the same request on retry,
   // including after a response is lost. No changing timestamp in the payload.
   const digest = createHash("sha256")
     .update(JSON.stringify(parsed.answers))
     .digest("hex")
     .slice(0, 32);
+  const saved = await writeIntakeSheet({
+    operation: "save",
+    submissionId: parsed.submissionId,
+    digest,
+    headers: intakeSheetHeaders,
+    values: intakeSheetValues(parsed.answers, parsed.submissionId, digest),
+  });
+  if (!saved) return reply({ ok: false, error: "storage_failed" }, 502);
+  const content = intakeEmail(
+    parsed.answers,
+    parsed.submissionId,
+    intakeRecordUrl(Number(saved.rowNumber)),
+  );
+  const success = () => {
+    const response = reply({
+      ok: true,
+      submissionId: parsed.submissionId,
+      redirect: "/info/danke",
+    });
+    response.cookies.set(
+      INTAKE_RECEIPT_COOKIE,
+      createIntakeReceipt(parsed.submissionId),
+      {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        path: "/",
+        maxAge: 1800,
+      },
+    );
+    return response;
+  };
+  if (saved.emailAccepted === true) return success();
   try {
     const response = await fetch("https://api.resend.com/emails", {
       method: "POST",
@@ -143,7 +186,16 @@ export async function POST(request: Request) {
       console.error("[client-intake] email_not_accepted", response.status);
       return reply({ ok: false, error: "delivery_failed" }, 502);
     }
-    return reply({ ok: true, submissionId: parsed.submissionId });
+    const updated = await writeIntakeSheet({
+      operation: "email_accepted",
+      submissionId: parsed.submissionId,
+      digest,
+      emailId: result.id,
+    });
+    // A saved row and an accepted email are the two required outcomes. Status
+    // sync may be retried by the same idempotent submission after an interruption.
+    if (!updated) console.error("[client-intake] email_status_sync_failed");
+    return success();
   } catch {
     console.error("[client-intake] email_request_failed");
     return reply({ ok: false, error: "delivery_failed" }, 502);

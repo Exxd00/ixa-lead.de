@@ -97,7 +97,10 @@ function updateGoogleConsent(consent: AnalyticsConsent): void {
     security_storage: "granted",
   } satisfies ConsentModeSettings);
 
-  if (consent === "denied") clearGoogleAnalyticsCookies();
+  if (consent === "denied") {
+    window.ixaAnalyticsReady = false;
+    clearGoogleAnalyticsCookies();
+  }
 }
 
 function ConsentBanner({
@@ -134,11 +137,12 @@ function ConsentBanner({
               Ihre Auswahl wird nur auf diesem Gerät gespeichert. Sie können sie
               jederzeit unter „Datenschutz“ ändern. Anfrage- und Rückrufangaben
               werden unabhängig davon zur Bearbeitung im gemeinsamen
-              Tabellenblatt „Anfragen“ gespeichert. Wenn Sie Statistik
-              erlauben, kommen für bestätigte Kontaktaktionen nur Ereignis,
-              Zeitpunkt, Seite und vorhandene Kampagnenparameter hinzu – keine
-              zusätzlichen Namen, E-Mail-Adressen, Telefonnummern oder
-              Nachrichten.
+              Anfrage-Tabellenblatt gespeichert. Angaben zum vereinbarten
+              Website-Projekt werden im Tabellenblatt „15 Kunden-Websites“
+              gespeichert. Wenn Sie Statistik erlauben, kommen für bestätigte
+              Kontaktaktionen nur Ereignis, Zeitpunkt, Seite und vorhandene
+              Kampagnenparameter hinzu – keine zusätzlichen Namen,
+              E-Mail-Adressen, Telefonnummern oder Nachrichten.
             </p>
           )}
           <button
@@ -183,6 +187,7 @@ function ConsentBanner({
 
 export function MeasurementConsent() {
   const pathname = usePathname();
+  const isClientIntakeThanks = /^\/info\/danke\/?$/.test(pathname);
   const isMeasurementDisabled = isNoTrackPath(pathname);
   const [consent, setConsent] = useState<AnalyticsConsent | null>(null);
   const [showBanner, setShowBanner] = useState(false);
@@ -266,8 +271,16 @@ export function MeasurementConsent() {
       allow_google_signals: false,
       anonymize_ip: true,
       send_page_view: true,
+      ...(isClientIntakeThanks
+        ? {
+            page_location: `${window.location.origin}/info/danke`,
+            page_referrer: "",
+          }
+        : {}),
     });
-  }, [consent]);
+    window.ixaAnalyticsReady = true;
+    window.dispatchEvent(new Event("ixa:analytics-ready"));
+  }, [consent, isClientIntakeThanks]);
 
   const analyticsAllowed = consent === "granted";
 
@@ -284,7 +297,7 @@ export function MeasurementConsent() {
         />
       )}
 
-      {analyticsAllowed && (
+      {analyticsAllowed && !isClientIntakeThanks && (
         <>
           <Analytics beforeSend={filterPrivateMeasurementEvent} />
           <SpeedInsights beforeSend={filterPrivateMeasurementEvent} />

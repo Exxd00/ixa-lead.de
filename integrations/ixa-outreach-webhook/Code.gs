@@ -202,6 +202,10 @@ function doPost(e) {
     if (!spreadsheetId) throw new Error("missing_outreach_spreadsheet_id");
     const spreadsheet = SpreadsheetApp.openById(spreadsheetId);
 
+    if (body.recordType === "client_intake") {
+      return saveClientIntake_(spreadsheet, body);
+    }
+
     if (body.recordType === "personal_page_resolve") {
       if (!isHash_(body.tokenProof)) {
         return json_({ ok: false, error: "invalid_payload" });
