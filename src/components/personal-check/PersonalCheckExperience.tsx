@@ -44,17 +44,17 @@ export function PersonalCheckExperience({ companyLabel, findings, firstTest, pri
           </p>
         </div>
 
-        <section aria-label="Zwei Beobachtungen" className="grid gap-3 sm:grid-cols-2">
+        <section aria-label="Zwei Beobachtungen" className="grid grid-cols-2 gap-2.5 sm:gap-3">
           {findings.map((finding, index) => (
-            <article key={`${index}-${finding.title}`} className="min-w-0 rounded-xl border border-[#d1e7e3] p-4 sm:p-5">
-              <div className="flex items-start gap-2.5">
+            <article key={`${index}-${finding.title}`} className="min-w-0 rounded-xl border border-[#d1e7e3] p-3 sm:p-5">
+              <div className="flex flex-col items-start gap-2 sm:flex-row sm:gap-2.5">
                 <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e8f7f4] text-xs font-bold text-[#08766d]">
                   {index + 1}
                 </span>
-                <h2 className="text-base font-bold leading-6">{finding.title}</h2>
+                <h2 className="min-w-0 break-words hyphens-auto text-sm font-bold leading-5 sm:text-base sm:leading-6">{finding.title}</h2>
               </div>
-              <p className="mt-2.5 text-base leading-6">{finding.observation}</p>
-              <p className="mt-3 text-xs leading-5 text-[#58736f]">
+              <p className="mt-2.5 break-words hyphens-auto text-sm leading-[1.6] sm:text-base sm:leading-6">{finding.observation}</p>
+              <p className="mt-3 break-words text-xs leading-5 text-[#58736f]">
                 {finding.sourceLabel} · geprüft am {finding.verifiedAt}
               </p>
             </article>
