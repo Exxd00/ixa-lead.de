@@ -25,20 +25,27 @@ export async function POST(request: Request): Promise<Response> {
     return empty(413);
   }
 
+  let ticket: string;
   try {
     const raw = await request.text();
     if (Buffer.byteLength(raw, "utf8") > MAX_BODY_BYTES) return empty(413);
     const body: unknown = JSON.parse(raw);
-    const ticket =
+    const candidate =
       body && typeof body === "object" && !Array.isArray(body)
         ? (body as { ticket?: unknown }).ticket
         : null;
-    if (typeof ticket !== "string") return empty(400);
-
-    await recordPersonalPageVisit(ticket);
-    // The browser never receives matching or deduplication state.
-    return empty();
+    if (typeof candidate !== "string") return empty(400);
+    ticket = candidate;
   } catch {
-    return empty();
+    return empty(400);
+  }
+
+  try {
+    const accepted = await recordPersonalPageVisit(ticket);
+    // Acknowledges receiver processing only. Matching and deduplication state
+    // remain private, while a failed handoff must not look like delivery.
+    return empty(accepted ? 204 : 503);
+  } catch {
+    return empty(503);
   }
 }

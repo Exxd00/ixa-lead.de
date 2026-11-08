@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, CheckCircle2, FileCheck2, MessageCircle, ShieldCheck } from "lucide-react";
+import { MessageCircle } from "lucide-react";
 
 import { BrandMark } from "@/components/BrandMark";
 import { ImpressumDialog } from "@/components/ImpressumDialog";
@@ -15,27 +15,109 @@ type Props = {
   previewReference?: string;
 };
 
-const benefits = [
-  "eine priorisierte Lösungsskizze statt einer allgemeinen Verkaufspräsentation",
-  "die sinnvollste erste Änderung – mit Aufwand, Reihenfolge und Messpunkt",
-  "eine kurze Einordnung, welche Baustellen vorerst warten können",
-] as const;
-
 export function PersonalCheckExperience({ companyLabel, findings, firstTest, primaryRequest, previewMessage, previewReference }: Props) {
   const preview = !primaryRequest;
   const message = primaryRequest?.message || previewMessage || "";
+
   return (
     <div className="ixa-page-v4 min-h-screen bg-white text-[#163230]">
-      {preview ? <div className="border-b border-[#b9ded8] bg-[#eaf8f5] px-4 py-2.5 text-center text-sm font-semibold">Interne V4-Vorschau · synthetische Daten · keine Aktion und kein Tracking</div> : null}
-      <header className="border-b border-[#d9ebe8] bg-white"><div className="container-lp flex min-h-[72px] items-center justify-between gap-4 py-3"><div className="flex min-w-0 items-center gap-3"><BrandMark className="size-11 shrink-0" priority /><div><p className="text-[15px] font-extrabold tracking-tight">IXA Leads</p><p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.14em] text-[#58736f]">Persönlicher Website-Check</p></div></div><span className="rounded-full border border-[#cce5e1] bg-[#f5fbfa] px-3 py-1.5 text-xs font-semibold text-[#58736f]">Nur über Ihren QR-Code</span></div></header>
-      <main>
-        <section className="border-b border-[#d9ebe8] bg-[radial-gradient(circle_at_85%_10%,rgba(100,224,213,.28),transparent_34%),linear-gradient(180deg,#fff,#f4fbfa)] py-14 sm:py-20"><div className="container-lp grid gap-10 lg:grid-cols-[1fr_.42fr] lg:items-end"><div><div className="inline-flex max-w-full items-center gap-2 rounded-full border border-[#9ed9d1] bg-white px-3.5 py-1.5 text-xs font-bold"><FileCheck2 className="size-4" />Kurz geprüft für <span className="break-words text-[#087f74]">{companyLabel}</span></div><h1 className="mt-6 max-w-4xl text-4xl font-bold leading-[1.08] sm:text-5xl lg:text-6xl">Zwei Stellen auf Ihrer Website könnten gute Anfragen unnötig abbremsen.</h1><p className="mt-6 max-w-3xl text-lg leading-relaxed text-[#58736f] sm:text-xl">Wir zeigen zuerst, was öffentlich sichtbar aufgefallen ist. Danach entscheiden Sie selbst, ob Sie die konkrete Lösungsskizze sehen möchten.</p></div><div className="rounded-3xl border border-[#b9ded8] bg-white p-5 shadow-[0_20px_60px_rgba(18,83,76,.10)]"><p className="text-xs font-bold uppercase tracking-[.14em] text-[#087f74]">Lesereihenfolge</p><ol className="mt-4 space-y-3 text-sm font-semibold"><li>1. Beobachtungen prüfen</li><li>2. Ersten Test verstehen</li><li>3. Lösungsskizze anfordern</li></ol></div></div></section>
-        <section className="container-lp py-14 sm:py-20"><div className="max-w-3xl"><p className="text-sm font-bold uppercase tracking-[.14em] text-[#087f74]">01 · Was wir gesehen haben</p><h2 className="mt-3 text-3xl font-bold sm:text-4xl">Zwei überprüfbare Beobachtungen</h2><p className="mt-4 leading-relaxed text-[#58736f]">Keine pauschale Bewertung: Jede Aussage nennt die sichtbare Stelle, ihre mögliche Wirkung und das Prüfdatum.</p></div><div className="mt-9 grid gap-6 lg:grid-cols-2">{findings.map((finding, index) => <article key={`${index}-${finding.title}`} className="rounded-3xl border border-[#d1e7e3] bg-white p-6 shadow-[0_12px_40px_rgba(18,83,76,.07)] sm:p-8"><div className="flex items-start justify-between gap-4"><div><p className="text-xs font-bold uppercase tracking-[.14em] text-[#087f74]">Beobachtung {index + 1}</p><h3 className="mt-3 text-2xl font-bold">{finding.title}</h3></div><span className="grid size-10 shrink-0 place-items-center rounded-xl bg-[#e8f7f4] font-bold text-[#087f74]">{index + 1}</span></div><p className="mt-6 leading-relaxed">{finding.observation}</p><div className="mt-5 rounded-2xl bg-[#f3f9f8] p-4"><p className="text-xs font-bold uppercase tracking-[.12em] text-[#087f74]">Warum das relevant sein könnte</p><p className="mt-2 text-sm leading-relaxed text-[#58736f]">{finding.implication}</p></div><p className="mt-5 flex items-center gap-2 text-xs text-[#58736f]"><ShieldCheck className="size-4 text-[#087f74]" />{finding.sourceLabel} · geprüft am {finding.verifiedAt}</p></article>)}</div></section>
-        <section className="border-y border-[#d9ebe8] bg-[#f3f9f8] py-14 sm:py-16"><div className="container-lp grid gap-6 lg:grid-cols-[.34fr_1fr] lg:items-start"><p className="text-sm font-bold uppercase tracking-[.14em] text-[#087f74]">02 · Sinnvoller erster Test</p><div><h2 className="text-3xl font-bold">{firstTest.title}</h2><p className="mt-4 max-w-4xl text-lg leading-relaxed text-[#58736f]">{firstTest.description}</p></div></div></section>
-        <section className="container-lp py-14 sm:py-20"><div className="overflow-hidden rounded-[2rem] border border-[#9ed9d1] bg-[linear-gradient(135deg,#effaf8,#fff)] p-6 shadow-[0_22px_70px_rgba(18,83,76,.12)] sm:p-9 lg:p-12"><div className="grid gap-9 lg:grid-cols-[1fr_.78fr] lg:items-center"><div><p className="text-sm font-bold uppercase tracking-[.14em] text-[#087f74]">03 · Ihre Entscheidung</p><h2 className="mt-3 text-3xl font-bold sm:text-4xl">Möchten Sie die Lösungsskizze zu genau diesen zwei Punkten?</h2><p className="mt-4 leading-relaxed text-[#58736f] sm:text-lg">Sie erhalten keine allgemeine Broschüre, sondern den nächsten sinnvollen Schritt für Ihren sichtbaren Anfrageweg.</p><ul className="mt-6 space-y-3">{benefits.map(item => <li key={item} className="flex items-start gap-3"><CheckCircle2 className="mt-0.5 size-5 shrink-0 text-[#087f74]" /><span>{item}</span></li>)}</ul></div><div className="rounded-3xl border border-[#cce5e1] bg-white p-5 sm:p-6">{preview ? <button type="button" disabled className="inline-flex min-h-14 w-full cursor-not-allowed items-center justify-center gap-3 rounded-2xl bg-[#61d8cc] px-6 py-3.5 text-center font-bold text-[#102f2c] opacity-80"><MessageCircle className="size-5" />Lösungsskizze per WhatsApp anfordern<ArrowRight className="size-4" /></button> : <a href={primaryRequest.href} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" className="focus-ring inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-2xl bg-[#61d8cc] px-6 py-3.5 text-center font-bold text-[#102f2c] shadow-lg transition-transform hover:-translate-y-0.5"><MessageCircle className="size-5" />Lösungsskizze per WhatsApp anfordern<ArrowRight className="size-4" /></a>}<div className="mt-4 rounded-2xl bg-[#f3f9f8] p-4"><p className="text-xs font-bold uppercase tracking-[.12em] text-[#087f74]">Vorbereitete Nachricht</p><blockquote className="mt-2 whitespace-pre-line text-sm leading-relaxed text-[#365954]">„{message}“</blockquote><p className="mt-3 text-xs leading-relaxed text-[#58736f]">WhatsApp öffnet nur den Entwurf. Gesendet wird erst, wenn Sie dort selbst auf „Senden“ tippen.</p></div>{preview ? <p className="mt-4 text-center text-xs text-[#58736f]">Vorschau ohne Link oder Tracking · Referenz {previewReference}</p> : null}</div></div></div></section>
-        <section className="border-t border-[#d9ebe8] bg-[#f7fbfa] py-10"><div className="container-lp grid gap-4 text-sm text-[#58736f] md:grid-cols-3"><p><b className="text-[#163230]">Sie behalten die Kontrolle.</b><br />Ohne Ihre Nachricht folgt kein WhatsApp-Kontakt.</p><p><b className="text-[#163230]">Keine Werbe-Analytics.</b><br />Die persönliche Seite nutzt keine Reichweitenmessung.</p><p><b className="text-[#163230]">Widerspruch genügt.</b><br />Jederzeit an {siteConfig.contact.emailDisplay}.</p></div></section>
+      {preview ? (
+        <div className="border-b border-[#b9ded8] bg-[#eaf8f5] px-4 py-2 text-center text-xs font-medium text-[#365954]">
+          Interne V4-Vorschau · keine Aktion und kein Tracking
+        </div>
+      ) : null}
+
+      <header className="border-b border-[#d9ebe8]">
+        <div className="mx-auto flex w-full max-w-4xl items-center gap-2.5 px-5 py-3 sm:px-8">
+          <BrandMark className="size-8 shrink-0" priority />
+          <p className="text-sm font-bold">IXA Leads</p>
+        </div>
+      </header>
+
+      <main className="mx-auto w-full max-w-4xl px-5 pb-6 pt-6 sm:px-8 sm:pt-9">
+        <div className="mb-5">
+          <h1 className="text-[1.875rem] font-bold leading-tight tracking-tight sm:text-4xl">
+            Ihr Website-Check
+          </h1>
+          <p className="mt-2 break-words text-base text-[#58736f]">
+            Zwei Hinweise für <span className="font-semibold text-[#08766d]">{companyLabel}</span>
+          </p>
+        </div>
+
+        <section aria-label="Zwei Beobachtungen" className="grid gap-3 sm:grid-cols-2">
+          {findings.map((finding, index) => (
+            <article key={`${index}-${finding.title}`} className="min-w-0 rounded-xl border border-[#d1e7e3] p-4 sm:p-5">
+              <div className="flex items-start gap-2.5">
+                <span aria-hidden="true" className="flex size-6 shrink-0 items-center justify-center rounded-full bg-[#e8f7f4] text-xs font-bold text-[#08766d]">
+                  {index + 1}
+                </span>
+                <h2 className="text-base font-bold leading-6">{finding.title}</h2>
+              </div>
+              <p className="mt-2.5 text-base leading-6">{finding.observation}</p>
+              <p className="mt-3 text-xs leading-5 text-[#58736f]">
+                {finding.sourceLabel} · geprüft am {finding.verifiedAt}
+              </p>
+            </article>
+          ))}
+        </section>
+
+        <section aria-labelledby="next-step" className="mt-5 rounded-xl bg-[#eff8f6] p-4 sm:flex sm:items-center sm:justify-between sm:gap-5 sm:p-5">
+          <div>
+            <h2 id="next-step" className="text-lg font-bold">Was würden wir zuerst ändern?</h2>
+            <p className="mt-1 text-sm leading-5 text-[#58736f]">Fragen Sie nach unserer Lösungsskizze.</p>
+          </div>
+          <div className="mt-3 sm:mt-0 sm:w-72 sm:shrink-0">
+            {preview ? (
+              <button type="button" disabled aria-label="Lösungsskizze per WhatsApp anfordern" className="inline-flex min-h-12 w-full cursor-not-allowed items-center justify-center gap-2 rounded-lg bg-[#61d8cc] px-4 py-3 text-center text-sm font-bold text-[#102f2c]">
+                <MessageCircle aria-hidden="true" className="size-5 shrink-0" />
+                Lösungsskizze anfordern
+              </button>
+            ) : (
+              <a href={primaryRequest.href} target="_blank" rel="noopener noreferrer" referrerPolicy="no-referrer" aria-label="Lösungsskizze per WhatsApp anfordern" className="focus-ring inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-lg bg-[#61d8cc] px-4 py-3 text-center text-sm font-bold text-[#102f2c] transition-colors hover:bg-[#72e2d6]">
+                <MessageCircle aria-hidden="true" className="size-5 shrink-0" />
+                Lösungsskizze anfordern
+              </a>
+            )}
+          </div>
+        </section>
+        <p className="mt-2.5 text-xs leading-5 text-[#58736f]">
+          WhatsApp öffnet einen Entwurf. Sie entscheiden, ob Sie ihn senden.
+        </p>
+
+        <details className="mt-5 border-y border-[#d9ebe8]">
+          <summary className="focus-ring cursor-pointer rounded-sm py-3 text-sm font-semibold text-[#365954]">
+            Einordnung und erster Test
+          </summary>
+          <div className="space-y-4 pb-5 text-sm leading-6 text-[#365954]">
+            {findings.map((finding, index) => (
+              <div key={`detail-${index}`}>
+                <h3 className="font-semibold text-[#163230]">{finding.title}</h3>
+                <p className="mt-1">{finding.implication}</p>
+              </div>
+            ))}
+            <div>
+              <h3 className="font-semibold text-[#163230]">{firstTest.title}</h3>
+              <p className="mt-1">{firstTest.description}</p>
+            </div>
+            <div>
+              <h3 className="font-semibold text-[#163230]">Ihre vorbereitete WhatsApp-Nachricht</h3>
+              <blockquote className="mt-1 whitespace-pre-line">„{message}“</blockquote>
+            </div>
+          </div>
+        </details>
       </main>
-      <footer className="border-t border-[#d9ebe8] bg-white"><div className="container-lp flex flex-col gap-5 py-8 sm:flex-row sm:items-center sm:justify-between"><div className="flex items-center gap-3"><BrandMark className="size-9" /><div><p className="text-sm font-bold">{siteConfig.name}</p><p className="text-xs text-[#58736f]">Persönlicher Website-Check</p></div></div><nav className="flex flex-wrap gap-5 text-sm text-[#58736f]"><Link href="/datenschutz">Datenschutz</Link><Link href="/datenloeschung">Datenlöschung</Link><ImpressumDialog className="text-[#58736f]" /></nav></div></footer>
+
+      <footer className="mx-auto w-full max-w-4xl px-5 pb-6 sm:px-8">
+        <p className="text-xs leading-5 text-[#58736f]">
+          Keine Werbe-Analytics. Widerspruch jederzeit an {siteConfig.contact.emailDisplay}.
+        </p>
+        <nav aria-label="Rechtliche Informationen" className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-xs text-[#365954]">
+          <Link href="/datenschutz" className="focus-ring rounded-sm py-2 underline-offset-4 hover:underline">Datenschutz</Link>
+          <Link href="/datenloeschung" className="focus-ring rounded-sm py-2 underline-offset-4 hover:underline">Datenlöschung</Link>
+          <ImpressumDialog className="py-2 text-[#365954]" />
+        </nav>
+        {preview ? <p className="mt-2 text-xs text-[#58736f]">Vorschau ohne Tracking · Referenz {previewReference}</p> : null}
+      </footer>
     </div>
   );
 }

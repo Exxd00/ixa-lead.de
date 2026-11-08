@@ -221,7 +221,23 @@ export async function recordPersonalPageVisit(ticket: string): Promise<boolean> 
     recordType: "personal_page_visit",
     visitTicket: ticket,
   });
-  return response?.ok === true;
+  if (response?.ok !== true) {
+    console.warn("ixa.personal_page_visit", { outcome: "receiver_unavailable" });
+    return false;
+  }
+  if (response.recorded === false) {
+    // Expired, unknown and replayed tickets intentionally have the same public
+    // acknowledgement. Only the trusted server log reports a missing write.
+    console.warn("ixa.personal_page_visit", { outcome: "not_recorded" });
+  } else if (!Object.hasOwn(response, "recorded")) {
+    // Permit rolling out the website before the Apps Script update. A legacy
+    // ok response proves processing only, never that an event row was written.
+    console.warn("ixa.personal_page_visit", { outcome: "legacy_receipt" });
+  } else if (response.recorded !== true) {
+    console.warn("ixa.personal_page_visit", { outcome: "invalid_receipt" });
+    return false;
+  }
+  return true;
 }
 
 export function personalPageUrl(token: string): string {

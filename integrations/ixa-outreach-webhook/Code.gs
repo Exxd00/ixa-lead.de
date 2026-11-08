@@ -231,13 +231,15 @@ function doPost(e) {
       if (!isPersonalPageTicket_(body.visitTicket)) {
         return json_({ ok: false, error: "invalid_payload" });
       }
-      recordPersonalPageVisit_(
+      const result = recordPersonalPageVisit_(
         spreadsheet,
         String(body.visitTicket),
         expectedSecret,
       );
-      // Matching and replay state are intentionally never disclosed.
-      return json_({ ok: true });
+      if (result.retryable) return json_({ ok: false, error: "busy" });
+      // This authenticated server-to-server receipt is never returned by the
+      // public visit API, which keeps matching and replay state private.
+      return json_({ ok: true, recorded: result.recorded === true });
     }
 
     const isCheck = body.recordType === "whatsapp_allowlist_batch";
@@ -1842,7 +1844,7 @@ function verifyPersonalPageTicket_(ticket, secret) {
     const paddingLength = (4 - (parts[0].length % 4)) % 4;
     const decoded = Utilities.newBlob(
       Utilities.base64DecodeWebSafe(parts[0] + "=".repeat(paddingLength)),
-    ).getDataAsString(Utilities.Charset.UTF_8);
+    ).getDataAsString();
     const payload = JSON.parse(decoded);
     const now = Date.now();
     if (
@@ -1896,7 +1898,7 @@ function recordPersonalPageVisit_(spreadsheet, ticket, secret) {
   if (!initial) return { recorded: false };
 
   const lock = LockService.getScriptLock();
-  if (!lock.tryLock(10000)) return { recorded: false };
+  if (!lock.tryLock(10000)) return { recorded: false, retryable: true };
   try {
     const verified = verifyPersonalPageTicket_(ticket, secret);
     if (!verified) return { recorded: false };
@@ -2191,7 +2193,7 @@ function verifyAllowlistTicket_(item, secret) {
     const encodedPayload = parts[0] + "=".repeat(paddingLength);
     const json = Utilities.newBlob(
       Utilities.base64DecodeWebSafe(encodedPayload),
-    ).getDataAsString(Utilities.Charset.UTF_8);
+    ).getDataAsString();
     const payload = JSON.parse(json);
     const now = Date.now();
     if (

@@ -35,6 +35,7 @@ function signedBytes(buffer) {
 function loadAppsScript(path) {
   const cacheValues = new Map();
   const rsaSigningCalls = [];
+  const utf8Charset = Object.freeze({ name: "UTF_8" });
   const context = vm.createContext({
     __rsaSigningCalls: rsaSigningCalls,
     CacheService: {
@@ -49,7 +50,7 @@ function loadAppsScript(path) {
     },
     SpreadsheetApp: { flush: () => {} },
     Utilities: {
-      Charset: { UTF_8: "UTF_8" },
+      Charset: { UTF_8: utf8Charset },
       DigestAlgorithm: { SHA_256: "SHA_256" },
       newBlob(value) {
         const buffer = Buffer.isBuffer(value)
@@ -59,7 +60,15 @@ function loadAppsScript(path) {
             : Buffer.from(String(value), "utf8");
         return {
           getBytes: () => signedBytes(buffer),
-          getDataAsString: () => buffer.toString("utf8"),
+          getDataAsString(charset) {
+            // Blob takes an encoding String, unlike Utilities methods that
+            // accept a Charset enum. Its no-argument overload defaults to UTF-8.
+            if (charset !== undefined) {
+              assert.equal(typeof charset, "string", "Blob charset must be a String");
+              assert.ok(Buffer.isEncoding(charset), "Invalid Blob charset");
+            }
+            return buffer.toString(charset || "utf8");
+          },
         };
       },
       base64EncodeWebSafe(value) {
@@ -187,6 +196,13 @@ assert.throws(
 );
 
 const apps = loadAppsScript("integrations/ixa-outreach-webhook/Code.gs");
+assert.throws(
+  () => apps('Utilities.newBlob("charset-probe").getDataAsString(Utilities.Charset.UTF_8)'),
+  /Blob charset must be a String/,
+  "the mock must reproduce the real Blob/Charset signature mismatch",
+);
+assert.equal(apps('Utilities.newBlob("charset-probe").getDataAsString()'), "charset-probe");
+assert.equal(apps('Utilities.newBlob("charset-probe").getDataAsString("UTF-8")'), "charset-probe");
 const matchAllowlist = apps("matchAllowlist_");
 const buildProspectIndex = apps("buildProspectIndex_");
 const allowlistResponse = apps("allowlistResponse_");
@@ -1640,6 +1656,77 @@ assert.equal(
 );
 assert.equal(pageEvents.rows.length, 2, "a replay must not add an event row");
 
+// Exercise the authenticated receiver boundary, not just its write helper.
+// The receipt stays between Apps Script and Vercel; the public API tests below
+// still require an empty response that reveals no matching/replay state.
+const receiptContext = apps("globalThis");
+const originalJson = receiptContext.json_;
+const originalProperties = receiptContext.PropertiesService;
+const originalOpenById = receiptContext.SpreadsheetApp.openById;
+const originalGetLock = receiptContext.LockService.getScriptLock;
+const originalScriptConsole = receiptContext.console;
+receiptContext.json_ = (value) => value;
+receiptContext.PropertiesService = {
+  getScriptProperties: () => ({
+    getProperty: (name) => ({
+      WHATSAPP_WEBHOOK_SECRET: secret,
+      OUTREACH_SPREADSHEET_ID: "test-sheet",
+    })[name] || null,
+  }),
+};
+receiptContext.SpreadsheetApp.openById = () => pageSpreadsheet;
+receiptContext.console = { error: () => {} };
+const receiverDoPost = apps("doPost");
+const receiveVisit = (ticket) => JSON.parse(JSON.stringify(receiverDoPost({
+  postData: { contents: JSON.stringify({
+    _secret: secret,
+    schemaVersion: 2,
+    recordType: "personal_page_visit",
+    visitTicket: ticket,
+  }) },
+})));
+const freshVisitTicket = () => resolvePersonalPage(
+  pageSpreadsheet, pageTokenProof, secret, pageActivationSecret,
+).visitTicket;
+try {
+  const receiptTicket = freshVisitTicket();
+  assert.deepEqual(receiveVisit(receiptTicket), { ok: true, recorded: true });
+  const afterFirstReceipt = pageEvents.rows.length;
+  assert.deepEqual(receiveVisit(receiptTicket), { ok: true, recorded: false });
+  assert.equal(pageEvents.rows.length, afterFirstReceipt);
+
+  const busyTicket = freshVisitTicket();
+  receiptContext.LockService.getScriptLock = () => ({ tryLock: () => false });
+  assert.deepEqual(receiveVisit(busyTicket), { ok: false, error: "busy" });
+  assert.equal(pageEvents.rows.length, afterFirstReceipt);
+  receiptContext.LockService.getScriptLock = originalGetLock;
+  assert.deepEqual(receiveVisit(busyTicket), { ok: true, recorded: true });
+  assert.equal(pageEvents.rows.length, afterFirstReceipt + 1);
+
+  const failedWriteTicket = freshVisitTicket();
+  const originalEventGetRange = pageEvents.getRange;
+  pageEvents.getRange = (row, ...args) => {
+    if (row > 1) throw new Error("simulated_write_failure");
+    return originalEventGetRange(row, ...args);
+  };
+  try {
+    assert.deepEqual(receiveVisit(failedWriteTicket), {
+      ok: false, error: "receiver_error",
+    });
+    assert.equal(pageEvents.rows.length, afterFirstReceipt + 1);
+  } finally {
+    pageEvents.getRange = originalEventGetRange;
+  }
+  assert.deepEqual(receiveVisit(failedWriteTicket), { ok: true, recorded: true });
+  assert.equal(pageEvents.rows.length, afterFirstReceipt + 2);
+} finally {
+  receiptContext.json_ = originalJson;
+  receiptContext.PropertiesService = originalProperties;
+  receiptContext.SpreadsheetApp.openById = originalOpenById;
+  receiptContext.LockService.getScriptLock = originalGetLock;
+  receiptContext.console = originalScriptConsole;
+}
+
 async function verifyPersonalPageContract() {
   const personal = loadTypeScriptModule("src/lib/personal-outreach.ts", {
     "@/data/site": {
@@ -1714,6 +1801,41 @@ async function verifyPersonalPageContract() {
     assert.equal(JSON.stringify(receiverBody).includes(pageToken), false);
     assert.equal(Object.hasOwn(receiverBody, "companyId"), false);
     assert.equal(Object.hasOwn(receiverBody, "contactId"), false);
+
+    const previousWarn = console.warn;
+    const visitWarnings = [];
+    console.warn = (...args) => visitWarnings.push(args);
+    try {
+      for (const [receipt, accepted] of [
+        [{ ok: true, recorded: true }, true],
+        [{ ok: true, recorded: false }, true],
+        [{ ok: true }, true], // Backward-compatible rolling deployment.
+        [{ ok: true, recorded: "false" }, false],
+        [{ ok: false, error: "busy" }, false],
+      ]) {
+        global.fetch = async (_url, options) => {
+          receiverBody = JSON.parse(options.body);
+          return new Response(JSON.stringify(receipt), { status: 200 });
+        };
+        assert.equal(await personal.recordPersonalPageVisit(opaqueTicket), accepted);
+        assert.equal(receiverBody.recordType, "personal_page_visit");
+        assert.equal(receiverBody.visitTicket, opaqueTicket);
+      }
+      global.fetch = async () => { throw new Error("simulated_transport_failure"); };
+      assert.equal(await personal.recordPersonalPageVisit(opaqueTicket), false);
+      assert.deepEqual(visitWarnings.map((entry) => entry[1].outcome), [
+        "not_recorded", "legacy_receipt", "invalid_receipt",
+        "receiver_unavailable", "receiver_unavailable",
+      ]);
+      for (const warning of visitWarnings) {
+        assert.equal(warning[0], "ixa.personal_page_visit");
+        assert.deepEqual(Object.keys(warning[1]), ["outcome"]);
+      }
+      assert.equal(JSON.stringify(visitWarnings).includes(opaqueTicket), false);
+      assert.equal(JSON.stringify(visitWarnings).includes(receiverSecret), false);
+    } finally {
+      console.warn = previousWarn;
+    }
 
     const whatsappHref = personal.personalWhatsAppHref(pageToken);
     assert.match(whatsappHref, /^https:\/\/wa\.me\/491629155408\?text=/);

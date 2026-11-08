@@ -226,14 +226,28 @@ html:not(.dark) .hero-wash .liquid-cta {
 }
 
 .dark .theme-toggle { color: #b9f4ee; border-color: rgb(100 224 213 / .25); background: rgb(27 30 30 / .7); }
-.dark .bg-white { background-color: #1b1e1e !important; }
-.dark .bg-stone-50\/70, .dark .bg-stone-50, .dark .bg-stone-100 { background-color: rgb(27 30 30 / .72) !important; }
-.dark .bg-\[\#fbfaf7\], .dark .bg-\[\#f3f1eb\] { background-color: #050606 !important; }
-.dark .bg-\[\#fbfaf7\]\/95, .dark .bg-\[\#fbfaf7\]\/80 { background-color: rgb(5 6 6 / .9) !important; }
-.dark .text-navy, .dark h1:not(.text-white), .dark h2:not(.text-white), .dark h3:not(.text-white), .dark h4:not(.text-white) { color: #fff !important; }
-.dark .text-stone-700, .dark .text-stone-600 { color: #b9f4ee !important; }
-.dark .text-stone-500, .dark .text-stone-400 { color: rgb(185 244 238 / .68) !important; }
-.dark .border-stone-200, .dark .border-stone-300 { border-color: rgb(100 224 213 / .18) !important; }
+/* These site-wide dark restyles must not recolor the fixed-light personal
+   check, including its nested cards and shared components. :where keeps the
+   exclusion from changing selector specificity elsewhere on the site. */
+.dark .bg-white:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { background-color: #1b1e1e !important; }
+.dark .bg-stone-50\/70:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .bg-stone-50:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .bg-stone-100:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { background-color: rgb(27 30 30 / .72) !important; }
+.dark .bg-\[\#fbfaf7\]:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .bg-\[\#f3f1eb\]:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { background-color: #050606 !important; }
+.dark .bg-\[\#fbfaf7\]\/95:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .bg-\[\#fbfaf7\]\/80:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { background-color: rgb(5 6 6 / .9) !important; }
+.dark .text-navy:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark h1:not(.text-white):not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark h2:not(.text-white):not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark h3:not(.text-white):not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark h4:not(.text-white):not(:where(.ixa-page-v4, .ixa-page-v4 *)) { color: #fff !important; }
+.dark .text-stone-700:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .text-stone-600:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { color: #b9f4ee !important; }
+.dark .text-stone-500:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .text-stone-400:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { color: rgb(185 244 238 / .68) !important; }
+.dark .border-stone-200:not(:where(.ixa-page-v4, .ixa-page-v4 *)),
+.dark .border-stone-300:not(:where(.ixa-page-v4, .ixa-page-v4 *)) { border-color: rgb(100 224 213 / .18) !important; }
 
 @keyframes liquid-orbit { to { transform: rotate(360deg); } }
 @property --ixa-angle {
