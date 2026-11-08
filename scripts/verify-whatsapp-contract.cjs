@@ -1896,13 +1896,13 @@ async function verifyPersonalPageContract() {
     );
     assert.match(
       personalCheckView,
-      /ixa-page-v4 min-h-screen bg-white text-\[#163230\]/,
-      "the personal page must use the approved fixed light palette",
+      /ixa-page-v4 min-h-screen bg-\[#e9e8e1\] text-\[#163230\]/,
+      "the personal page must use the fixed warm palette with dark text",
     );
     assert.match(
       personalCheckView,
-      /bg-\[#61d8cc\][^\"]*text-\[#102f2c\]/,
-      "the personal page CTA must keep a high-contrast color pair",
+      /ixa-glass-cta[^\"]*text-\[#102f2c\]/,
+      "the glass CTA must keep its readable dark foreground",
     );
     assert.doesNotMatch(
       personalCheckView,

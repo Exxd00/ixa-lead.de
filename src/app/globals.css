@@ -2,13 +2,73 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Personal Page V4 is deliberately a fixed light decision surface. */
+/* Personal pages keep a warm, readable surface in either site theme. */
 .dark .ixa-page-v4,
 .ixa-page-v4 { color-scheme: light; }
-.dark .ixa-page-v4 { background: #fff !important; color: #163230 !important; }
+.dark .ixa-page-v4 { background: #e9e8e1 !important; color: #163230 !important; }
 .dark .ixa-page-v4 h1,
 .dark .ixa-page-v4 h2,
 .dark .ixa-page-v4 h3 { color: #163230 !important; }
+
+/* A static illuminated rim keeps the glass action distinct without flashing. */
+.ixa-page-v4 .ixa-glass-cta {
+  position: relative;
+  isolation: isolate;
+  border: 1px solid rgb(17 128 99 / .90);
+  border-radius: .875rem;
+  background-color: #d8e5db;
+  color: #102f2c;
+  box-shadow:
+    0 0 0 1px rgb(108 212 173 / .30),
+    0 0 18px rgb(42 170 127 / .20),
+    0 5px 14px rgb(29 80 61 / .08),
+    inset 0 1px 0 rgb(255 255 255 / .65),
+    inset 0 0 12px rgb(216 247 231 / .28);
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .ixa-page-v4 .ixa-glass-cta {
+    background-color: rgb(216 235 222 / .20);
+    background-image: linear-gradient(135deg, rgb(255 255 255 / .28), rgb(130 194 168 / .10));
+    -webkit-backdrop-filter: blur(12px) saturate(130%);
+    backdrop-filter: blur(12px) saturate(130%);
+  }
+}
+
+.ixa-page-v4 .ixa-glass-cta:not(:disabled):hover {
+  border-color: rgb(9 111 82 / .92);
+  box-shadow:
+    0 0 0 1px rgb(108 212 173 / .45),
+    0 0 22px rgb(42 170 127 / .28),
+    0 5px 14px rgb(29 80 61 / .08),
+    inset 0 1px 0 rgb(255 255 255 / .70);
+}
+
+.ixa-page-v4 .ixa-glass-cta:focus-visible {
+  outline: 2px solid #0a6351;
+  outline-offset: 4px;
+}
+
+@media (prefers-reduced-transparency: reduce) {
+  .ixa-page-v4 .ixa-glass-cta {
+    background: #d8e5db;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+}
+
+@media (forced-colors: active) {
+  .ixa-page-v4 .ixa-glass-cta {
+    border: 2px solid ButtonText;
+    background: ButtonFace;
+    color: ButtonText;
+    box-shadow: none;
+    -webkit-backdrop-filter: none;
+    backdrop-filter: none;
+  }
+  .ixa-page-v4 .ixa-glass-cta:focus-visible { outline-color: Highlight; }
+}
 
 @layer base {
   :root {
