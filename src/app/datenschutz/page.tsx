@@ -119,12 +119,17 @@ export default function DatenschutzPage() {
         <h2>4. Persönliche Prüfseite und QR-Messung</h2>
         <p className="mt-3">
           Der Geschäftsbrief kann zu einer individuellen Prüfseite unter {" "}
-          <code>/r</code> führen. Beim ersten Aufruf wird ausschließlich ein
-          pseudonymes Ereignis mit der internen Bezeichnung {" "}
-          <code>personal_page_visit</code> gespeichert. Es dient dazu, die
+          <code>/r</code> führen. Beim Aufruf können ausschließlich pseudonyme
+          Besuchsereignisse mit der internen Bezeichnung {" "}
+          <code>personal_page_visit</code> gespeichert werden. Sie dienen dazu, die
           Resonanz des konkreten Briefs zu messen. Rechtsgrundlage ist Art. 6
           Abs. 1 lit. f DSGVO; unser Interesse ist die zurückhaltende,
           aggregierbare Erfolgskontrolle der einmaligen Postansprache.
+        </p>
+        <p className="mt-3">
+          Wiederholte Aufrufe können weitere Ereignisse auslösen. Für die
+          Kampagnenauswertung zählt je Empfängerlink nur der erste passende
+          Aufruf ab dem bestätigten Versanddatum.
         </p>
         <p className="mt-3">
           Dabei übernehmen wir weder die IP-Adresse noch User-Agent, Referrer,
